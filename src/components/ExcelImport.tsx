@@ -16,7 +16,8 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
 
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const workbook = XLSX.read(evt.target?.result, { type: 'binary' });
+      const data = new Uint8Array(evt.target?.result as ArrayBuffer);
+      const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const rows: string[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
@@ -52,7 +53,7 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
 
       onImport(updatedCrews);
     };
-    reader.readAsBinary(file);
+    reader.readAsArrayBuffer(file);
   };
 
   return (

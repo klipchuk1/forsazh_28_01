@@ -55,7 +55,6 @@ function generateWeeklyHistory(crewIndex: number, currentFact: number, target: n
   const variance = 0.3 + (crewIndex % 3) * 0.1;
 
   for (let w = 1; w <= totalWeeks; w++) {
-    const progress = w / totalWeeks;
     const randomFactor = 0.7 + Math.random() * 0.6;
     const weekTarget = Math.round(target * (w / totalWeeks) * randomFactor);
     const weekFact = Math.round(weekTarget * (currentFact / target) * (0.85 + Math.random() * variance));

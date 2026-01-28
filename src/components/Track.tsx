@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { Crew } from '../data/types';
 
 interface TrackProps {
@@ -9,11 +9,6 @@ interface TrackProps {
 function getProgressPercent(crew: Crew): number {
   const cp = crew.metrics.connectedPoints;
   return Math.min(Math.round((cp.fact / cp.target) * 100), 120);
-}
-
-function getRank(crews: Crew[], crew: Crew): number {
-  const sorted = [...crews].sort((a, b) => getProgressPercent(b) - getProgressPercent(a));
-  return sorted.findIndex((c) => c.id === crew.id) + 1;
 }
 
 export default function Track({ crews, onCrewClick }: TrackProps) {
