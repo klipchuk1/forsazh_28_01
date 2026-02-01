@@ -7,7 +7,6 @@ import Track from './components/Track';
 import Leaderboard from './components/Leaderboard';
 import TeamCards from './components/TeamCards';
 import TeamDetail from './components/TeamDetail';
-import ExcelImport from './components/ExcelImport';
 import CountdownTimer from './components/CountdownTimer';
 import LandingPage from './components/LandingPage';
 import logoImage from './assets/logo.png';
@@ -43,15 +42,11 @@ class ErrorBoundary extends React.Component<
 }
 
 export default function App() {
-  const [crews, setCrews] = useState<Crew[]>(mockCrews);
+  const [crews] = useState<Crew[]>(mockCrews);
   const [selectedCrew, setSelectedCrew] = useState<Crew | null>(null);
 
   const handleCrewClick = (crew: Crew) => {
     setSelectedCrew(crew);
-  };
-
-  const handleImport = (updatedCrews: Crew[]) => {
-    setCrews(updatedCrews);
   };
 
   if (SHOW_LANDING) return <LandingPage />;
@@ -79,10 +74,6 @@ export default function App() {
 
       <ErrorBoundary label="StatsBar">
         <StatsBar crews={crews} />
-      </ErrorBoundary>
-
-      <ErrorBoundary label="ExcelImport">
-        <ExcelImport onImport={handleImport} existingCrews={crews} />
       </ErrorBoundary>
 
       <ErrorBoundary label="Track">
