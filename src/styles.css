@@ -126,6 +126,7 @@ body::before {
   height: 100%;
   object-fit: contain;
   object-position: center;
+  opacity: 0.75;
   filter:
     brightness(1.3) saturate(1.4)
     drop-shadow(0 0 4px #00d4ff)
@@ -818,12 +819,13 @@ body::before {
 }
 
 @media (max-width: 640px) {
-  .stats-bar { grid-template-columns: 1fr 1fr; }
-  .team-cards-grid { grid-template-columns: 1fr; }
-  .header { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .header-title h1 { font-size: 22px; }
   .app-container { padding: 0 12px 40px; }
+  .header { padding: 36px 16px 32px; min-height: 150px; }
   .logo-icon { width: 300px; height: 64px; }
+  .stats-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card { padding: 16px; }
+  .team-cards-grid { grid-template-columns: 1fr; }
+  .track-container { padding: 12px; }
   .countdown-timer { padding: 20px; }
   .countdown-display { gap: 6px; }
   .countdown-value { font-size: 32px; width: 72px; padding: 8px 10px; }
@@ -839,10 +841,12 @@ body::before {
 }
 
 @media (max-width: 380px) {
+  .header { padding: 28px 12px 24px; min-height: 120px; }
+  .logo-icon { width: 240px; height: 50px; }
   .countdown-value { font-size: 28px; width: 64px; }
   .countdown-separator { font-size: 24px; }
-  .logo-icon { width: 240px; height: 50px; }
   .stat-card-value { font-size: 20px; }
+  .stats-bar { gap: 8px; }
 }
 
 /* ============ ANIMATIONS ============ */
