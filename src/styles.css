@@ -114,8 +114,8 @@ body::before {
 }
 
 .logo-icon {
-  width: 320px;
-  height: 120px;
+  width: 340px;
+  height: 80px;
   position: relative;
   flex-shrink: 0;
 }
@@ -127,8 +127,8 @@ body::before {
   object-position: left center;
   mix-blend-mode: screen;
   filter: brightness(2.0) contrast(1.5);
-  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 42% 58%, black 20%, transparent 68%);
-  mask-image: radial-gradient(ellipse 90% 80% at 42% 58%, black 20%, transparent 68%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 75% at 50% 50%, black 25%, transparent 70%);
+  mask-image: radial-gradient(ellipse 95% 75% at 50% 50%, black 25%, transparent 70%);
 }
 
 .logo-icon svg {
@@ -821,7 +821,7 @@ body::before {
   .header { flex-direction: column; align-items: flex-start; gap: 12px; }
   .header-title h1 { font-size: 22px; }
   .app-container { padding: 0 12px 40px; }
-  .logo-icon { width: 220px; height: 80px; }
+  .logo-icon { width: 240px; height: 56px; }
   .countdown-timer { padding: 20px; }
   .countdown-display { gap: 6px; }
   .countdown-value { font-size: 32px; width: 72px; padding: 8px 10px; }
@@ -839,7 +839,7 @@ body::before {
 @media (max-width: 380px) {
   .countdown-value { font-size: 28px; width: 64px; }
   .countdown-separator { font-size: 24px; }
-  .logo-icon { width: 180px; height: 65px; }
+  .logo-icon { width: 180px; height: 44px; }
   .stat-card-value { font-size: 20px; }
 }
 

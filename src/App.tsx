@@ -61,7 +61,6 @@ export default function App() {
           </div>
           <div className="header-title">
             <h1>Форсаж</h1>
-            <p>Пилот // 3 месяца // 19 экипажей</p>
           </div>
         </div>
         <div className="header-badge">
