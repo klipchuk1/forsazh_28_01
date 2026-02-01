@@ -9,7 +9,11 @@ import TeamCards from './components/TeamCards';
 import TeamDetail from './components/TeamDetail';
 import ExcelImport from './components/ExcelImport';
 import CountdownTimer from './components/CountdownTimer';
+import LandingPage from './components/LandingPage';
 import logoImage from './assets/logo.png';
+
+// Установить в false когда приложение готово к запуску
+const SHOW_LANDING = true;
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode; label: string },
@@ -48,6 +52,8 @@ export default function App() {
   const handleImport = (updatedCrews: Crew[]) => {
     setCrews(updatedCrews);
   };
+
+  if (SHOW_LANDING) return <LandingPage />;
 
   return (
     <div className="app-container">
