@@ -1,4 +1,4 @@
-import type { Crew } from './types';
+import type { Crew, SegmentScores } from './types';
 
 const crewNames = [
   { team: 'Молния', driver: 'Виктор Соrokин', navigator: 'Анна Петрова' },
@@ -69,6 +69,35 @@ function generateWeeklyHistory(crewIndex: number, currentFact: number, target: n
   return weeks;
 }
 
+// Distributes total target/fact across 4 segments sequentially.
+// Warmup (Feb 16-28) is shorter → smaller weight.
+// Fact fills segments left-to-right; any excess lands in lap3 (over-achievement).
+// When the backend supplies real per-segment points, just populate segmentScores
+// and getTrackPosition in Track.tsx will place cars correctly.
+function generateSegmentScores(target: number, fact: number): SegmentScores {
+  const weights = [0.2, 0.27, 0.27, 0.26];
+  const targets = weights.map(w => Math.round(target * w));
+
+  let remaining = fact;
+  const facts = targets.map((t, i) => {
+    if (i === targets.length - 1) {
+      const f = remaining;
+      remaining = 0;
+      return Math.max(0, f);
+    }
+    const f = Math.min(remaining, t);
+    remaining = Math.max(0, remaining - f);
+    return f;
+  });
+
+  return {
+    warmup: { target: targets[0], fact: facts[0] },
+    lap1:   { target: targets[1], fact: facts[1] },
+    lap2:   { target: targets[2], fact: facts[2] },
+    lap3:   { target: targets[3], fact: facts[3] },
+  };
+}
+
 export function generateMockData(): Crew[] {
   return crewNames.map((crew, index) => {
     const connectedTarget = 25 + Math.floor(Math.random() * 15);
@@ -102,6 +131,7 @@ export function generateMockData(): Crew[] {
       weeklyHistory: generateWeeklyHistory(index, connectedFact, connectedTarget),
       checkpoint1: factPct > 0.3,
       checkpoint2: factPct > 0.65,
+      segmentScores: generateSegmentScores(connectedTarget, connectedFact),
     };
   });
 }

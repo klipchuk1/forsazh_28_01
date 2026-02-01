@@ -11,6 +11,13 @@ type WeeklyData = {
   skuCount: number;
 };
 
+type SegmentScores = {
+  warmup: KPIMetric;
+  lap1: KPIMetric;
+  lap2: KPIMetric;
+  lap3: KPIMetric;
+};
+
 type Crew = {
   id: number;
   teamName: string;
@@ -32,6 +39,7 @@ type Crew = {
   weeklyHistory: WeeklyData[];
   checkpoint1: boolean;
   checkpoint2: boolean;
+  segmentScores: SegmentScores;
 };
 
 type AppState = {
@@ -41,4 +49,4 @@ type AppState = {
   selectedCrew: Crew | null;
 };
 
-export type { Crew, KPIMetric, WeeklyData, AppState };
+export type { Crew, KPIMetric, WeeklyData, AppState, SegmentScores };
