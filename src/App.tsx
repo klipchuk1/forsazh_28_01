@@ -73,7 +73,7 @@ export default function App() {
       <CountdownTimer />
 
       <ErrorBoundary label="StatsBar">
-        <StatsBar crews={crews} />
+        <StatsBar />
       </ErrorBoundary>
 
       <ErrorBoundary label="Track">
