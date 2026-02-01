@@ -53,6 +53,8 @@ body::before {
   max-width: 1600px;
   margin: 0 auto;
   padding: 0 24px 60px;
+  background-repeat: repeat;
+  background-size: 400px 400px;
 }
 
 /* Scanline overlay effect */
@@ -76,12 +78,30 @@ body::before {
 
 /* ============ HEADER ============ */
 .header {
-  padding: 32px 0 24px;
+  padding: 32px 24px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 32px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(10,10,15,0.75) 0%, rgba(10,10,15,0.45) 100%);
+  z-index: 0;
+}
+
+.header > * {
+  position: relative;
+  z-index: 1;
 }
 
 .header-left {

@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Crew } from '../data/types';
 import { useCounterAnimation } from '../hooks/useCounterAnimation';
+import iconsSprite from '../assets/icons-metrics.png';
 
 interface StatsBarProps {
   crews: Crew[];
@@ -30,9 +31,7 @@ function StatCard({
       style={{ '--stat-color': color } as React.CSSProperties}
     >
       <div className="stat-card-icon" style={{ background: `${color}18` }}>
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={color} strokeWidth="2">
-          {icon}
-        </svg>
+        {icon}
       </div>
       <div className="stat-card-value">{animated.toLocaleString('ru-RU')}</div>
       <div className="stat-card-label">{label}</div>
@@ -58,7 +57,7 @@ export default function StatsBar({ crews }: StatsBarProps) {
         color="#ff3366"
         change={`${overallPercent}% от плана`}
         delayClass="animate-delay-1"
-        icon={<><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></>}
+        icon={<div style={{ width: '18px', height: '18px', backgroundImage: `url(${iconsSprite})`, backgroundSize: '54px 18px', backgroundPosition: '0px 0' }} />}
       />
       <StatCard
         value={totalSales}
@@ -66,7 +65,7 @@ export default function StatsBar({ crews }: StatsBarProps) {
         color="#00d4ff"
         change={`+12.3% vs.прошл.`}
         delayClass="animate-delay-2"
-        icon={<><path d="M23 6l-9 5.5L9 4 1 8.5" /><path d="M17 6h6v6" /></>}
+        icon={<div style={{ width: '18px', height: '18px', backgroundImage: `url(${iconsSprite})`, backgroundSize: '54px 18px', backgroundPosition: '-18px 0' }} />}
       />
       <StatCard
         value={totalSku}
@@ -74,7 +73,7 @@ export default function StatsBar({ crews }: StatsBarProps) {
         color="#a855f7"
         change={`+8 новых`}
         delayClass="animate-delay-3"
-        icon={<><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>}
+        icon={<div style={{ width: '18px', height: '18px', backgroundImage: `url(${iconsSprite})`, backgroundSize: '54px 18px', backgroundPosition: '-36px 0' }} />}
       />
       <StatCard
         value={19}
@@ -82,7 +81,7 @@ export default function StatsBar({ crews }: StatsBarProps) {
         color="#00ff88"
         change="Все активны"
         delayClass="animate-delay-4"
-        icon={<><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></>}
+        icon={<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#00ff88" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>}
       />
     </div>
   );

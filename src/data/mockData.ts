@@ -1,5 +1,17 @@
 import type { Crew } from './types';
 
+import driver1 from '../assets/avatars/driver-1.png';
+import driver2 from '../assets/avatars/driver-2.png';
+import driver3 from '../assets/avatars/driver-3.png';
+import driver4 from '../assets/avatars/driver-4.png';
+import navigator1 from '../assets/avatars/navigator-1.png';
+import navigator2 from '../assets/avatars/navigator-2.png';
+import navigator3 from '../assets/avatars/navigator-3.png';
+import navigator4 from '../assets/avatars/navigator-4.png';
+
+const driverAvatars = [driver1, driver2, driver3, driver4];
+const navigatorAvatars = [navigator1, navigator2, navigator3, navigator4];
+
 const crewNames = [
   { team: 'Молния', driver: 'Виктор Соrokин', navigator: 'Анна Петрова' },
   { team: 'Торнадо', driver: 'Дмитрий Волков', navigator: 'Мария Иванова' },
@@ -86,11 +98,11 @@ export function generateMockData(): Crew[] {
       teamName: crew.team,
       driver: {
         name: crew.driver,
-        avatar: `https://i.pravatar.cc/150?img=${(index * 3) % 70 + 1}`,
+        avatar: driverAvatars[index % 4],
       },
       navigator: {
         name: crew.navigator,
-        avatar: `https://i.pravatar.cc/150?img=${(index * 3 + 1) % 70 + 1}`,
+        avatar: navigatorAvatars[index % 4],
       },
       color: colors[index].color,
       glowColor: colors[index].glow,
