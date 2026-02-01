@@ -10,8 +10,6 @@ import TeamDetail from './components/TeamDetail';
 import ExcelImport from './components/ExcelImport';
 import CountdownTimer from './components/CountdownTimer';
 import logoImage from './assets/logo.png';
-import headerBg from './assets/header-bg.png';
-import bgTexture from './assets/bg-texture.png';
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode; label: string },
@@ -52,9 +50,9 @@ export default function App() {
   };
 
   return (
-    <div className="app-container" style={{ backgroundImage: `url(${bgTexture})` }}>
+    <div className="app-container">
       {/* Header */}
-      <div className="header" style={{ backgroundImage: `url(${headerBg})` }}>
+      <div className="header">
         <div className="header-left">
           <div className="logo-icon">
             <img src={logoImage} alt="Форсаж" className="logo-image" />
