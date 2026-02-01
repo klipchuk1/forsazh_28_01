@@ -126,6 +126,10 @@ body::before {
   object-fit: contain;
   object-position: left center;
   mix-blend-mode: screen;
+  filter: brightness(1.4) contrast(1.6);
+  opacity: 0.85;
+  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 42% 58%, black 20%, transparent 68%);
+  mask-image: radial-gradient(ellipse 90% 80% at 42% 58%, black 20%, transparent 68%);
 }
 
 .logo-icon svg {
