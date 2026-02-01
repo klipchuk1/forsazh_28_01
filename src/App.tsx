@@ -13,7 +13,7 @@ import LandingPage from './components/LandingPage';
 import logoImage from './assets/logo.png';
 
 // Установить в false когда приложение готово к запуску
-const SHOW_LANDING = true;
+const SHOW_LANDING = false;
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode; label: string },
