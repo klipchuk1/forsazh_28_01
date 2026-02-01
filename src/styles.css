@@ -116,28 +116,32 @@ body::before {
 }
 
 .logo-icon {
-  width: 480px;
-  height: 100px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   position: relative;
 }
 
-.logo-icon .logo-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  opacity: 0.75;
-  filter:
-    brightness(1.3) saturate(1.4)
-    drop-shadow(0 0 4px #00d4ff)
-    drop-shadow(0 0 12px #00d4ff90)
-    drop-shadow(0 0 30px #00d4ff40);
+.logo-brand {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #6677aa;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
-.logo-icon svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 8px var(--accent-primary));
+.logo-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  text-shadow:
+    0 0 7px var(--accent-primary),
+    0 0 20px rgba(255, 51, 102, 0.6),
+    0 0 50px rgba(255, 51, 102, 0.3);
 }
 
 .header-title h1 {
@@ -821,7 +825,8 @@ body::before {
 @media (max-width: 640px) {
   .app-container { padding: 0 12px 40px; }
   .header { padding: 36px 16px 32px; min-height: 150px; }
-  .logo-icon { width: 300px; height: 64px; }
+  .logo-title { font-size: 28px; letter-spacing: 4px; }
+  .logo-brand { font-size: 12px; }
   .stats-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
   .stat-card { padding: 16px; }
   .team-cards-grid { grid-template-columns: 1fr; }
@@ -842,7 +847,8 @@ body::before {
 
 @media (max-width: 380px) {
   .header { padding: 28px 12px 24px; min-height: 120px; }
-  .logo-icon { width: 240px; height: 50px; }
+  .logo-title { font-size: 22px; letter-spacing: 3px; }
+  .logo-brand { font-size: 10px; gap: 8px; }
   .countdown-value { font-size: 28px; width: 64px; }
   .countdown-separator { font-size: 24px; }
   .stat-card-value { font-size: 20px; }

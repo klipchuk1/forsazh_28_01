@@ -9,7 +9,6 @@ import TeamCards from './components/TeamCards';
 import TeamDetail from './components/TeamDetail';
 import CountdownTimer from './components/CountdownTimer';
 import LandingPage from './components/LandingPage';
-import logoImage from './assets/logo.png';
 import headerBg from './assets/header-bg.png';
 
 // Установить в false когда приложение готово к запуску
@@ -57,7 +56,8 @@ export default function App() {
       <div className="header" style={{ backgroundImage: `url(${headerBg})` }}>
         <div className="header-left">
           <div className="logo-icon">
-            <img src={logoImage} alt="Форсаж" className="logo-image" />
+            <span className="logo-brand">itms | sns</span>
+            <span className="logo-title">ФОРСАЖ</span>
           </div>
         </div>
         <div className="header-badge">
