@@ -56,8 +56,8 @@ export default function App() {
       <div className="header" style={{ backgroundImage: `url(${headerBg})` }}>
         <div className="header-left">
           <div className="logo-icon">
-            <span className="logo-brand">itms | sns</span>
             <span className="logo-title">ФОРСАЖ</span>
+            <span className="logo-brand">itms | sns</span>
           </div>
         </div>
         <div className="header-badge">

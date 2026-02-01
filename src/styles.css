@@ -117,18 +117,10 @@ body::before {
 
 .logo-icon {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 2px;
   position: relative;
-}
-
-.logo-brand {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  color: #6677aa;
-  letter-spacing: 2px;
-  text-transform: uppercase;
 }
 
 .logo-title {
@@ -137,11 +129,22 @@ body::before {
   font-weight: 900;
   letter-spacing: 6px;
   text-transform: uppercase;
-  color: var(--accent-primary);
+  color: #fff;
   text-shadow:
-    0 0 7px var(--accent-primary),
-    0 0 20px rgba(255, 51, 102, 0.6),
-    0 0 50px rgba(255, 51, 102, 0.3);
+    0 0 2px #fff,
+    0 0 6px #ff3366,
+    0 0 14px #ff3366,
+    0 0 30px rgba(255, 51, 102, 0.7),
+    0 0 60px rgba(255, 51, 102, 0.4);
+}
+
+.logo-brand {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff8c00;
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .header-title h1 {
