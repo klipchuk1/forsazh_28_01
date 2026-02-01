@@ -130,6 +130,9 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 onMouseEnter={() => setHoveredCrew(crew.id)}
                 onMouseLeave={() => setHoveredCrew(null)}
               >
+                {/* Touch hit area (44×44 min target) */}
+                <rect x={x - 22} y={y - 22} width="44" height="44" fill="transparent" />
+
                 {/* Glow behind car */}
                 <ellipse cx={x} cy={y + 6} rx={12} ry={4} fill={crew.color} opacity={isHovered ? 0.4 : 0.2} />
 
