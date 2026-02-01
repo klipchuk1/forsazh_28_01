@@ -1,5 +1,4 @@
 import CountdownTimer from './CountdownTimer';
-import logoImage from '../assets/logo.png';
 
 export default function LandingPage() {
   return (
@@ -10,7 +9,6 @@ export default function LandingPage() {
 
       <div className="landing-overlay">
         <div className="landing-content">
-          <img src={logoImage} alt="Форсаж" className="landing-logo" />
           <CountdownTimer />
         </div>
       </div>
