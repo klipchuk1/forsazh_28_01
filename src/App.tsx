@@ -59,9 +59,6 @@ export default function App() {
           <div className="logo-icon">
             <img src={logoImage} alt="Форсаж" className="logo-image" />
           </div>
-          <div className="header-title">
-            <h1>Форсаж</h1>
-          </div>
         </div>
         <div className="header-badge">
           <span className="pulse-dot"></span>
