@@ -43,9 +43,9 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
       zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '20px',
     }} onClick={onClose}>
-      <div style={{
+      <div className="detail-modal" style={{
         background: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: '20px', padding: '32px', maxWidth: '800px', width: '100%',
+        borderRadius: '20px', maxWidth: '800px', width: '100%',
         maxHeight: '85vh', overflowY: 'auto', position: 'relative',
         borderTop: `3px solid ${crew.color}`,
         boxShadow: `0 0 40px ${crew.glowColor}`,
@@ -59,7 +59,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
         }}>×</button>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
+        <div className="detail-header">
           <div style={{
             width: '56px', height: '56px', borderRadius: '12px',
             background: `${crew.color}20`, border: `2px solid ${crew.color}`,
@@ -78,7 +78,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
               🚗 {crew.driver.name} · 🧭 {crew.navigator.name}
             </p>
           </div>
-          <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+          <div className="detail-header-percent">
             <div style={{
               fontFamily: 'Orbitron, sans-serif', fontSize: '28px', fontWeight: '900',
               color: crew.color,
@@ -92,7 +92,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
         </div>
 
         {/* Metrics row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+        <div className="detail-metrics-row">
           {[
             { label: 'Подключённые точки', fact: crew.metrics.connectedPoints.fact, target: crew.metrics.connectedPoints.target, color: '#ff3366' },
             { label: 'Объём продаж', fact: crew.metrics.salesVolume.fact, target: crew.metrics.salesVolume.target, color: '#00d4ff' },
@@ -130,7 +130,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
         </div>
 
         {/* Charts */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '16px' }}>
+        <div className="detail-charts-row">
           {/* Weekly progress chart */}
           <div style={{
             background: 'var(--bg-secondary)', borderRadius: '10px',

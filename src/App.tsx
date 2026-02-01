@@ -7,9 +7,12 @@ import Track from './components/Track';
 import Leaderboard from './components/Leaderboard';
 import TeamCards from './components/TeamCards';
 import TeamDetail from './components/TeamDetail';
-import ExcelImport from './components/ExcelImport';
 import CountdownTimer from './components/CountdownTimer';
-import logoImage from './assets/logo.png';
+import LandingPage from './components/LandingPage';
+import headerBg from './assets/header-bg.png';
+
+// Установить в false когда приложение готово к запуску
+const SHOW_LANDING = false;
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode; label: string },
@@ -38,28 +41,23 @@ class ErrorBoundary extends React.Component<
 }
 
 export default function App() {
-  const [crews, setCrews] = useState<Crew[]>(mockCrews);
+  const [crews] = useState<Crew[]>(mockCrews);
   const [selectedCrew, setSelectedCrew] = useState<Crew | null>(null);
 
   const handleCrewClick = (crew: Crew) => {
     setSelectedCrew(crew);
   };
 
-  const handleImport = (updatedCrews: Crew[]) => {
-    setCrews(updatedCrews);
-  };
+  if (SHOW_LANDING) return <LandingPage />;
 
   return (
     <div className="app-container">
       {/* Header */}
-      <div className="header">
+      <div className="header" style={{ backgroundImage: `url(${headerBg})` }}>
         <div className="header-left">
           <div className="logo-icon">
-            <img src={logoImage} alt="Форсаж" className="logo-image" />
-          </div>
-          <div className="header-title">
-            <h1>Форсаж</h1>
-            <p>Пилот // 3 месяца // 19 экипажей</p>
+            <span className="logo-title">ФОРСАЖ</span>
+            <span className="logo-brand">itms | sns</span>
           </div>
         </div>
         <div className="header-badge">
@@ -71,11 +69,7 @@ export default function App() {
       <CountdownTimer />
 
       <ErrorBoundary label="StatsBar">
-        <StatsBar crews={crews} />
-      </ErrorBoundary>
-
-      <ErrorBoundary label="ExcelImport">
-        <ExcelImport onImport={handleImport} existingCrews={crews} />
+        <StatsBar />
       </ErrorBoundary>
 
       <ErrorBoundary label="Track">

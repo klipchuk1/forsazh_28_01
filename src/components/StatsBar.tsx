@@ -1,10 +1,5 @@
 import React from 'react';
-import type { Crew } from '../data/types';
 import { useCounterAnimation } from '../hooks/useCounterAnimation';
-
-interface StatsBarProps {
-  crews: Crew[];
-}
 
 function StatCard({
   value,
@@ -43,46 +38,32 @@ function StatCard({
   );
 }
 
-export default function StatsBar({ crews }: StatsBarProps) {
-  const totalConnected = crews.reduce((s, c) => s + c.metrics.connectedPoints.fact, 0);
-  const totalTarget = crews.reduce((s, c) => s + c.metrics.connectedPoints.target, 0);
-  const totalSales = crews.reduce((s, c) => s + c.metrics.salesVolume.fact, 0);
-  const totalSku = crews.reduce((s, c) => s + c.metrics.skuCount.fact, 0);
-  const overallPercent = Math.round((totalConnected / totalTarget) * 100);
-
+export default function StatsBar() {
   return (
     <div className="stats-bar">
       <StatCard
-        value={totalConnected}
-        label="Подключено точек"
+        value={3}
+        label="Месяца"
         color="#ff3366"
-        change={`${overallPercent}% от плана`}
+        change="Пилот проект"
         delayClass="animate-delay-1"
-        icon={<><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></>}
+        icon={<><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></>}
       />
       <StatCard
-        value={totalSales}
-        label="Объём продаж"
+        value={1500}
+        label="Торговых точек"
         color="#00d4ff"
-        change={`+12.3% vs.прошл.`}
+        change="План подключения"
         delayClass="animate-delay-2"
-        icon={<><path d="M23 6l-9 5.5L9 4 1 8.5" /><path d="M17 6h6v6" /></>}
-      />
-      <StatCard
-        value={totalSku}
-        label="Уникальных СКЮ"
-        color="#a855f7"
-        change={`+8 новых`}
-        delayClass="animate-delay-3"
-        icon={<><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>}
+        icon={<><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></>}
       />
       <StatCard
         value={19}
-        label="Экипажей гонки"
-        color="#00ff88"
+        label="Лучших экипажей"
+        color="#a855f7"
         change="Все активны"
-        delayClass="animate-delay-4"
-        icon={<><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></>}
+        delayClass="animate-delay-3"
+        icon={<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></>}
       />
     </div>
   );
