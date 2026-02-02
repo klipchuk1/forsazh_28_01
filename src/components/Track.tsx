@@ -7,10 +7,7 @@ interface TrackProps {
 }
 
 // Computes car position on track (0..1.15) from segmentScores.
-// Each of the 4 segments occupies 25% of track length.
-// Segments fill left-to-right: a segment must reach 100% before the next begins.
-// When the backend supplies real per-segment points, just populate crew.segmentScores
-// and cars will move automatically — no other logic needs to change.
+// Warmup is separate area on the left, then 3 laps on winding track.
 function getTrackPosition(crew: Crew): number {
   const segments = [
     crew.segmentScores.warmup,
@@ -44,6 +41,41 @@ function getTrackPosition(crew: Crew): number {
   return Math.min(position, 1.15);
 }
 
+// Computes X,Y position along the winding track path
+function getCarPositionOnPath(progress: number, trackWidth: number): { x: number; y: number } {
+  const warmupZoneWidth = 280;
+  const startX = warmupZoneWidth + 40;
+  const endX = trackWidth - 60;
+  const trackLength = endX - startX;
+
+  const centerY = 120;
+  const waveAmplitude = 30;
+
+  if (progress < 0.25) {
+    // Warmup zone - circular area on the left
+    const warmupProgress = progress / 0.25;
+    const angle = warmupProgress * Math.PI * 0.7 - Math.PI * 0.35;
+    const radius = 50;
+    const warmupCenterX = 140;
+    const warmupCenterY = 120;
+
+    return {
+      x: warmupCenterX + Math.cos(angle) * radius,
+      y: warmupCenterY + Math.sin(angle) * radius,
+    };
+  } else {
+    // Main winding track (3 laps)
+    const mainProgress = (progress - 0.25) / 0.75;
+    const x = startX + trackLength * mainProgress;
+
+    // Create S-curve wave pattern
+    const waveFrequency = 2.5;
+    const y = centerY + Math.sin(mainProgress * Math.PI * waveFrequency) * waveAmplitude;
+
+    return { x, y };
+  }
+}
+
 function getCurrentSegmentLabel(): string {
   const now = new Date();
   const year = now.getFullYear();
@@ -58,16 +90,16 @@ function getCurrentSegmentLabel(): string {
 export default function Track({ crews, onCrewClick }: TrackProps) {
   const [hoveredCrew, setHoveredCrew] = useState<number | null>(null);
 
-  const trackWidth = 1100;
-  const trackHeight = 240;
-  const startX = 60;
+  const trackWidth = 1400;
+  const trackHeight = 280;
+  const warmupZoneWidth = 280;
+  const startX = warmupZoneWidth + 40;
   const endX = trackWidth - 60;
   const trackLength = endX - startX;
 
-  // Segment boundaries at 25 / 50 / 75 %
-  const cp1X = startX + trackLength * 0.25;
-  const cp2X = startX + trackLength * 0.50;
-  const cp3X = startX + trackLength * 0.75;
+  // Segment boundaries for main track (after warmup)
+  const cp1X = startX + trackLength * 0.333;
+  const cp2X = startX + trackLength * 0.666;
 
   // Sorted best-first (furthest right = best)
   const sorted = [...crews].sort((a, b) => getTrackPosition(b) - getTrackPosition(a));
@@ -84,6 +116,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
       <div className="track-svg-wrapper">
         <svg viewBox={`0 0 ${trackWidth} ${trackHeight}`} preserveAspectRatio="xMidYMid meet">
           <defs>
+            <linearGradient id="warmupGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#00d4ff20" />
+              <stop offset="100%" stopColor="#00d4ff05" />
+            </linearGradient>
             <linearGradient id="trackGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#1a1a2e" />
               <stop offset="50%" stopColor="#0f0f1a" />
@@ -109,71 +145,79 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             </filter>
           </defs>
 
-          {/* Track background */}
-          <rect x={startX - 20} y={55} width={trackLength + 40} height={40} rx="20" fill="url(#trackGrad)" />
+          {/* Warmup zone background (left side) */}
+          <rect x={20} y={30} width={warmupZoneWidth - 20} height={220} rx="20" fill="url(#warmupGrad)" stroke="#00d4ff30" strokeWidth="2" />
+          <text x={140} y={260} textAnchor="middle" fill="#00d4ff" fontSize="11" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="1">
+            ❄️ ПРОГР. КРУГ
+          </text>
+          <text x={140} y={25} textAnchor="middle" fill="#00d4ff80" fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">
+            ФЕВРАЛЬ
+          </text>
 
-          {/* Subtle segment colour tints */}
-          <rect x={startX}  y={58} width={trackLength * 0.25} height={34} fill="#00d4ff" opacity={0.03} />
-          <rect x={cp1X}    y={58} width={trackLength * 0.25} height={34} fill="#a855f7" opacity={0.035} />
-          <rect x={cp2X}    y={58} width={trackLength * 0.25} height={34} fill="#ff6b35" opacity={0.035} />
-          <rect x={cp3X}    y={58} width={trackLength * 0.25} height={34} fill="#ffd600" opacity={0.03} />
+          {/* Main winding track path */}
+          <path
+            d={`M ${startX} 120 Q ${startX + trackLength * 0.15} ${120 - 30}, ${startX + trackLength * 0.3} 120 T ${startX + trackLength * 0.6} 120 Q ${startX + trackLength * 0.75} ${120 + 30}, ${startX + trackLength * 0.9} 120 L ${endX} 120`}
+            fill="none"
+            stroke="url(#trackGrad)"
+            strokeWidth="70"
+            strokeLinecap="round"
+            opacity="0.4"
+          />
 
-          {/* Lane dashes */}
-          <line x1={startX} y1={75} x2={endX} y2={75} stroke="#ffffff08" strokeWidth="1" strokeDasharray="8,12" />
-          <line x1={startX} y1={75} x2={endX} y2={75} stroke="#ffffff15" strokeWidth="2" />
+          {/* Track center line */}
+          <path
+            d={`M ${startX} 120 Q ${startX + trackLength * 0.15} ${120 - 30}, ${startX + trackLength * 0.3} 120 T ${startX + trackLength * 0.6} 120 Q ${startX + trackLength * 0.75} ${120 + 30}, ${startX + trackLength * 0.9} 120 L ${endX} 120`}
+            fill="none"
+            stroke="#ffffff15"
+            strokeWidth="2"
+            strokeDasharray="8,12"
+          />
 
-          {/* Checkpoint 1 — конец февраля (25%) */}
+          {/* Checkpoint labels above track */}
           <g>
-            <line x1={cp1X} y1={38} x2={cp1X} y2={115} stroke="#00d4ff25" strokeWidth="1" strokeDasharray="4,4" />
-            <rect x={cp1X - 30} y={28} width="60" height="18" rx="4" fill="#00d4ff10" stroke="#00d4ff35" strokeWidth="1" />
-            <text x={cp1X} y={41} textAnchor="middle" fill="#00d4ff" fontSize="8" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">ФЕВР.</text>
+            <line x1={cp1X} y1={50} x2={cp1X} y2={190} stroke="#a855f725" strokeWidth="1" strokeDasharray="4,4" />
+            <rect x={cp1X - 35} y={35} width="70" height="20" rx="5" fill="#a855f710" stroke="#a855f735" strokeWidth="1" />
+            <text x={cp1X} y={49} textAnchor="middle" fill="#a855f7" fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">МАРТ</text>
           </g>
 
-          {/* Checkpoint 2 — конец марта (50%) */}
           <g>
-            <line x1={cp2X} y1={38} x2={cp2X} y2={115} stroke="#a855f725" strokeWidth="1" strokeDasharray="4,4" />
-            <rect x={cp2X - 30} y={28} width="60" height="18" rx="4" fill="#a855f710" stroke="#a855f735" strokeWidth="1" />
-            <text x={cp2X} y={41} textAnchor="middle" fill="#a855f7" fontSize="8" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">МАРТ</text>
+            <line x1={cp2X} y1={50} x2={cp2X} y2={190} stroke="#ff6b3525" strokeWidth="1" strokeDasharray="4,4" />
+            <rect x={cp2X - 35} y={35} width="70" height="20" rx="5" fill="#ff6b3510" stroke="#ff6b3535" strokeWidth="1" />
+            <text x={cp2X} y={49} textAnchor="middle" fill="#ff6b35" fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">АПРЕЛЬ</text>
           </g>
 
-          {/* Checkpoint 3 — конец апреля (75%) */}
+          {/* Start flag at warmup entrance */}
           <g>
-            <line x1={cp3X} y1={38} x2={cp3X} y2={115} stroke="#ff6b3525" strokeWidth="1" strokeDasharray="4,4" />
-            <rect x={cp3X - 30} y={28} width="60" height="18" rx="4" fill="#ff6b3510" stroke="#ff6b3535" strokeWidth="1" />
-            <text x={cp3X} y={41} textAnchor="middle" fill="#ff6b35" fontSize="8" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">АПРЕЛЬ</text>
-          </g>
-
-          {/* Start flag */}
-          <g>
-            <line x1={startX} y1={50} x2={startX} y2={100} stroke="#ffffff30" strokeWidth="2" />
-            <rect x={startX + 2} y={48} width="22" height="12" fill="#ffffff15" rx="2" />
-            <text x={startX + 13} y={57} textAnchor="middle" fill="#ffffff60" fontSize="8" fontFamily="Orbitron, sans-serif">START</text>
+            <line x={startX - 20} y1={100} x2={startX - 20} y2={140} stroke="#ffffff30" strokeWidth="2" />
+            <rect x={startX - 18} y={98} width="22" height="12" fill="#ffffff15" rx="2" />
+            <text x={startX - 7} y={107} textAnchor="middle" fill="#ffffff60" fontSize="8" fontFamily="Orbitron, sans-serif">START</text>
           </g>
 
           {/* Finish flag */}
           <g filter="url(#glow)">
-            <line x1={endX} y1={38} x2={endX} y2={105} stroke="url(#finishGrad)" strokeWidth="3" />
-            {[0, 1, 2, 3].map((i) => (
-              <rect key={i} x={endX + 3} y={40 + i * 7} width="7" height="7"
+            <line x1={endX} y1={80} x2={endX} y2={160} stroke="url(#finishGrad)" strokeWidth="3" />
+            {[0, 1, 2, 3, 4].map((i) => (
+              <rect key={i} x={endX + 3} y={80 + i * 8} width="8" height="8"
                 fill={i % 2 === 0 ? '#ffd60080' : '#ffffff20'} />
             ))}
-            {[0, 1, 2, 3].map((i) => (
-              <rect key={`b${i}`} x={endX + 10} y={40 + i * 7} width="7" height="7"
+            {[0, 1, 2, 3, 4].map((i) => (
+              <rect key={`b${i}`} x={endX + 11} y={80 + i * 8} width="8" height="8"
                 fill={i % 2 === 1 ? '#ffd60080' : '#ffffff20'} />
             ))}
-            <text x={endX + 13} y={120} textAnchor="middle" fill="#ffd600" fontSize="8" fontFamily="Orbitron, sans-serif" fontWeight="700">FINISH</text>
+            <text x={endX + 14} y={175} textAnchor="middle" fill="#ffd600" fontSize="9" fontFamily="Orbitron, sans-serif" fontWeight="700">FINISH</text>
+            <text x={endX + 14} y={75} textAnchor="middle" fill="#ffd60080" fontSize="8" fontFamily="Rajdhani, sans-serif" fontWeight="600">МАЙ</text>
           </g>
 
           {/* Crew cars */}
           {sorted.map((crew, index) => {
             const position = getTrackPosition(crew);
-            const x = Math.min(startX + trackLength * position, endX + 15);
+            const { x, y } = getCarPositionOnPath(position, trackWidth);
             const isHovered = hoveredCrew === crew.id;
             const rank = index + 1;
 
-            // 3-row vertical stagger to avoid overlap
-            const yOffset = (index % 3) * 12 - 12;
-            const y = 75 + yOffset;
+            // Vertical stagger for overlapping cars (more rows now)
+            const yOffset = ((index % 5) - 2) * 8;
+            const finalY = y + yOffset;
 
             return (
               <g
@@ -184,19 +228,19 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 onMouseLeave={() => setHoveredCrew(null)}
               >
                 {/* Touch hit area (44×44 min target) */}
-                <rect x={x - 22} y={y - 22} width="44" height="44" fill="transparent" />
+                <rect x={x - 22} y={finalY - 22} width="44" height="44" fill="transparent" />
 
                 {/* Exhaust trail behind car */}
                 {position > 0.01 && (
                   <g opacity={isHovered ? 0.7 : 0.35}>
-                    <rect x={x - 17} y={y - 1}   width={4}   height={1}   rx={0.5}  fill={crew.color} opacity={0.4} />
-                    <rect x={x - 22} y={y - 0.3} width={3}   height={0.7} rx={0.35} fill={crew.color} opacity={0.2} />
-                    <rect x={x - 16} y={y + 0.8} width={2.5} height={0.7} rx={0.35} fill={crew.color} opacity={0.25} />
+                    <rect x={x - 17} y={finalY - 1}   width={4}   height={1}   rx={0.5}  fill={crew.color} opacity={0.4} />
+                    <rect x={x - 22} y={finalY - 0.3} width={3}   height={0.7} rx={0.35} fill={crew.color} opacity={0.2} />
+                    <rect x={x - 16} y={finalY + 0.8} width={2.5} height={0.7} rx={0.35} fill={crew.color} opacity={0.25} />
                   </g>
                 )}
 
                 {/* Car group */}
-                <g transform={`translate(${x}, ${y})`}>
+                <g transform={`translate(${x}, ${finalY})`}>
                   {/* Ground shadow */}
                   <ellipse cx={0} cy={5} rx={12} ry={2} fill={crew.color} opacity={isHovered ? 0.35 : 0.15} />
 
@@ -208,8 +252,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
                   {/* Body + spoiler with glow */}
                   <g filter={isHovered ? 'url(#glowIntense)' : 'url(#glow)'}>
-                    {/* Main body silhouette:
-                        flat bottom, raised cabin in the middle, sloped hood & rear */}
+                    {/* Main body silhouette */}
                     <path
                       d="M-11,2 L-11,-0.5 L-7,-2 L-3,-4 L2,-4 L6,-2 L9,-0.5 L11,2 Z"
                       fill={crew.color}
@@ -219,16 +262,16 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                     <rect x={-12.5} y={-2} width={2} height={3} rx={0.5} fill={crew.color} />
                   </g>
 
-                  {/* Windshield (trapezoid inside cabin) */}
+                  {/* Windshield */}
                   <path
                     d="M-2,-3.5 L1.5,-3.5 L4,-2 L-3.5,-2 Z"
                     fill="rgba(130,210,255,0.3)"
                   />
 
-                  {/* Exhaust flame at rear */}
+                  {/* Exhaust flame */}
                   <rect x={-14} y={0} width={1.8} height={1.5} rx={0.6} fill="rgba(255,100,30,0.6)" />
 
-                  {/* Rank number on body */}
+                  {/* Rank number */}
                   <text
                     x={0}
                     y={0.5}
@@ -247,7 +290,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                   <g>
                     <rect
                       x={x - 48}
-                      y={y - 48}
+                      y={finalY - 48}
                       width="96"
                       height="34"
                       rx="6"
@@ -256,10 +299,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                       strokeWidth="1"
                       opacity={0.95}
                     />
-                    <text x={x} y={y - 32} textAnchor="middle" fill="#fff" fontSize="8" fontFamily="Rajdhani, sans-serif" fontWeight="600">
+                    <text x={x} y={finalY - 32} textAnchor="middle" fill="#fff" fontSize="8" fontFamily="Rajdhani, sans-serif" fontWeight="600">
                       {crew.teamName}
                     </text>
-                    <text x={x} y={y - 20} textAnchor="middle" fill={crew.color} fontSize="8" fontFamily="Orbitron, sans-serif" fontWeight="700">
+                    <text x={x} y={finalY - 20} textAnchor="middle" fill={crew.color} fontSize="8" fontFamily="Orbitron, sans-serif" fontWeight="700">
                       {Math.round(position * 100)}%
                     </text>
                   </g>
@@ -270,11 +313,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
           {/* Progress markers */}
           <g>
-            <text x={startX} y={120} textAnchor="middle" fill="#ffffff25" fontSize="8" fontFamily="Rajdhani, sans-serif">0%</text>
-            <text x={cp1X}   y={120} textAnchor="middle" fill="#00d4ff50" fontSize="8" fontFamily="Rajdhani, sans-serif">25%</text>
-            <text x={cp2X}   y={120} textAnchor="middle" fill="#a855f750" fontSize="8" fontFamily="Rajdhani, sans-serif">50%</text>
-            <text x={cp3X}   y={120} textAnchor="middle" fill="#ff6b3550" fontSize="8" fontFamily="Rajdhani, sans-serif">75%</text>
-            <text x={endX}   y={120} textAnchor="middle" fill="#ffd60050" fontSize="8" fontFamily="Rajdhani, sans-serif">100%</text>
+            <text x={startX} y={210} textAnchor="middle" fill="#ffffff25" fontSize="8" fontFamily="Rajdhani, sans-serif">25%</text>
+            <text x={cp1X}   y={210} textAnchor="middle" fill="#a855f750" fontSize="8" fontFamily="Rajdhani, sans-serif">50%</text>
+            <text x={cp2X}   y={210} textAnchor="middle" fill="#ff6b3550" fontSize="8" fontFamily="Rajdhani, sans-serif">75%</text>
+            <text x={endX}   y={210} textAnchor="middle" fill="#ffd60050" fontSize="8" fontFamily="Rajdhani, sans-serif">100%</text>
           </g>
         </svg>
       </div>
