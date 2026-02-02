@@ -69,59 +69,29 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
   const row2Y = 160;
   const row3Y = 240;
 
-  const amplitude = 18; // Reduced to prevent self-intersection
-  const frequency = 4;
-
   // Sorted best-first
   const sorted = [...crews].sort((a, b) => getTrackPosition(b) - getTrackPosition(a));
 
-  // Generate ONE continuous serpentine path through all 3 rows
-  const generateContinuousPath = () => {
-    const points = [];
-    const steps = 50;
+  // Generate simple Z-shaped track path (no serpentine)
+  const generateZPath = () => {
+    const curveRadius = 30;
 
-    // Row 1: Март (left to right)
-    for (let i = 0; i <= steps; i++) {
-      const progress = i / steps;
-      const x = rowStartX + rowLength * progress;
-      const waveOffset = Math.sin(progress * Math.PI * frequency) * amplitude;
-      points.push(`${x},${row1Y + waveOffset}`);
-    }
+    // Row 1: straight line left to right
+    let path = `M ${rowStartX} ${row1Y} L ${rowEndX} ${row1Y}`;
 
-    // Smooth curve transition from row1 end to row2 start
-    const curveSteps = 15;
-    for (let i = 1; i <= curveSteps; i++) {
-      const t = i / curveSteps;
-      const x = rowEndX + 25 * Math.sin(t * Math.PI);
-      const y = row1Y + (row2Y - row1Y) * t;
-      points.push(`${x},${y}`);
-    }
+    // Curve down to row 2
+    path += ` Q ${rowEndX + curveRadius} ${row1Y + (row2Y - row1Y) / 2}, ${rowEndX} ${row2Y}`;
 
-    // Row 2: Апрель (right to left)
-    for (let i = 0; i <= steps; i++) {
-      const progress = i / steps;
-      const x = rowEndX - rowLength * progress;
-      const waveOffset = Math.sin(progress * Math.PI * frequency) * amplitude;
-      points.push(`${x},${row2Y + waveOffset}`);
-    }
+    // Row 2: straight line right to left
+    path += ` L ${rowStartX} ${row2Y}`;
 
-    // Smooth curve transition from row2 end to row3 start
-    for (let i = 1; i <= curveSteps; i++) {
-      const t = i / curveSteps;
-      const x = rowStartX - 25 * Math.sin(t * Math.PI);
-      const y = row2Y + (row3Y - row2Y) * t;
-      points.push(`${x},${y}`);
-    }
+    // Curve down to row 3
+    path += ` Q ${rowStartX - curveRadius} ${row2Y + (row3Y - row2Y) / 2}, ${rowStartX} ${row3Y}`;
 
-    // Row 3: Май (left to right)
-    for (let i = 0; i <= steps; i++) {
-      const progress = i / steps;
-      const x = rowStartX + rowLength * progress;
-      const waveOffset = Math.sin(progress * Math.PI * frequency) * amplitude;
-      points.push(`${x},${row3Y + waveOffset}`);
-    }
+    // Row 3: straight line left to right
+    path += ` L ${rowEndX} ${row3Y}`;
 
-    return `M ${points.join(' L ')}`;
+    return path;
   };
 
   return (
@@ -237,9 +207,9 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             </text>
           </g>
 
-          {/* ONE continuous serpentine track */}
+          {/* Z-shaped track - simple straight lines */}
           <path
-            d={generateContinuousPath()}
+            d={generateZPath()}
             fill="none"
             stroke="url(#trackGrad)"
             strokeWidth="50"
@@ -249,7 +219,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
           />
 
           <path
-            d={generateContinuousPath()}
+            d={generateZPath()}
             fill="none"
             stroke="#ffffff12"
             strokeWidth="2"
@@ -303,46 +273,55 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             <text x={rowStartX - 3} y={row1Y - 18} textAnchor="middle" fill="#ffffff60" fontSize="7" fontFamily="Orbitron, sans-serif">START</text>
           </g>
 
-          {/* Checkpoint 1 flag - end of March */}
+          {/* Checkpoint 1 - vertical line crossing track at end of March */}
           <g filter="url(#glow)">
-            <line x1={rowEndX + 25} y1={row1Y - 30} x2={rowEndX + 25} y2={row1Y + 30} stroke="url(#checkpoint1Grad)" strokeWidth="3" />
-            {[0, 1, 2, 3, 4].map((i) => (
-              <rect key={i} x={rowEndX + 28} y={row1Y - 28 + i * 11} width="8" height="8"
+            <line
+              x1={rowEndX}
+              y1={row1Y - 40}
+              x2={rowEndX}
+              y2={row1Y + 40}
+              stroke="url(#checkpoint1Grad)"
+              strokeWidth="4"
+            />
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <rect key={i} x={rowEndX - 4} y={row1Y - 35 + i * 12} width="8" height="8"
                 fill={i % 2 === 0 ? '#a855f790' : '#ffffff25'} />
             ))}
-            {[0, 1, 2, 3, 4].map((i) => (
-              <rect key={`b${i}`} x={rowEndX + 36} y={row1Y - 28 + i * 11} width="8" height="8"
-                fill={i % 2 === 1 ? '#a855f790' : '#ffffff25'} />
-            ))}
-            <text x={rowEndX + 40} y={row1Y + 50} textAnchor="middle" fill="#a855f7" fontSize="9" fontFamily="Orbitron, sans-serif" fontWeight="700">CHECKPOINT 1</text>
+            <text x={rowEndX} y={row1Y + 58} textAnchor="middle" fill="#a855f7" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700">CP 1</text>
           </g>
 
-          {/* Checkpoint 2 flag - end of April */}
+          {/* Checkpoint 2 - vertical line crossing track at end of April */}
           <g filter="url(#glow)">
-            <line x1={rowStartX - 25} y1={row2Y - 30} x2={rowStartX - 25} y2={row2Y + 30} stroke="url(#checkpoint2Grad)" strokeWidth="3" />
-            {[0, 1, 2, 3, 4].map((i) => (
-              <rect key={i} x={rowStartX - 44} y={row2Y - 28 + i * 11} width="8" height="8"
+            <line
+              x1={rowStartX}
+              y1={row2Y - 40}
+              x2={rowStartX}
+              y2={row2Y + 40}
+              stroke="url(#checkpoint2Grad)"
+              strokeWidth="4"
+            />
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <rect key={i} x={rowStartX - 4} y={row2Y - 35 + i * 12} width="8" height="8"
                 fill={i % 2 === 0 ? '#ff6b3590' : '#ffffff25'} />
             ))}
-            {[0, 1, 2, 3, 4].map((i) => (
-              <rect key={`b${i}`} x={rowStartX - 36} y={row2Y - 28 + i * 11} width="8" height="8"
-                fill={i % 2 === 1 ? '#ff6b3590' : '#ffffff25'} />
-            ))}
-            <text x={rowStartX - 40} y={row2Y + 50} textAnchor="middle" fill="#ff6b35" fontSize="9" fontFamily="Orbitron, sans-serif" fontWeight="700">CHECKPOINT 2</text>
+            <text x={rowStartX} y={row2Y + 58} textAnchor="middle" fill="#ff6b35" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700">CP 2</text>
           </g>
 
-          {/* Finish flag - end of May */}
+          {/* Finish - vertical line crossing track at end of May */}
           <g filter="url(#glow)">
-            <line x1={rowEndX + 25} y1={row3Y - 35} x2={rowEndX + 25} y2={row3Y + 35} stroke="url(#finishGrad)" strokeWidth="3" />
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <rect key={i} x={rowEndX + 28} y={row3Y - 33 + i * 11} width="9" height="9"
+            <line
+              x1={rowEndX}
+              y1={row3Y - 40}
+              x2={rowEndX}
+              y2={row3Y + 40}
+              stroke="url(#finishGrad)"
+              strokeWidth="4"
+            />
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+              <rect key={i} x={rowEndX - 4} y={row3Y - 38 + i * 11} width="8" height="8"
                 fill={i % 2 === 0 ? '#ffd60090' : '#ffffff25'} />
             ))}
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <rect key={`b${i}`} x={rowEndX + 37} y={row3Y - 33 + i * 11} width="9" height="9"
-                fill={i % 2 === 1 ? '#ffd60090' : '#ffffff25'} />
-            ))}
-            <text x={rowEndX + 42} y={row3Y + 55} textAnchor="middle" fill="#ffd600" fontSize="12" fontFamily="Orbitron, sans-serif" fontWeight="700">FINISH</text>
+            <text x={rowEndX} y={row3Y + 58} textAnchor="middle" fill="#ffd600" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">FINISH</text>
           </g>
 
           {/* Crew cars - all in warmup zone since we're before start */}
