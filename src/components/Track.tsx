@@ -245,15 +245,6 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             />
           </path>
 
-          {/* Center dashed line */}
-          <path
-            d={generateZPath()}
-            fill="none"
-            stroke="#ffffff25"
-            strokeWidth="2"
-            strokeDasharray="10,15"
-          />
-
           {/* Month labels ABOVE track */}
           <text
             x={rowStartX + rowLength / 2}
