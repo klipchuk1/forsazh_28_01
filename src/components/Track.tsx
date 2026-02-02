@@ -54,14 +54,14 @@ function getCurrentSegmentLabel(): string {
 export default function Track({ crews, onCrewClick }: TrackProps) {
   const [hoveredCrew, setHoveredCrew] = useState<number | null>(null);
 
-  const trackWidth = 1500;
+  const trackWidth = 1600;
   const trackHeight = 340;
 
-  const warmupCenterX = 180;
+  const warmupCenterX = 140;
   const warmupCenterY = 140;
-  const warmupRadius = 70;
+  const warmupRadius = 90;
 
-  const rowStartX = 320;
+  const rowStartX = 360;
   const rowEndX = trackWidth - 80;
   const rowLength = rowEndX - rowStartX;
 
@@ -69,7 +69,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
   const row2Y = 160;
   const row3Y = 240;
 
-  const amplitude = 25;
+  const amplitude = 18; // Reduced to prevent self-intersection
   const frequency = 4;
 
   // Sorted best-first
@@ -92,7 +92,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
     const curveSteps = 15;
     for (let i = 1; i <= curveSteps; i++) {
       const t = i / curveSteps;
-      const x = rowEndX - (rowEndX - rowEndX) * t * 0.3 + 30 * Math.sin(t * Math.PI);
+      const x = rowEndX + 25 * Math.sin(t * Math.PI);
       const y = row1Y + (row2Y - row1Y) * t;
       points.push(`${x},${y}`);
     }
@@ -108,7 +108,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
     // Smooth curve transition from row2 end to row3 start
     for (let i = 1; i <= curveSteps; i++) {
       const t = i / curveSteps;
-      const x = rowStartX + (rowStartX - rowStartX) * t * 0.3 - 30 * Math.sin(t * Math.PI);
+      const x = rowStartX - 25 * Math.sin(t * Math.PI);
       const y = row2Y + (row3Y - row2Y) * t;
       points.push(`${x},${y}`);
     }
@@ -145,6 +145,14 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               <stop offset="0%" stopColor="#ffd600" />
               <stop offset="100%" stopColor="#ff6600" />
             </linearGradient>
+            <linearGradient id="checkpoint1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#a855f7" />
+              <stop offset="100%" stopColor="#6b21a8" />
+            </linearGradient>
+            <linearGradient id="checkpoint2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ff6b35" />
+              <stop offset="100%" stopColor="#c2410c" />
+            </linearGradient>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="coloredBlur" />
               <feMerge>
@@ -166,7 +174,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             <circle
               cx={warmupCenterX}
               cy={warmupCenterY}
-              r={warmupRadius + 18}
+              r={warmupRadius + 20}
               fill="none"
               stroke="#00d4ff20"
               strokeWidth="2"
@@ -179,7 +187,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               r={warmupRadius}
               fill="none"
               stroke="url(#trackGrad)"
-              strokeWidth="30"
+              strokeWidth="35"
               opacity="0.6"
             />
 
@@ -195,13 +203,13 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
             <text
               x={warmupCenterX}
-              y={warmupCenterY - 10}
+              y={warmupCenterY - 12}
               textAnchor="middle"
               fill="#00d4ff"
-              fontSize="13"
+              fontSize="14"
               fontFamily="Rajdhani, sans-serif"
               fontWeight="700"
-              letterSpacing="1"
+              letterSpacing="1.2"
             >
               ФЕВРАЛЬ
             </text>
@@ -210,7 +218,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               y={warmupCenterY + 8}
               textAnchor="middle"
               fill="#00d4ff90"
-              fontSize="10"
+              fontSize="11"
               fontFamily="Rajdhani, sans-serif"
               fontWeight="600"
             >
@@ -218,10 +226,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             </text>
             <text
               x={warmupCenterX}
-              y={warmupCenterY + 23}
+              y={warmupCenterY + 25}
               textAnchor="middle"
               fill="#00d4ff60"
-              fontSize="8"
+              fontSize="9"
               fontFamily="Rajdhani, sans-serif"
               fontWeight="500"
             >
@@ -251,39 +259,39 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
           {/* Month labels ABOVE track */}
           <text
             x={rowStartX + rowLength / 2}
-            y={row1Y - 40}
+            y={row1Y - 45}
             textAnchor="middle"
             fill="#a855f7"
-            fontSize="14"
+            fontSize="16"
             fontFamily="Rajdhani, sans-serif"
             fontWeight="700"
-            letterSpacing="1.5"
+            letterSpacing="2"
           >
             МАРТ
           </text>
 
           <text
             x={rowStartX + rowLength / 2}
-            y={row2Y - 40}
+            y={row2Y - 45}
             textAnchor="middle"
             fill="#ff6b35"
-            fontSize="14"
+            fontSize="16"
             fontFamily="Rajdhani, sans-serif"
             fontWeight="700"
-            letterSpacing="1.5"
+            letterSpacing="2"
           >
             АПРЕЛЬ
           </text>
 
           <text
             x={rowStartX + rowLength / 2}
-            y={row3Y - 40}
+            y={row3Y - 45}
             textAnchor="middle"
             fill="#ffd600"
-            fontSize="14"
+            fontSize="16"
             fontFamily="Rajdhani, sans-serif"
             fontWeight="700"
-            letterSpacing="1.5"
+            letterSpacing="2"
           >
             МАЙ
           </text>
@@ -295,7 +303,35 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             <text x={rowStartX - 3} y={row1Y - 18} textAnchor="middle" fill="#ffffff60" fontSize="7" fontFamily="Orbitron, sans-serif">START</text>
           </g>
 
-          {/* Finish flag */}
+          {/* Checkpoint 1 flag - end of March */}
+          <g filter="url(#glow)">
+            <line x1={rowEndX + 25} y1={row1Y - 30} x2={rowEndX + 25} y2={row1Y + 30} stroke="url(#checkpoint1Grad)" strokeWidth="3" />
+            {[0, 1, 2, 3, 4].map((i) => (
+              <rect key={i} x={rowEndX + 28} y={row1Y - 28 + i * 11} width="8" height="8"
+                fill={i % 2 === 0 ? '#a855f790' : '#ffffff25'} />
+            ))}
+            {[0, 1, 2, 3, 4].map((i) => (
+              <rect key={`b${i}`} x={rowEndX + 36} y={row1Y - 28 + i * 11} width="8" height="8"
+                fill={i % 2 === 1 ? '#a855f790' : '#ffffff25'} />
+            ))}
+            <text x={rowEndX + 40} y={row1Y + 50} textAnchor="middle" fill="#a855f7" fontSize="9" fontFamily="Orbitron, sans-serif" fontWeight="700">CHECKPOINT 1</text>
+          </g>
+
+          {/* Checkpoint 2 flag - end of April */}
+          <g filter="url(#glow)">
+            <line x1={rowStartX - 25} y1={row2Y - 30} x2={rowStartX - 25} y2={row2Y + 30} stroke="url(#checkpoint2Grad)" strokeWidth="3" />
+            {[0, 1, 2, 3, 4].map((i) => (
+              <rect key={i} x={rowStartX - 44} y={row2Y - 28 + i * 11} width="8" height="8"
+                fill={i % 2 === 0 ? '#ff6b3590' : '#ffffff25'} />
+            ))}
+            {[0, 1, 2, 3, 4].map((i) => (
+              <rect key={`b${i}`} x={rowStartX - 36} y={row2Y - 28 + i * 11} width="8" height="8"
+                fill={i % 2 === 1 ? '#ff6b3590' : '#ffffff25'} />
+            ))}
+            <text x={rowStartX - 40} y={row2Y + 50} textAnchor="middle" fill="#ff6b35" fontSize="9" fontFamily="Orbitron, sans-serif" fontWeight="700">CHECKPOINT 2</text>
+          </g>
+
+          {/* Finish flag - end of May */}
           <g filter="url(#glow)">
             <line x1={rowEndX + 25} y1={row3Y - 35} x2={rowEndX + 25} y2={row3Y + 35} stroke="url(#finishGrad)" strokeWidth="3" />
             {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -314,7 +350,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             // Distribute all cars around warmup circle
             const warmupProgress = index / sorted.length;
             const angle = Math.PI * 0.5 + warmupProgress * Math.PI * 2;
-            const radiusOffset = ((index % 3) - 1) * 8;
+            const radiusOffset = ((index % 3) - 1) * 10;
 
             const x = warmupCenterX + Math.cos(angle) * (warmupRadius + radiusOffset);
             const y = warmupCenterY + Math.sin(angle) * (warmupRadius + radiusOffset);
@@ -392,14 +428,6 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             );
           })}
         </svg>
-      </div>
-
-      <div className="checkpoint-labels">
-        <span className="checkpoint-label">🏁 Старт</span>
-        <span className="checkpoint-label">❄️ Прогр. круг</span>
-        <span className="checkpoint-label">🏎️ Круг 1</span>
-        <span className="checkpoint-label">🏎️ Круг 2</span>
-        <span className="checkpoint-label">🏆 Круг 3 — Финиш</span>
       </div>
     </div>
   );
