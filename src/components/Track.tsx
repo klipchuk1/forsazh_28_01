@@ -86,7 +86,17 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
   return (
     <div className="track-container">
       <div className="section-header" style={{ justifyContent: 'center' }}>
-        <span className="section-title">Трасса Форсаж — 3 месяца</span>
+        <span className="section-title" style={{
+          fontSize: '28px',
+          fontWeight: '800',
+          background: 'linear-gradient(90deg, #00d4ff, #00ff88, #00d4ff)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
+          letterSpacing: '3px'
+        }}>
+          ТРАССА ФОРСАЖ
+        </span>
       </div>
 
       <div className="track-svg-wrapper">
@@ -215,24 +225,18 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             strokeLinecap="round"
             strokeLinejoin="round"
             opacity="0.9"
+            filter="url(#glow)"
           />
 
           <path
             d={generateZPath()}
             fill="none"
             stroke="#00d4ff"
-            strokeWidth="3"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity="0.4"
-          />
-
-          <path
-            d={generateZPath()}
-            fill="none"
-            stroke="#ffffff25"
-            strokeWidth="2"
-            strokeDasharray="10,15"
+            opacity="0.6"
+            filter="url(#glow)"
           />
 
           {/* Month labels ABOVE track */}
