@@ -311,38 +311,38 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             </text>
           </g>
 
-          {/* Checkpoint 1 - horizontal line crossing track on March row */}
+          {/* Checkpoint 1 - horizontal line at right turn between row1 and row2 */}
           <g filter="url(#glow)">
             <line
-              x1={rowStartX + rowLength * 0.65 - 60}
-              y1={row1Y}
-              x2={rowStartX + rowLength * 0.65 + 60}
-              y2={row1Y}
+              x1={rowEndX - 60}
+              y1={(row1Y + row2Y) / 2}
+              x2={rowEndX + 60}
+              y2={(row1Y + row2Y) / 2}
               stroke="url(#checkpoint1Grad)"
               strokeWidth="4"
             />
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-              <rect key={i} x={rowStartX + rowLength * 0.65 - 60 + i * 12} y={row1Y - 4} width="8" height="8"
+              <rect key={i} x={rowEndX - 60 + i * 12} y={(row1Y + row2Y) / 2 - 4} width="8" height="8"
                 fill={i % 2 === 0 ? '#a855f790' : '#ffffff25'} />
             ))}
-            <text x={rowStartX + rowLength * 0.65} y={row1Y - 15} textAnchor="middle" fill="#a855f7" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">Чекпоинт Этап 1</text>
+            <text x={rowEndX} y={(row1Y + row2Y) / 2 - 15} textAnchor="middle" fill="#a855f7" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">Чекпоинт Этап 1</text>
           </g>
 
-          {/* Checkpoint 2 - horizontal line crossing track on April row */}
+          {/* Checkpoint 2 - horizontal line at left turn between row2 and row3 */}
           <g filter="url(#glow)">
             <line
-              x1={rowStartX + rowLength * 0.35 - 60}
-              y1={row2Y}
-              x2={rowStartX + rowLength * 0.35 + 60}
-              y2={row2Y}
+              x1={rowStartX - 60}
+              y1={(row2Y + row3Y) / 2}
+              x2={rowStartX + 60}
+              y2={(row2Y + row3Y) / 2}
               stroke="url(#checkpoint2Grad)"
               strokeWidth="4"
             />
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-              <rect key={i} x={rowStartX + rowLength * 0.35 - 60 + i * 12} y={row2Y - 4} width="8" height="8"
+              <rect key={i} x={rowStartX - 60 + i * 12} y={(row2Y + row3Y) / 2 - 4} width="8" height="8"
                 fill={i % 2 === 0 ? '#ff6b3590' : '#ffffff25'} />
             ))}
-            <text x={rowStartX + rowLength * 0.35} y={row2Y - 15} textAnchor="middle" fill="#ff6b35" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">Чекпоинт Этап 2</text>
+            <text x={rowStartX} y={(row2Y + row3Y) / 2 - 15} textAnchor="middle" fill="#ff6b35" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">Чекпоинт Этап 2</text>
           </g>
 
           {/* Finish - vertical line crossing track at end of May */}
