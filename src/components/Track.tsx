@@ -55,19 +55,19 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
   const [hoveredCrew, setHoveredCrew] = useState<number | null>(null);
 
   const trackWidth = 1600;
-  const trackHeight = 340;
+  const trackHeight = 450;
 
   const warmupCenterX = 140;
-  const warmupCenterY = 140;
+  const warmupCenterY = 200;
   const warmupRadius = 90;
 
   const rowStartX = 360;
   const rowEndX = trackWidth - 80;
   const rowLength = rowEndX - rowStartX;
 
-  const row1Y = 80;
-  const row2Y = 160;
-  const row3Y = 240;
+  const row1Y = 100;
+  const row2Y = 225;
+  const row3Y = 350;
 
   // Sorted best-first
   const sorted = [...crews].sort((a, b) => getTrackPosition(b) - getTrackPosition(a));
@@ -123,6 +123,12 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               <stop offset="0%" stopColor="#ff6b35" />
               <stop offset="100%" stopColor="#c2410c" />
             </linearGradient>
+            <pattern id="checkeredPattern" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+              <rect x="0" y="0" width="6" height="6" fill="#ffffff" />
+              <rect x="6" y="0" width="6" height="6" fill="#000000" />
+              <rect x="0" y="6" width="6" height="6" fill="#000000" />
+              <rect x="6" y="6" width="6" height="6" fill="#ffffff" />
+            </pattern>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="coloredBlur" />
               <feMerge>
@@ -196,14 +202,21 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             </text>
             <text
               x={warmupCenterX}
-              y={warmupCenterY + 25}
+              y={warmupCenterY + 30}
               textAnchor="middle"
-              fill="#00d4ff60"
-              fontSize="9"
+              fill="#FFD600"
+              fontSize="15"
               fontFamily="Rajdhani, sans-serif"
-              fontWeight="500"
+              fontWeight="800"
+              letterSpacing="1.5"
             >
               Поиск точек
+              <animate
+                attributeName="opacity"
+                values="1;0.3;1"
+                dur="1.5s"
+                repeatCount="indefinite"
+              />
             </text>
           </g>
 
@@ -212,7 +225,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             d={generateZPath()}
             fill="none"
             stroke="url(#trackGrad)"
-            strokeWidth="50"
+            strokeWidth="60"
             strokeLinecap="round"
             strokeLinejoin="round"
             opacity="0.6"
@@ -229,7 +242,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
           {/* Month labels ABOVE track */}
           <text
             x={rowStartX + rowLength / 2}
-            y={row1Y - 45}
+            y={row1Y - 50}
             textAnchor="middle"
             fill="#a855f7"
             fontSize="16"
@@ -242,7 +255,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
           <text
             x={rowStartX + rowLength / 2}
-            y={row2Y - 45}
+            y={row2Y - 50}
             textAnchor="middle"
             fill="#ff6b35"
             fontSize="16"
@@ -255,7 +268,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
           <text
             x={rowStartX + rowLength / 2}
-            y={row3Y - 45}
+            y={row3Y - 50}
             textAnchor="middle"
             fill="#ffd600"
             fontSize="16"
@@ -266,62 +279,87 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             МАЙ
           </text>
 
-          {/* Start flag */}
+          {/* Start line - checkered like Formula 1 */}
           <g>
-            <line x1={rowStartX - 15} y1={row1Y - 25} x2={rowStartX - 15} y2={row1Y + 25} stroke="#ffffff30" strokeWidth="2" />
-            <rect x={rowStartX - 13} y={row1Y - 27} width="20" height="12" fill="#ffffff15" rx="2" />
-            <text x={rowStartX - 3} y={row1Y - 18} textAnchor="middle" fill="#ffffff60" fontSize="7" fontFamily="Orbitron, sans-serif">START</text>
+            <rect
+              x={rowStartX - 8}
+              y={row1Y - 35}
+              width="16"
+              height="70"
+              fill="url(#checkeredPattern)"
+              opacity="0.95"
+            />
+            <rect
+              x={rowStartX - 8}
+              y={row1Y - 35}
+              width="16"
+              height="70"
+              fill="none"
+              stroke="#ffffff40"
+              strokeWidth="1"
+            />
+            <text
+              x={rowStartX}
+              y={row1Y - 42}
+              textAnchor="middle"
+              fill="#ffffff"
+              fontSize="9"
+              fontFamily="Orbitron, sans-serif"
+              fontWeight="700"
+            >
+              START
+            </text>
           </g>
 
           {/* Checkpoint 1 - vertical line crossing track at end of March */}
           <g filter="url(#glow)">
             <line
               x1={rowEndX}
-              y1={row1Y - 40}
+              y1={row1Y - 45}
               x2={rowEndX}
-              y2={row1Y + 40}
+              y2={row1Y + 45}
               stroke="url(#checkpoint1Grad)"
               strokeWidth="4"
             />
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <rect key={i} x={rowEndX - 4} y={row1Y - 35 + i * 12} width="8" height="8"
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+              <rect key={i} x={rowEndX - 4} y={row1Y - 42 + i * 12} width="8" height="8"
                 fill={i % 2 === 0 ? '#a855f790' : '#ffffff25'} />
             ))}
-            <text x={rowEndX} y={row1Y + 58} textAnchor="middle" fill="#a855f7" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700">CP 1</text>
+            <text x={rowEndX} y={row1Y + 63} textAnchor="middle" fill="#a855f7" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700">CP 1</text>
           </g>
 
           {/* Checkpoint 2 - vertical line crossing track at end of April */}
           <g filter="url(#glow)">
             <line
               x1={rowStartX}
-              y1={row2Y - 40}
+              y1={row2Y - 45}
               x2={rowStartX}
-              y2={row2Y + 40}
+              y2={row2Y + 45}
               stroke="url(#checkpoint2Grad)"
               strokeWidth="4"
             />
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <rect key={i} x={rowStartX - 4} y={row2Y - 35 + i * 12} width="8" height="8"
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+              <rect key={i} x={rowStartX - 4} y={row2Y - 42 + i * 12} width="8" height="8"
                 fill={i % 2 === 0 ? '#ff6b3590' : '#ffffff25'} />
             ))}
-            <text x={rowStartX} y={row2Y + 58} textAnchor="middle" fill="#ff6b35" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700">CP 2</text>
+            <text x={rowStartX} y={row2Y + 63} textAnchor="middle" fill="#ff6b35" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700">CP 2</text>
           </g>
 
           {/* Finish - vertical line crossing track at end of May */}
           <g filter="url(#glow)">
             <line
               x1={rowEndX}
-              y1={row3Y - 40}
+              y1={row3Y - 45}
               x2={rowEndX}
-              y2={row3Y + 40}
+              y2={row3Y + 45}
               stroke="url(#finishGrad)"
               strokeWidth="4"
             />
-            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <rect key={i} x={rowEndX - 4} y={row3Y - 38 + i * 11} width="8" height="8"
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <rect key={i} x={rowEndX - 4} y={row3Y - 42 + i * 11} width="8" height="8"
                 fill={i % 2 === 0 ? '#ffd60090' : '#ffffff25'} />
             ))}
-            <text x={rowEndX} y={row3Y + 58} textAnchor="middle" fill="#ffd600" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">FINISH</text>
+            <text x={rowEndX} y={row3Y + 63} textAnchor="middle" fill="#ffd600" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">FINISH</text>
           </g>
 
           {/* Crew cars - all in warmup zone since we're before start */}
