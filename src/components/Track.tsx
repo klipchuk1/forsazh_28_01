@@ -40,17 +40,6 @@ function getTrackPosition(crew: Crew): number {
   return Math.min(position, 1.15);
 }
 
-function getCurrentSegmentLabel(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  if (now < new Date(year, 1, 16)) return 'До старта';
-  if (now < new Date(year, 2, 1))  return 'Прогревочный круг';
-  if (now < new Date(year, 3, 1))  return 'Круг 1';
-  if (now < new Date(year, 4, 1))  return 'Круг 2';
-  if (now < new Date(year, 5, 1))  return 'Круг 3';
-  return 'Завершено';
-}
-
 export default function Track({ crews, onCrewClick }: TrackProps) {
   const [hoveredCrew, setHoveredCrew] = useState<number | null>(null);
 
@@ -96,20 +85,17 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
   return (
     <div className="track-container">
-      <div className="section-header">
-        <span className="section-title">🏁 Трасса Форсаж — 4 отрезка</span>
-        <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
-          {getCurrentSegmentLabel()}
-        </span>
+      <div className="section-header" style={{ justifyContent: 'center' }}>
+        <span className="section-title">Трасса Форсаж — 3 месяца</span>
       </div>
 
       <div className="track-svg-wrapper">
         <svg viewBox={`0 0 ${trackWidth} ${trackHeight}`} preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id="trackGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#1a1a2e" />
-              <stop offset="50%" stopColor="#0f0f1a" />
-              <stop offset="100%" stopColor="#1a1a2e" />
+              <stop offset="0%" stopColor="#2d2d4a" />
+              <stop offset="50%" stopColor="#1a1a2e" />
+              <stop offset="100%" stopColor="#2d2d4a" />
             </linearGradient>
             <linearGradient id="finishGrad" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#ffd600" />
@@ -228,13 +214,23 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             strokeWidth="60"
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity="0.6"
+            opacity="0.9"
           />
 
           <path
             d={generateZPath()}
             fill="none"
-            stroke="#ffffff12"
+            stroke="#00d4ff"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.4"
+          />
+
+          <path
+            d={generateZPath()}
+            fill="none"
+            stroke="#ffffff25"
             strokeWidth="2"
             strokeDasharray="10,15"
           />
@@ -314,35 +310,35 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
           {/* Checkpoint 1 - horizontal line at right turn between row1 and row2 */}
           <g filter="url(#glow)">
             <line
-              x1={rowEndX - 60}
+              x1={rowEndX - 45}
               y1={(row1Y + row2Y) / 2}
-              x2={rowEndX + 60}
+              x2={rowEndX + 75}
               y2={(row1Y + row2Y) / 2}
               stroke="url(#checkpoint1Grad)"
               strokeWidth="4"
             />
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-              <rect key={i} x={rowEndX - 60 + i * 12} y={(row1Y + row2Y) / 2 - 4} width="8" height="8"
+              <rect key={i} x={rowEndX - 45 + i * 12} y={(row1Y + row2Y) / 2 - 4} width="8" height="8"
                 fill={i % 2 === 0 ? '#a855f790' : '#ffffff25'} />
             ))}
-            <text x={rowEndX} y={(row1Y + row2Y) / 2 - 15} textAnchor="middle" fill="#a855f7" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">Чекпоинт Этап 1</text>
+            <text x={rowEndX + 15} y={(row1Y + row2Y) / 2 - 15} textAnchor="middle" fill="#a855f7" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">Чекпоинт Этап 1</text>
           </g>
 
           {/* Checkpoint 2 - horizontal line at left turn between row2 and row3 */}
           <g filter="url(#glow)">
             <line
-              x1={rowStartX - 60}
+              x1={rowStartX - 75}
               y1={(row2Y + row3Y) / 2}
-              x2={rowStartX + 60}
+              x2={rowStartX + 45}
               y2={(row2Y + row3Y) / 2}
               stroke="url(#checkpoint2Grad)"
               strokeWidth="4"
             />
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-              <rect key={i} x={rowStartX - 60 + i * 12} y={(row2Y + row3Y) / 2 - 4} width="8" height="8"
+              <rect key={i} x={rowStartX - 75 + i * 12} y={(row2Y + row3Y) / 2 - 4} width="8" height="8"
                 fill={i % 2 === 0 ? '#ff6b3590' : '#ffffff25'} />
             ))}
-            <text x={rowStartX} y={(row2Y + row3Y) / 2 - 15} textAnchor="middle" fill="#ff6b35" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">Чекпоинт Этап 2</text>
+            <text x={rowStartX - 15} y={(row2Y + row3Y) / 2 - 15} textAnchor="middle" fill="#ff6b35" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">Чекпоинт Этап 2</text>
           </g>
 
           {/* Finish - vertical line crossing track at end of May */}
