@@ -225,18 +225,33 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             strokeLinecap="round"
             strokeLinejoin="round"
             opacity="0.9"
-            filter="url(#glow)"
           />
 
+          {/* Glowing animated outline */}
           <path
             d={generateZPath()}
             fill="none"
             stroke="#00d4ff"
-            strokeWidth="2"
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity="0.6"
-            filter="url(#glow)"
+            filter="url(#glowIntense)"
+          >
+            <animate
+              attributeName="opacity"
+              values="0.3;0.8;0.3"
+              dur="2s"
+              repeatCount="indefinite"
+            />
+          </path>
+
+          {/* Center dashed line */}
+          <path
+            d={generateZPath()}
+            fill="none"
+            stroke="#ffffff25"
+            strokeWidth="2"
+            strokeDasharray="10,15"
           />
 
           {/* Month labels ABOVE track */}
