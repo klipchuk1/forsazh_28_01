@@ -7,7 +7,6 @@ interface TrackProps {
 }
 
 // Computes car position on track (0..1.15) from segmentScores.
-// Warmup is circular loop on the left, then 3 laps on serpentine track.
 function getTrackPosition(crew: Crew): number {
   const segments = [
     crew.segmentScores.warmup,
@@ -42,37 +41,47 @@ function getTrackPosition(crew: Crew): number {
 }
 
 // Computes X,Y position along the track path
+// Layout: Warmup circle, then 3 horizontal serpentine rows (Март L→R, Апрель R→L, Май L→R)
 function getCarPositionOnPath(progress: number, trackWidth: number): { x: number; y: number } {
   const warmupCenterX = 180;
-  const warmupCenterY = 140;
-  const warmupRadius = 80;
+  const warmupCenterY = 100;
+  const warmupRadius = 70;
 
-  const mainTrackStartX = 340;
-  const mainTrackEndX = trackWidth - 60;
-  const trackLength = mainTrackEndX - mainTrackStartX;
+  const rowStartX = 340;
+  const rowEndX = trackWidth - 80;
+  const rowLength = rowEndX - rowStartX;
+
+  const row1Y = 80;  // Март
+  const row2Y = 160; // Апрель
+  const row3Y = 240; // Май
 
   if (progress < 0.25) {
     // Warmup zone - circular loop (counterclockwise from bottom)
     const warmupProgress = progress / 0.25;
-    const angle = Math.PI * 0.5 + warmupProgress * Math.PI * 2; // Start at bottom, go counterclockwise
+    const angle = Math.PI * 0.5 + warmupProgress * Math.PI * 2;
 
     return {
       x: warmupCenterX + Math.cos(angle) * warmupRadius,
       y: warmupCenterY + Math.sin(angle) * warmupRadius,
     };
+  } else if (progress < 0.5) {
+    // Март (Lap 1): left to right, row 1
+    const lapProgress = (progress - 0.25) / 0.25;
+    const x = rowStartX + rowLength * lapProgress;
+    const waveOffset = Math.sin(lapProgress * Math.PI * 3) * 15;
+    return { x, y: row1Y + waveOffset };
+  } else if (progress < 0.75) {
+    // Апрель (Lap 2): right to left, row 2
+    const lapProgress = (progress - 0.5) / 0.25;
+    const x = rowEndX - rowLength * lapProgress; // Reverse direction
+    const waveOffset = Math.sin(lapProgress * Math.PI * 3) * 15;
+    return { x, y: row2Y + waveOffset };
   } else {
-    // Main serpentine track (3 laps) - very winding like a snake
-    const mainProgress = (progress - 0.25) / 0.75;
-    const x = mainTrackStartX + trackLength * mainProgress;
-
-    // Serpentine pattern: multiple tight S-curves
-    const centerY = 140;
-    const amplitude = 50; // Large amplitude for dramatic curves
-    const frequency = 5; // More waves = more serpentine
-
-    const y = centerY + Math.sin(mainProgress * Math.PI * frequency) * amplitude;
-
-    return { x, y };
+    // Май (Lap 3): left to right, row 3
+    const lapProgress = (progress - 0.75) / 0.25;
+    const x = rowStartX + rowLength * lapProgress;
+    const waveOffset = Math.sin(lapProgress * Math.PI * 3) * 15;
+    return { x, y: row3Y + waveOffset };
   }
 }
 
@@ -91,36 +100,34 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
   const [hoveredCrew, setHoveredCrew] = useState<number | null>(null);
 
   const trackWidth = 1500;
-  const trackHeight = 300;
+  const trackHeight = 320;
 
   const warmupCenterX = 180;
-  const warmupCenterY = 140;
-  const warmupRadius = 80;
+  const warmupCenterY = 100;
+  const warmupRadius = 70;
 
-  const mainTrackStartX = 340;
-  const mainTrackEndX = trackWidth - 60;
-  const trackLength = mainTrackEndX - mainTrackStartX;
+  const rowStartX = 340;
+  const rowEndX = trackWidth - 80;
+  const rowLength = rowEndX - rowStartX;
 
-  // Segment boundaries for main track (after warmup)
-  const cp1X = mainTrackStartX + trackLength * 0.333;
-  const cp2X = mainTrackStartX + trackLength * 0.666;
+  const row1Y = 80;
+  const row2Y = 160;
+  const row3Y = 240;
 
   // Sorted best-first (furthest right = best)
   const sorted = [...crews].sort((a, b) => getTrackPosition(b) - getTrackPosition(a));
 
-  // Generate serpentine path for main track
-  const generateSerpentinePath = () => {
+  // Generate serpentine path for a row
+  const generateRowPath = (startX: number, endX: number, y: number, reverse: boolean) => {
     const points = [];
-    const steps = 100;
-    const centerY = 140;
-    const amplitude = 50;
-    const frequency = 5;
+    const steps = 60;
+    const length = Math.abs(endX - startX);
 
     for (let i = 0; i <= steps; i++) {
       const progress = i / steps;
-      const x = mainTrackStartX + trackLength * progress;
-      const y = centerY + Math.sin(progress * Math.PI * frequency) * amplitude;
-      points.push(`${x},${y}`);
+      const x = reverse ? endX - length * progress : startX + length * progress;
+      const waveOffset = Math.sin(progress * Math.PI * 3) * 15;
+      points.push(`${x},${y + waveOffset}`);
     }
 
     return `M ${points.join(' L ')}`;
@@ -169,7 +176,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             <circle
               cx={warmupCenterX}
               cy={warmupCenterY}
-              r={warmupRadius + 25}
+              r={warmupRadius + 20}
               fill="none"
               stroke="#00d4ff30"
               strokeWidth="2"
@@ -183,7 +190,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               r={warmupRadius}
               fill="none"
               stroke="url(#trackGrad)"
-              strokeWidth="35"
+              strokeWidth="30"
               opacity="0.5"
             />
 
@@ -198,13 +205,13 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               strokeDasharray="6,8"
             />
 
-            {/* Text in the center of warmup circle */}
+            {/* Text in the center */}
             <text
               x={warmupCenterX}
-              y={warmupCenterY - 15}
+              y={warmupCenterY - 10}
               textAnchor="middle"
               fill="#00d4ff"
-              fontSize="13"
+              fontSize="12"
               fontFamily="Rajdhani, sans-serif"
               fontWeight="700"
               letterSpacing="1"
@@ -213,10 +220,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             </text>
             <text
               x={warmupCenterX}
-              y={warmupCenterY + 5}
+              y={warmupCenterY + 8}
               textAnchor="middle"
               fill="#00d4ff90"
-              fontSize="10"
+              fontSize="9"
               fontFamily="Rajdhani, sans-serif"
               fontWeight="600"
             >
@@ -224,10 +231,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             </text>
             <text
               x={warmupCenterX}
-              y={warmupCenterY + 20}
+              y={warmupCenterY + 22}
               textAnchor="middle"
               fill="#00d4ff60"
-              fontSize="9"
+              fontSize="8"
               fontFamily="Rajdhani, sans-serif"
               fontWeight="500"
             >
@@ -235,56 +242,146 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             </text>
           </g>
 
-          {/* Main serpentine track path - very winding */}
-          <path
-            d={generateSerpentinePath()}
-            fill="none"
-            stroke="url(#trackGrad)"
-            strokeWidth="60"
-            strokeLinecap="round"
-            opacity="0.5"
-          />
-
-          {/* Track center line (dashed) */}
-          <path
-            d={generateSerpentinePath()}
-            fill="none"
-            stroke="#ffffff15"
-            strokeWidth="2"
-            strokeDasharray="8,12"
-          />
-
-          {/* Checkpoint markers on serpentine track */}
+          {/* Row 1: МАРТ (left to right) */}
           <g>
-            <rect x={cp1X - 40} y={30} width="80" height="22" rx="6" fill="#a855f710" stroke="#a855f735" strokeWidth="1" />
-            <text x={cp1X} y={46} textAnchor="middle" fill="#a855f7" fontSize="10" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">МАРТ</text>
+            <path
+              d={generateRowPath(rowStartX, rowEndX, row1Y, false)}
+              fill="none"
+              stroke="url(#trackGrad)"
+              strokeWidth="50"
+              strokeLinecap="round"
+              opacity="0.5"
+            />
+            <path
+              d={generateRowPath(rowStartX, rowEndX, row1Y, false)}
+              fill="none"
+              stroke="#ffffff15"
+              strokeWidth="2"
+              strokeDasharray="8,12"
+            />
+            {/* Month label */}
+            <rect x={rowStartX + rowLength / 2 - 45} y={row1Y - 35} width="90" height="24" rx="6" fill="#a855f710" stroke="#a855f735" strokeWidth="1" />
+            <text x={rowStartX + rowLength / 2} y={row1Y - 16} textAnchor="middle" fill="#a855f7" fontSize="11" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">МАРТ</text>
+            {/* Direction arrow */}
+            <path d={`M ${rowStartX + 20} ${row1Y - 25} L ${rowStartX + 50} ${row1Y - 25}`} stroke="#a855f750" strokeWidth="2" markerEnd="url(#arrowMart)" />
+            <defs>
+              <marker id="arrowMart" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#a855f7" />
+              </marker>
+            </defs>
           </g>
 
+          {/* Transition arrow: Row 1 → Row 2 */}
           <g>
-            <rect x={cp2X - 40} y={30} width="80" height="22" rx="6" fill="#ff6b3510" stroke="#ff6b3535" strokeWidth="1" />
-            <text x={cp2X} y={46} textAnchor="middle" fill="#ff6b35" fontSize="10" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">АПРЕЛЬ</text>
+            <path
+              d={`M ${rowEndX + 20} ${row1Y + 20} Q ${rowEndX + 50} ${(row1Y + row2Y) / 2}, ${rowEndX + 20} ${row2Y - 20}`}
+              fill="none"
+              stroke="#ff6b3550"
+              strokeWidth="3"
+              strokeDasharray="6,6"
+              markerEnd="url(#arrowTransition1)"
+            />
+            <defs>
+              <marker id="arrowTransition1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#ff6b35" />
+              </marker>
+            </defs>
           </g>
 
-          {/* Start flag at warmup entry */}
+          {/* Row 2: АПРЕЛЬ (right to left - reverse) */}
           <g>
-            <line x1={mainTrackStartX - 25} y1={115} x2={mainTrackStartX - 25} y2={165} stroke="#ffffff30" strokeWidth="2" />
-            <rect x={mainTrackStartX - 23} y={113} width="22" height="12" fill="#ffffff15" rx="2" />
-            <text x={mainTrackStartX - 12} y={122} textAnchor="middle" fill="#ffffff60" fontSize="8" fontFamily="Orbitron, sans-serif">START</text>
+            <path
+              d={generateRowPath(rowStartX, rowEndX, row2Y, true)}
+              fill="none"
+              stroke="url(#trackGrad)"
+              strokeWidth="50"
+              strokeLinecap="round"
+              opacity="0.5"
+            />
+            <path
+              d={generateRowPath(rowStartX, rowEndX, row2Y, true)}
+              fill="none"
+              stroke="#ffffff15"
+              strokeWidth="2"
+              strokeDasharray="8,12"
+            />
+            {/* Month label */}
+            <rect x={rowStartX + rowLength / 2 - 45} y={row2Y - 35} width="90" height="24" rx="6" fill="#ff6b3510" stroke="#ff6b3535" strokeWidth="1" />
+            <text x={rowStartX + rowLength / 2} y={row2Y - 16} textAnchor="middle" fill="#ff6b35" fontSize="11" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">АПРЕЛЬ</text>
+            {/* Direction arrow (reverse) */}
+            <path d={`M ${rowEndX - 20} ${row2Y - 25} L ${rowEndX - 50} ${row2Y - 25}`} stroke="#ff6b3550" strokeWidth="2" markerEnd="url(#arrowApril)" />
+            <defs>
+              <marker id="arrowApril" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#ff6b35" />
+              </marker>
+            </defs>
           </g>
 
-          {/* Finish flag */}
+          {/* Transition arrow: Row 2 → Row 3 */}
+          <g>
+            <path
+              d={`M ${rowStartX - 20} ${row2Y + 20} Q ${rowStartX - 50} ${(row2Y + row3Y) / 2}, ${rowStartX - 20} ${row3Y - 20}`}
+              fill="none"
+              stroke="#ffd60050"
+              strokeWidth="3"
+              strokeDasharray="6,6"
+              markerEnd="url(#arrowTransition2)"
+            />
+            <defs>
+              <marker id="arrowTransition2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#ffd600" />
+              </marker>
+            </defs>
+          </g>
+
+          {/* Row 3: МАЙ (left to right) */}
+          <g>
+            <path
+              d={generateRowPath(rowStartX, rowEndX, row3Y, false)}
+              fill="none"
+              stroke="url(#trackGrad)"
+              strokeWidth="50"
+              strokeLinecap="round"
+              opacity="0.5"
+            />
+            <path
+              d={generateRowPath(rowStartX, rowEndX, row3Y, false)}
+              fill="none"
+              stroke="#ffffff15"
+              strokeWidth="2"
+              strokeDasharray="8,12"
+            />
+            {/* Month label */}
+            <rect x={rowStartX + rowLength / 2 - 45} y={row3Y - 35} width="90" height="24" rx="6" fill="#ffd60010" stroke="#ffd60035" strokeWidth="1" />
+            <text x={rowStartX + rowLength / 2} y={row3Y - 16} textAnchor="middle" fill="#ffd600" fontSize="11" fontFamily="Rajdhani, sans-serif" fontWeight="600" letterSpacing="0.5">МАЙ</text>
+            {/* Direction arrow */}
+            <path d={`M ${rowStartX + 20} ${row3Y - 25} L ${rowStartX + 50} ${row3Y - 25}`} stroke="#ffd60050" strokeWidth="2" markerEnd="url(#arrowMay)" />
+            <defs>
+              <marker id="arrowMay" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#ffd600" />
+              </marker>
+            </defs>
+          </g>
+
+          {/* Start flag at warmup exit */}
+          <g>
+            <line x1={rowStartX - 25} y1={row1Y - 20} x2={rowStartX - 25} y2={row1Y + 20} stroke="#ffffff30" strokeWidth="2" />
+            <rect x={rowStartX - 23} y={row1Y - 22} width="22" height="12" fill="#ffffff15" rx="2" />
+            <text x={rowStartX - 12} y={row1Y - 13} textAnchor="middle" fill="#ffffff60" fontSize="8" fontFamily="Orbitron, sans-serif">START</text>
+          </g>
+
+          {/* Finish flag at end of row 3 */}
           <g filter="url(#glow)">
-            <line x1={mainTrackEndX} y1={100} x2={mainTrackEndX} y2={180} stroke="url(#finishGrad)" strokeWidth="3" />
+            <line x1={rowEndX + 30} y1={row3Y - 30} x2={rowEndX + 30} y2={row3Y + 30} stroke="url(#finishGrad)" strokeWidth="3" />
             {[0, 1, 2, 3, 4].map((i) => (
-              <rect key={i} x={mainTrackEndX + 3} y={100 + i * 10} width="10" height="10"
+              <rect key={i} x={rowEndX + 33} y={row3Y - 28 + i * 12} width="10" height="10"
                 fill={i % 2 === 0 ? '#ffd60080' : '#ffffff20'} />
             ))}
             {[0, 1, 2, 3, 4].map((i) => (
-              <rect key={`b${i}`} x={mainTrackEndX + 13} y={100 + i * 10} width="10" height="10"
+              <rect key={`b${i}`} x={rowEndX + 43} y={row3Y - 28 + i * 12} width="10" height="10"
                 fill={i % 2 === 1 ? '#ffd60080' : '#ffffff20'} />
             ))}
-            <text x={mainTrackEndX + 18} y={195} textAnchor="middle" fill="#ffd600" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700">FINISH</text>
-            <text x={mainTrackEndX + 18} y={90} textAnchor="middle" fill="#ffd60080" fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600">МАЙ</text>
+            <text x={rowEndX + 48} y={row3Y + 48} textAnchor="middle" fill="#ffd600" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">FINISH</text>
           </g>
 
           {/* Crew cars */}
@@ -295,7 +392,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             const rank = index + 1;
 
             // Vertical stagger for overlapping cars
-            const yOffset = ((index % 6) - 2.5) * 7;
+            const yOffset = ((index % 5) - 2) * 6;
             const finalY = y + yOffset;
 
             return (
@@ -387,14 +484,6 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               </g>
             );
           })}
-
-          {/* Progress markers below track */}
-          <g>
-            <text x={warmupCenterX} y={warmupCenterY + warmupRadius + 35} textAnchor="middle" fill="#00d4ff50" fontSize="8" fontFamily="Rajdhani, sans-serif">0-25%</text>
-            <text x={cp1X}   y={260} textAnchor="middle" fill="#a855f750" fontSize="8" fontFamily="Rajdhani, sans-serif">50%</text>
-            <text x={cp2X}   y={260} textAnchor="middle" fill="#ff6b3550" fontSize="8" fontFamily="Rajdhani, sans-serif">75%</text>
-            <text x={mainTrackEndX} y={260} textAnchor="middle" fill="#ffd60050" fontSize="8" fontFamily="Rajdhani, sans-serif">100%</text>
-          </g>
         </svg>
       </div>
 
