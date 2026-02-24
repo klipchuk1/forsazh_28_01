@@ -70,8 +70,9 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
         { opacity: 0, scale: 0, transformOrigin: 'center center' },
         { opacity: 1, scale: 1, duration: 0.5, delay: 0.3 + i * 0.05, ease: 'back.out(1.4)' }
       );
+      // Subtle pulse glow instead of floating (no position shift = no jittery numbers)
       gsap.to(el, {
-        y: '+=1.5', duration: 1.2 + Math.random() * 0.6,
+        opacity: 0.85, duration: 1.2 + Math.random() * 0.6,
         repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.8 + i * 0.05,
       });
     });
@@ -232,10 +233,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
           {/* ========== CARS (top-down view) ========== */}
           {sorted.map((crew, index) => {
             // Grid: 2 rows of cars across the road width, staggered behind start
-            const row = index % 5;
-            const col = Math.floor(index / 5);
-            const x = sx - 20 - col * 30;
-            const y = r1 - 36 + row * 18;
+            const row = index % 4;
+            const col = Math.floor(index / 4);
+            const x = sx - 28 - col * 42;
+            const y = r1 - 30 + row * 22;
 
             const isHovered = hoveredCrew === crew.id;
             const rank = index + 1;
@@ -250,26 +251,26 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 onMouseLeave={() => setHoveredCrew(null)}
               >
                 {/* Hit area */}
-                <rect x={x - 16} y={y - 10} width="32" height="20" fill="transparent" />
+                <rect x={x - 20} y={y - 14} width="40" height="28" fill="transparent" />
 
-                <g transform={`translate(${x}, ${y})`}>
+                <g transform={`translate(${x}, ${y}) scale(1.5)`}>
                   {/* Ground glow under car */}
-                  <ellipse cx={0} cy={0} rx={12} ry={6}
-                    fill={crew.color} opacity={isHovered ? 0.3 : 0.1} />
+                  <ellipse cx={0} cy={0} rx={14} ry={7}
+                    fill={crew.color} opacity={isHovered ? 0.35 : 0.12} />
 
                   {/* === TOP-DOWN CAR === */}
-                  <g filter={isHovered ? 'url(#glowStrong)' : 'url(#glow)'}>
+                  <g filter={isHovered ? 'url(#glowStrong)' : undefined}>
                     {/* Body — rounded rectangle, pointing right */}
                     <rect x={-11} y={-5} width="22" height="10" rx="4" ry="3"
                       fill={crew.color} opacity="0.95" />
 
-                    {/* Darker center cabin stripe */}
-                    <rect x={-4} y={-4} width="8" height="8" rx="2"
-                      fill="#00000040" />
+                    {/* Darker center cabin */}
+                    <rect x={-4} y={-3.5} width="8" height="7" rx="2"
+                      fill="#00000050" />
 
                     {/* Windshield (front) */}
                     <rect x={7} y={-3} width="3" height="6" rx="1"
-                      fill="rgba(0,212,255,0.4)" />
+                      fill="rgba(0,212,255,0.45)" />
 
                     {/* Rear window */}
                     <rect x={-10} y={-2.5} width="2" height="5" rx="0.8"
@@ -277,22 +278,22 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                   </g>
 
                   {/* Wheels — 4 small dark rects */}
-                  <rect x={5} y={-7} width="4" height="2.5" rx="0.8" fill="#222" stroke={crew.color} strokeWidth="0.4" opacity="0.8" />
-                  <rect x={5} y={4.5} width="4" height="2.5" rx="0.8" fill="#222" stroke={crew.color} strokeWidth="0.4" opacity="0.8" />
-                  <rect x={-8} y={-7} width="4" height="2.5" rx="0.8" fill="#222" stroke={crew.color} strokeWidth="0.4" opacity="0.8" />
-                  <rect x={-8} y={4.5} width="4" height="2.5" rx="0.8" fill="#222" stroke={crew.color} strokeWidth="0.4" opacity="0.8" />
+                  <rect x={6} y={-7.5} width="4" height="3" rx="1" fill="#1a1a1a" stroke="#444" strokeWidth="0.3" />
+                  <rect x={6} y={4.5} width="4" height="3" rx="1" fill="#1a1a1a" stroke="#444" strokeWidth="0.3" />
+                  <rect x={-9} y={-7.5} width="4" height="3" rx="1" fill="#1a1a1a" stroke="#444" strokeWidth="0.3" />
+                  <rect x={-9} y={4.5} width="4" height="3" rx="1" fill="#1a1a1a" stroke="#444" strokeWidth="0.3" />
 
                   {/* Headlights */}
-                  <circle cx={11.5} cy={-2.5} r="1" fill="#fff" opacity="0.8" />
-                  <circle cx={11.5} cy={2.5} r="1" fill="#fff" opacity="0.8" />
+                  <circle cx={11.5} cy={-2.5} r="1.2" fill="#fff" opacity="0.85" />
+                  <circle cx={11.5} cy={2.5} r="1.2" fill="#fff" opacity="0.85" />
 
                   {/* Tail lights */}
-                  <circle cx={-11} cy={-2.5} r="0.8" fill="#ff3366" opacity="0.8" />
-                  <circle cx={-11} cy={2.5} r="0.8" fill="#ff3366" opacity="0.8" />
+                  <circle cx={-11.5} cy={-2.5} r="1" fill="#ff3366" opacity="0.9" />
+                  <circle cx={-11.5} cy={2.5} r="1" fill="#ff3366" opacity="0.9" />
 
                   {/* Number on roof */}
-                  <text x={0} y={1.5} textAnchor="middle"
-                    fill="#fff" fontSize="5.5" fontFamily="Orbitron, sans-serif"
+                  <text x={0} y={2} textAnchor="middle" dominantBaseline="middle"
+                    fill="#fff" fontSize="6" fontFamily="Orbitron, sans-serif"
                     fontWeight="800">
                     {rank}
                   </text>
@@ -301,9 +302,9 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 {/* Hover tooltip */}
                 {isHovered && (
                   <g>
-                    <rect x={x - 50} y={y - 30} width="100" height="22" rx="6"
+                    <rect x={x - 55} y={y - 34} width="110" height="22" rx="6"
                       fill="#0d0d18" stroke={crew.color} strokeWidth="1" opacity="0.95" />
-                    <text x={x} y={y - 15} textAnchor="middle" fill="#fff"
+                    <text x={x} y={y - 19} textAnchor="middle" fill="#fff"
                       fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600">
                       {crew.teamName} · #{rank}
                     </text>
