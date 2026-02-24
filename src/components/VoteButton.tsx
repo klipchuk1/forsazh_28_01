@@ -16,7 +16,7 @@ function getVoterId(): string {
   return id;
 }
 
-interface FlyingHeart {
+interface FlyingThumb {
   id: number;
   x: number;
 }
@@ -24,7 +24,7 @@ interface FlyingHeart {
 export default function VoteButton({ crewId, color }: VoteButtonProps) {
   const [count, setCount] = useState(0);
   const [voted, setVoted] = useState(false);
-  const [hearts, setHearts] = useState<FlyingHeart[]>([]);
+  const [hearts, setHearts] = useState<FlyingThumb[]>([]);
   const [animating, setAnimating] = useState(false);
 
   const voterId = getVoterId();
@@ -67,8 +67,8 @@ export default function VoteButton({ crewId, color }: VoteButtonProps) {
     setVoted(true);
     setCount(prev => prev + 1);
 
-    // Spawn flying hearts
-    const newHearts: FlyingHeart[] = Array.from({ length: 6 }, (_, i) => ({
+    // Spawn flying thumbs
+    const newHearts: FlyingThumb[] = Array.from({ length: 6 }, (_, i) => ({
       id: Date.now() + i,
       x: (Math.random() - 0.5) * 60,
     }));
@@ -101,7 +101,7 @@ export default function VoteButton({ crewId, color }: VoteButtonProps) {
         }}
         title={voted ? 'Вы уже проголосовали' : 'Поддержать команду'}
       >
-        {voted ? '❤️' : '🤍'}
+        {voted ? '👍' : '👍🏻'}
       </motion.button>
 
       <span style={{
@@ -115,7 +115,7 @@ export default function VoteButton({ crewId, color }: VoteButtonProps) {
         {count}
       </span>
 
-      {/* Flying hearts */}
+      {/* Flying thumbs */}
       <AnimatePresence>
         {hearts.map(heart => (
           <motion.span
@@ -132,7 +132,7 @@ export default function VoteButton({ crewId, color }: VoteButtonProps) {
               fontSize: '16px',
             }}
           >
-            ❤️
+            👍
           </motion.span>
         ))}
       </AnimatePresence>
