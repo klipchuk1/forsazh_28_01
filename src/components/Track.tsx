@@ -44,15 +44,15 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
   const [hoveredCrew, setHoveredCrew] = useState<number | null>(null);
 
   const W = 1600;
-  const H = 500;
+  const H = 600;
 
   const sx = 140;       // row start X
   const ex = W - 100;   // row end X
 
-  const r1 = 120;       // row 1 Y center
-  const r2 = 260;       // row 2 Y center
-  const r3 = 400;       // row 3 Y center
-  const roadW = 50;     // half road width
+  const r1 = 130;       // row 1 Y center
+  const r2 = 310;       // row 2 Y center
+  const r3 = 490;       // row 3 Y center
+  const roadW = 70;     // half road width
 
   const sorted = [...crews].sort((a, b) => getTrackPosition(b) - getTrackPosition(a));
 
