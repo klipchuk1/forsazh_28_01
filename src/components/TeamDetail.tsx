@@ -1,5 +1,7 @@
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Crew } from '../data/types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import VoteButton from './VoteButton';
 
 interface TeamDetailProps {
   crew: Crew;
@@ -37,13 +39,25 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
     .findIndex((c) => c.id === crew.id) + 1;
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
-      zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '20px',
-    }} onClick={onClose}>
-      <div className="detail-modal" style={{
+    <AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
+        zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px',
+      }} onClick={onClose}>
+      <motion.div
+        className="detail-modal"
+        initial={{ opacity: 0, scale: 0.9, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 30 }}
+        transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+        style={{
         background: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: '20px', maxWidth: '800px', width: '100%',
         maxHeight: '85vh', overflowY: 'auto', position: 'relative',
@@ -78,15 +92,18 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
               🚗 {crew.driver.name} · 🧭 {crew.navigator.name}
             </p>
           </div>
-          <div className="detail-header-percent">
-            <div style={{
-              fontFamily: 'Orbitron, sans-serif', fontSize: '28px', fontWeight: '900',
-              color: crew.color,
-            }}>
-              {Math.round((crew.metrics.connectedPoints.fact / crew.metrics.connectedPoints.target) * 100)}%
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Overall Progress
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <VoteButton crewId={crew.id} color={crew.color} />
+            <div className="detail-header-percent">
+              <div style={{
+                fontFamily: 'Orbitron, sans-serif', fontSize: '28px', fontWeight: '900',
+                color: crew.color,
+              }}>
+                {Math.round((crew.metrics.connectedPoints.fact / crew.metrics.connectedPoints.target) * 100)}%
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                Overall Progress
+              </div>
             </div>
           </div>
         </div>
@@ -173,7 +190,8 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+    </AnimatePresence>
   );
 }

@@ -1,5 +1,7 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import type { Crew } from '../data/types';
+import VoteButton from './VoteButton';
 
 interface TeamCardsProps {
   crews: Crew[];
@@ -39,15 +41,23 @@ export default function TeamCards({ crews, onCrewClick }: TeamCardsProps) {
           const skuPct = Math.round((crew.metrics.skuCount.fact / crew.metrics.skuCount.target) * 100);
 
           return (
-            <div
+            <motion.div
               key={crew.id}
-              className={`team-card animate-fade-in`}
+              className="team-card"
               style={{
-                animationDelay: `${index * 0.05}s`,
                 '--card-color': crew.color,
                 '--card-glow': crew.glowColor,
               } as React.CSSProperties}
               onClick={() => onCrewClick(crew)}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{
+                duration: 0.5,
+                delay: index * 0.04,
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
             >
               <div className="team-card-header">
                 <div className="team-card-avatars">
@@ -60,7 +70,10 @@ export default function TeamCards({ crews, onCrewClick }: TeamCardsProps) {
                     🚗 {crew.driver.name.split(' ')[0]} · 🧭 {crew.navigator.name.split(' ')[0]}
                   </div>
                 </div>
-                <div className="team-card-rank">#{rank}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <VoteButton crewId={crew.id} color={crew.color} />
+                  <div className="team-card-rank">#{rank}</div>
+                </div>
               </div>
 
               <div className="team-card-metrics">
@@ -95,7 +108,7 @@ export default function TeamCards({ crews, onCrewClick }: TeamCardsProps) {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

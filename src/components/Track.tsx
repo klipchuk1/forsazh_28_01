@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 import type { Crew } from '../data/types';
 
 interface TrackProps {
@@ -61,6 +62,40 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
   // Sorted best-first
   const sorted = [...crews].sort((a, b) => getTrackPosition(b) - getTrackPosition(a));
 
+  const carsRef = useRef<(SVGGElement | null)[]>([]);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const animatedRef = useRef(false);
+
+  useEffect(() => {
+    if (animatedRef.current) return;
+    animatedRef.current = true;
+
+    // Animate cars from center to their positions
+    carsRef.current.forEach((el, i) => {
+      if (!el) return;
+      gsap.fromTo(el,
+        { opacity: 0, scale: 0.3, transformOrigin: 'center center' },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          delay: i * 0.06,
+          ease: 'back.out(1.7)',
+        }
+      );
+
+      // Idle floating animation
+      gsap.to(el, {
+        y: '+=3',
+        duration: 1.5 + Math.random() * 0.5,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: i * 0.06 + 0.6,
+      });
+    });
+  }, [sorted.length]);
+
   // Generate simple Z-shaped track path (no serpentine)
   const generateZPath = () => {
     const curveRadius = 30;
@@ -100,7 +135,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
       </div>
 
       <div className="track-svg-wrapper">
-        <svg viewBox={`0 0 ${trackWidth} ${trackHeight}`} preserveAspectRatio="xMidYMid meet">
+        <svg ref={svgRef} viewBox={`0 0 ${trackWidth} ${trackHeight}`} preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id="trackGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#2d2d4a" />
@@ -375,6 +410,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             return (
               <g
                 key={crew.id}
+                ref={(el) => { carsRef.current[index] = el; }}
                 style={{ cursor: 'pointer' }}
                 onClick={() => onCrewClick(crew)}
                 onMouseEnter={() => setHoveredCrew(crew.id)}

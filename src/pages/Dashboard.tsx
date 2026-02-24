@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import '../styles.css';
 import type { Crew } from '../data/types';
 import { mockCrews } from '../data/mockData';
@@ -9,9 +10,12 @@ import TeamCards from '../components/TeamCards';
 import TeamDetail from '../components/TeamDetail';
 import CountdownTimer from '../components/CountdownTimer';
 import LandingPage from '../components/LandingPage';
+import AnimatedSection from '../components/AnimatedSection';
 import headerBg from '../assets/header-bg.png';
 
 const SHOW_LANDING = false;
+
+const logoText = 'ФОРСАЖ';
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode; label: string },
@@ -51,36 +55,81 @@ export default function Dashboard() {
 
   return (
     <div className="app-container">
-      <div className="header" style={{ backgroundImage: `url(${headerBg})` }}>
+      {/* Header with character-by-character logo animation */}
+      <motion.div
+        className="header"
+        style={{ backgroundImage: `url(${headerBg})` }}
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+      >
         <div className="header-left">
           <div className="logo-icon">
-            <span className="logo-title">ФОРСАЖ</span>
-            <span className="logo-brand">itms | sns</span>
+            <span className="logo-title">
+              {logoText.split('').map((char, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, y: 30, rotateX: 90 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0.3 + i * 0.08,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                  }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </span>
+            <motion.span
+              className="logo-brand"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 1 }}
+            >
+              itms | sns
+            </motion.span>
           </div>
         </div>
-        <div className="header-badge">
+        <motion.div
+          className="header-badge"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 1.2, type: 'spring', stiffness: 200 }}
+        >
           <span className="pulse-dot"></span>
           На старт
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <CountdownTimer />
+      <AnimatedSection delay={0.1}>
+        <CountdownTimer />
+      </AnimatedSection>
 
-      <ErrorBoundary label="StatsBar">
-        <StatsBar />
-      </ErrorBoundary>
+      <AnimatedSection delay={0.1}>
+        <ErrorBoundary label="StatsBar">
+          <StatsBar />
+        </ErrorBoundary>
+      </AnimatedSection>
 
-      <ErrorBoundary label="Track">
-        <Track crews={crews} onCrewClick={handleCrewClick} />
-      </ErrorBoundary>
+      <AnimatedSection delay={0.15}>
+        <ErrorBoundary label="Track">
+          <Track crews={crews} onCrewClick={handleCrewClick} />
+        </ErrorBoundary>
+      </AnimatedSection>
 
-      <ErrorBoundary label="Leaderboard">
-        <Leaderboard crews={crews} onCrewClick={handleCrewClick} />
-      </ErrorBoundary>
+      <AnimatedSection delay={0.1} direction="left">
+        <ErrorBoundary label="Leaderboard">
+          <Leaderboard crews={crews} onCrewClick={handleCrewClick} />
+        </ErrorBoundary>
+      </AnimatedSection>
 
-      <ErrorBoundary label="TeamCards">
-        <TeamCards crews={crews} onCrewClick={handleCrewClick} />
-      </ErrorBoundary>
+      <AnimatedSection delay={0.05}>
+        <ErrorBoundary label="TeamCards">
+          <TeamCards crews={crews} onCrewClick={handleCrewClick} />
+        </ErrorBoundary>
+      </AnimatedSection>
 
       {selectedCrew && (
         <ErrorBoundary label="TeamDetail">
