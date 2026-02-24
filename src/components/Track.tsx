@@ -30,7 +30,6 @@ function getTrackPosition(crew: Crew): number {
     position += segmentSize;
   }
 
-  // Allow overshoot past finish for over-achievers on the last segment
   if (allComplete) {
     const last = segments[segments.length - 1];
     if (last.target > 0 && last.fact > last.target) {
@@ -44,18 +43,17 @@ function getTrackPosition(crew: Crew): number {
 export default function Track({ crews, onCrewClick }: TrackProps) {
   const [hoveredCrew, setHoveredCrew] = useState<number | null>(null);
 
-  const trackWidth = 1600;
-  const trackHeight = 470;
+  const W = 1600;
+  const H = 500;
 
-  const rowStartX = 120;
-  const rowEndX = trackWidth - 80;
-  const rowLength = rowEndX - rowStartX;
+  const sx = 140;       // row start X
+  const ex = W - 100;   // row end X
 
-  const row1Y = 110;
-  const row2Y = 240;
-  const row3Y = 370;
+  const r1 = 120;       // row 1 Y center
+  const r2 = 260;       // row 2 Y center
+  const r3 = 400;       // row 3 Y center
+  const roadW = 50;     // half road width
 
-  // Sorted best-first
   const sorted = [...crews].sort((a, b) => getTrackPosition(b) - getTrackPosition(a));
 
   const carsRef = useRef<(SVGGElement | null)[]>([]);
@@ -69,311 +67,175 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
     carsRef.current.forEach((el, i) => {
       if (!el) return;
       gsap.fromTo(el,
-        { opacity: 0, scale: 0.3, transformOrigin: 'center center' },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.6,
-          delay: i * 0.06,
-          ease: 'back.out(1.7)',
-        }
+        { opacity: 0, scale: 0, transformOrigin: 'center center' },
+        { opacity: 1, scale: 1, duration: 0.5, delay: 0.3 + i * 0.05, ease: 'back.out(1.4)' }
       );
-
       gsap.to(el, {
-        y: '+=2',
-        duration: 1.5 + Math.random() * 0.5,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-        delay: i * 0.06 + 0.6,
+        y: '+=1.5', duration: 1.2 + Math.random() * 0.6,
+        repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.8 + i * 0.05,
       });
     });
   }, [sorted.length]);
 
-  const generateZPath = () => {
-    const cr = 35;
-    let path = `M ${rowStartX} ${row1Y} L ${rowEndX} ${row1Y}`;
-    path += ` Q ${rowEndX + cr} ${row1Y + (row2Y - row1Y) / 2}, ${rowEndX} ${row2Y}`;
-    path += ` L ${rowStartX} ${row2Y}`;
-    path += ` Q ${rowStartX - cr} ${row2Y + (row3Y - row2Y) / 2}, ${rowStartX} ${row3Y}`;
-    path += ` L ${rowEndX} ${row3Y}`;
-    return path;
-  };
-
-  // Offset path for road edges
-  const generateEdgePath = (offset: number) => {
-    const cr = 35;
-    let path = `M ${rowStartX} ${row1Y + offset} L ${rowEndX} ${row1Y + offset}`;
-    path += ` Q ${rowEndX + cr + (offset > 0 ? 4 : -4)} ${row1Y + (row2Y - row1Y) / 2 + offset}, ${rowEndX} ${row2Y + offset}`;
-    path += ` L ${rowStartX} ${row2Y + offset}`;
-    path += ` Q ${rowStartX - cr + (offset > 0 ? 4 : -4)} ${row2Y + (row3Y - row2Y) / 2 + offset}, ${rowStartX} ${row3Y + offset}`;
-    path += ` L ${rowEndX} ${row3Y + offset}`;
-    return path;
-  };
+  // Z-path for center line
+  const zPath = (() => {
+    const cr = 40;
+    let p = `M ${sx} ${r1} L ${ex} ${r1}`;
+    p += ` Q ${ex + cr} ${(r1 + r2) / 2}, ${ex} ${r2}`;
+    p += ` L ${sx} ${r2}`;
+    p += ` Q ${sx - cr} ${(r2 + r3) / 2}, ${sx} ${r3}`;
+    p += ` L ${ex} ${r3}`;
+    return p;
+  })();
 
   return (
     <div className="track-container">
       <div className="section-header" style={{ justifyContent: 'center' }}>
         <span className="section-title" style={{
-          fontSize: '28px',
-          fontWeight: '800',
+          fontSize: '26px', fontWeight: '800',
           background: 'linear-gradient(90deg, #00d4ff, #00ff88, #00d4ff)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          letterSpacing: '3px'
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          letterSpacing: '3px',
         }}>
           ТРАССА ФОРСАЖ
         </span>
       </div>
 
       <div className="track-svg-wrapper">
-        <svg ref={svgRef} viewBox={`0 0 ${trackWidth} ${trackHeight}`} preserveAspectRatio="xMidYMid meet">
+        <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
           <defs>
-            {/* Grid pattern for Tron background */}
-            <pattern id="tronGrid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <rect width="40" height="40" fill="none" />
-              <line x1="0" y1="0" x2="0" y2="40" stroke="#00d4ff08" strokeWidth="0.5" />
-              <line x1="0" y1="0" x2="40" y2="0" stroke="#00d4ff08" strokeWidth="0.5" />
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2.5" result="b" />
+              <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+            <filter id="glowStrong">
+              <feGaussianBlur stdDeviation="4" result="b" />
+              <feMerge><feMergeNode in="b" /><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+            <pattern id="checker" width="10" height="10" patternUnits="userSpaceOnUse">
+              <rect width="5" height="5" fill="#fff" opacity="0.85" />
+              <rect x="5" width="5" height="5" fill="#111" />
+              <rect y="5" width="5" height="5" fill="#111" />
+              <rect x="5" y="5" width="5" height="5" fill="#fff" opacity="0.85" />
             </pattern>
-
-            {/* Road surface gradient */}
-            <linearGradient id="roadSurface" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#0d0d1a" />
-              <stop offset="50%" stopColor="#111122" />
-              <stop offset="100%" stopColor="#0d0d1a" />
-            </linearGradient>
-
-            {/* Neon edge glow */}
-            <linearGradient id="neonEdge" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#00d4ff" />
-              <stop offset="50%" stopColor="#00ffcc" />
-              <stop offset="100%" stopColor="#00d4ff" />
-            </linearGradient>
-
-            {/* Checkpoint portal gradients */}
-            <linearGradient id="portal1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#a855f7" />
-              <stop offset="50%" stopColor="#c084fc" />
-              <stop offset="100%" stopColor="#a855f7" />
-            </linearGradient>
-            <linearGradient id="portal2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#ff6b35" />
-              <stop offset="50%" stopColor="#ff9966" />
-              <stop offset="100%" stopColor="#ff6b35" />
-            </linearGradient>
-            <linearGradient id="finishGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#ffd600" />
-              <stop offset="50%" stopColor="#ffee88" />
-              <stop offset="100%" stopColor="#ffd600" />
-            </linearGradient>
-
-            {/* Checkered pattern with neon */}
-            <pattern id="checkeredNeon" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-              <rect x="0" y="0" width="5" height="5" fill="#ffffff" opacity="0.9" />
-              <rect x="5" y="0" width="5" height="5" fill="#0a0a15" />
-              <rect x="0" y="5" width="5" height="5" fill="#0a0a15" />
-              <rect x="5" y="5" width="5" height="5" fill="#ffffff" opacity="0.9" />
-            </pattern>
-
-            {/* Glow filters */}
-            <filter id="neonGlow">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-            <filter id="neonGlowStrong">
-              <feGaussianBlur stdDeviation="6" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-            <filter id="softGlow">
-              <feGaussianBlur stdDeviation="2" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-            <filter id="carGlow">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
 
-          {/* Tron grid background */}
-          <rect width={trackWidth} height={trackHeight} fill="url(#tronGrid)" />
+          {/* ========== ROAD ========== */}
+          {/* Road surface — wide dark band */}
+          <path d={zPath} fill="none" stroke="#161625" strokeWidth={roadW * 2}
+            strokeLinecap="round" strokeLinejoin="round" />
 
-          {/* Road surface - dark asphalt */}
-          <path
-            d={generateZPath()}
-            fill="none"
-            stroke="url(#roadSurface)"
-            strokeWidth="64"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          {/* Road edge lines — subtle white */}
+          <path d={zPath} fill="none" stroke="#ffffff18" strokeWidth={roadW * 2 + 4}
+            strokeLinecap="round" strokeLinejoin="round" />
+          <path d={zPath} fill="none" stroke="#161625" strokeWidth={roadW * 2}
+            strokeLinecap="round" strokeLinejoin="round" />
 
-          {/* Road edge - outer neon border */}
-          <path
-            d={generateEdgePath(30)}
-            fill="none"
-            stroke="#00d4ff"
-            strokeWidth="1.5"
-            opacity="0.6"
-            filter="url(#neonGlow)"
-          />
-          <path
-            d={generateEdgePath(-30)}
-            fill="none"
-            stroke="#00d4ff"
-            strokeWidth="1.5"
-            opacity="0.6"
-            filter="url(#neonGlow)"
-          />
+          {/* Kerb stripes — red/white on edges */}
+          <path d={zPath} fill="none" stroke="#ff336640" strokeWidth={roadW * 2 + 2}
+            strokeLinecap="round" strokeLinejoin="round"
+            strokeDasharray="8,8" />
 
-          {/* Road edge - inner neon lines */}
-          <path
-            d={generateEdgePath(24)}
-            fill="none"
-            stroke="#00d4ff40"
-            strokeWidth="0.8"
-          />
-          <path
-            d={generateEdgePath(-24)}
-            fill="none"
-            stroke="#00d4ff40"
-            strokeWidth="0.8"
-          />
+          {/* Center dashed line */}
+          <path d={zPath} fill="none" stroke="#ffffff30" strokeWidth="2"
+            strokeDasharray="14,20" />
 
-          {/* Center dashed neon line */}
-          <path
-            d={generateZPath()}
-            fill="none"
-            stroke="#00d4ff"
-            strokeWidth="1.5"
-            strokeDasharray="12,18"
-            opacity="0.35"
-            filter="url(#softGlow)"
-          />
+          {/* ========== LABELS ========== */}
+          <text x={sx + (ex - sx) / 2} y={r1 - 42} textAnchor="middle"
+            fill="#a855f7" fontSize="14" fontFamily="Orbitron, sans-serif"
+            fontWeight="700" letterSpacing="2" opacity="0.9">
+            ЭТАП 1 — МАРТ
+          </text>
+          <text x={sx + (ex - sx) / 2} y={r2 - 42} textAnchor="middle"
+            fill="#ff6b35" fontSize="14" fontFamily="Orbitron, sans-serif"
+            fontWeight="700" letterSpacing="2" opacity="0.9">
+            ЭТАП 2 — АПРЕЛЬ
+          </text>
+          <text x={sx + (ex - sx) / 2} y={r3 - 42} textAnchor="middle"
+            fill="#ffd600" fontSize="14" fontFamily="Orbitron, sans-serif"
+            fontWeight="700" letterSpacing="2" opacity="0.9">
+            ЭТАП 3 — МАЙ
+          </text>
 
-          {/* Month labels with glow */}
-          <g filter="url(#softGlow)">
-            <text x={rowStartX + rowLength / 2} y={row1Y - 48} textAnchor="middle"
-              fill="#a855f7" fontSize="15" fontFamily="Orbitron, sans-serif" fontWeight="700" letterSpacing="3">
-              ЭТАП 1 — МАРТ
-            </text>
-            <text x={rowStartX + rowLength / 2} y={row2Y - 48} textAnchor="middle"
-              fill="#ff6b35" fontSize="15" fontFamily="Orbitron, sans-serif" fontWeight="700" letterSpacing="3">
-              ЭТАП 2 — АПРЕЛЬ
-            </text>
-            <text x={rowStartX + rowLength / 2} y={row3Y - 48} textAnchor="middle"
-              fill="#ffd600" fontSize="15" fontFamily="Orbitron, sans-serif" fontWeight="700" letterSpacing="3">
-              ЭТАП 3 — МАЙ
-            </text>
-          </g>
-
-          {/* START gate - checkered with neon frame */}
+          {/* ========== START ========== */}
           <g>
-            {/* Neon frame around start */}
-            <rect x={rowStartX - 10} y={row1Y - 34} width="20" height="68" rx="3"
-              fill="none" stroke="#00ff88" strokeWidth="1.5" opacity="0.7" filter="url(#neonGlow)" />
-            <rect x={rowStartX - 8} y={row1Y - 32} width="16" height="64"
-              fill="url(#checkeredNeon)" opacity="0.85" />
-            <text x={rowStartX} y={row1Y - 40} textAnchor="middle"
-              fill="#00ff88" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700"
-              filter="url(#softGlow)">
+            <rect x={sx - 6} y={r1 - roadW} width="12" height={roadW * 2}
+              fill="url(#checker)" opacity="0.8" />
+            <text x={sx} y={r1 - roadW - 8} textAnchor="middle"
+              fill="#00ff88" fontSize="10" fontFamily="Orbitron, sans-serif"
+              fontWeight="700" filter="url(#glow)">
               START
             </text>
           </g>
 
-          {/* Checkpoint 1 — neon portal at right turn */}
+          {/* ========== CHECKPOINT 1 — right turn ========== */}
           <g>
-            {/* Portal glow background */}
-            <ellipse cx={rowEndX + 15} cy={(row1Y + row2Y) / 2} rx="50" ry="45"
-              fill="#a855f7" opacity="0.04" />
-            {/* Portal arcs */}
-            <line x1={rowEndX - 30} y1={(row1Y + row2Y) / 2 - 40} x2={rowEndX - 30} y2={(row1Y + row2Y) / 2 + 40}
-              stroke="url(#portal1Grad)" strokeWidth="3" opacity="0.8" filter="url(#neonGlow)" />
-            <line x1={rowEndX + 60} y1={(row1Y + row2Y) / 2 - 40} x2={rowEndX + 60} y2={(row1Y + row2Y) / 2 + 40}
-              stroke="url(#portal1Grad)" strokeWidth="3" opacity="0.8" filter="url(#neonGlow)" />
-            {/* Portal cross beams */}
-            <line x1={rowEndX - 30} y1={(row1Y + row2Y) / 2 - 40} x2={rowEndX + 60} y2={(row1Y + row2Y) / 2 - 40}
-              stroke="#a855f7" strokeWidth="2" opacity="0.5" filter="url(#softGlow)" />
-            <line x1={rowEndX - 30} y1={(row1Y + row2Y) / 2 + 40} x2={rowEndX + 60} y2={(row1Y + row2Y) / 2 + 40}
-              stroke="#a855f7" strokeWidth="2" opacity="0.5" filter="url(#softGlow)" />
-            {/* Pulsing core */}
-            <line x1={rowEndX - 30} y1={(row1Y + row2Y) / 2} x2={rowEndX + 60} y2={(row1Y + row2Y) / 2}
-              stroke="#c084fc" strokeWidth="1" opacity="0.4" strokeDasharray="4,6">
-              <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite" />
-            </line>
-            <text x={rowEndX + 15} y={(row1Y + row2Y) / 2 - 48} textAnchor="middle"
-              fill="#a855f7" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700"
-              filter="url(#softGlow)">
+            <line x1={ex - 10} y1={(r1 + r2) / 2 - roadW - 5}
+              x2={ex + 40} y2={(r1 + r2) / 2 - roadW - 5}
+              stroke="#a855f7" strokeWidth="3" opacity="0.7" filter="url(#glow)" />
+            <line x1={ex - 10} y1={(r1 + r2) / 2 + roadW + 5}
+              x2={ex + 40} y2={(r1 + r2) / 2 + roadW + 5}
+              stroke="#a855f7" strokeWidth="3" opacity="0.7" filter="url(#glow)" />
+            {/* Connecting verticals */}
+            <line x1={ex - 10} y1={(r1 + r2) / 2 - roadW - 5}
+              x2={ex - 10} y2={(r1 + r2) / 2 + roadW + 5}
+              stroke="#a855f7" strokeWidth="2" opacity="0.5" />
+            <line x1={ex + 40} y1={(r1 + r2) / 2 - roadW - 5}
+              x2={ex + 40} y2={(r1 + r2) / 2 + roadW + 5}
+              stroke="#a855f7" strokeWidth="2" opacity="0.5" />
+            <text x={ex + 15} y={(r1 + r2) / 2 - roadW - 14} textAnchor="middle"
+              fill="#a855f7" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700">
               ЧЕКПОИНТ 1
             </text>
           </g>
 
-          {/* Checkpoint 2 — neon portal at left turn */}
+          {/* ========== CHECKPOINT 2 — left turn ========== */}
           <g>
-            <ellipse cx={rowStartX - 15} cy={(row2Y + row3Y) / 2} rx="50" ry="45"
-              fill="#ff6b35" opacity="0.04" />
-            <line x1={rowStartX - 60} y1={(row2Y + row3Y) / 2 - 40} x2={rowStartX - 60} y2={(row2Y + row3Y) / 2 + 40}
-              stroke="url(#portal2Grad)" strokeWidth="3" opacity="0.8" filter="url(#neonGlow)" />
-            <line x1={rowStartX + 30} y1={(row2Y + row3Y) / 2 - 40} x2={rowStartX + 30} y2={(row2Y + row3Y) / 2 + 40}
-              stroke="url(#portal2Grad)" strokeWidth="3" opacity="0.8" filter="url(#neonGlow)" />
-            <line x1={rowStartX - 60} y1={(row2Y + row3Y) / 2 - 40} x2={rowStartX + 30} y2={(row2Y + row3Y) / 2 - 40}
-              stroke="#ff6b35" strokeWidth="2" opacity="0.5" filter="url(#softGlow)" />
-            <line x1={rowStartX - 60} y1={(row2Y + row3Y) / 2 + 40} x2={rowStartX + 30} y2={(row2Y + row3Y) / 2 + 40}
-              stroke="#ff6b35" strokeWidth="2" opacity="0.5" filter="url(#softGlow)" />
-            <line x1={rowStartX - 60} y1={(row2Y + row3Y) / 2} x2={rowStartX + 30} y2={(row2Y + row3Y) / 2}
-              stroke="#ff9966" strokeWidth="1" opacity="0.4" strokeDasharray="4,6">
-              <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite" />
-            </line>
-            <text x={rowStartX - 15} y={(row2Y + row3Y) / 2 - 48} textAnchor="middle"
-              fill="#ff6b35" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700"
-              filter="url(#softGlow)">
+            <line x1={sx - 40} y1={(r2 + r3) / 2 - roadW - 5}
+              x2={sx + 10} y2={(r2 + r3) / 2 - roadW - 5}
+              stroke="#ff6b35" strokeWidth="3" opacity="0.7" filter="url(#glow)" />
+            <line x1={sx - 40} y1={(r2 + r3) / 2 + roadW + 5}
+              x2={sx + 10} y2={(r2 + r3) / 2 + roadW + 5}
+              stroke="#ff6b35" strokeWidth="3" opacity="0.7" filter="url(#glow)" />
+            <line x1={sx - 40} y1={(r2 + r3) / 2 - roadW - 5}
+              x2={sx - 40} y2={(r2 + r3) / 2 + roadW + 5}
+              stroke="#ff6b35" strokeWidth="2" opacity="0.5" />
+            <line x1={sx + 10} y1={(r2 + r3) / 2 - roadW - 5}
+              x2={sx + 10} y2={(r2 + r3) / 2 + roadW + 5}
+              stroke="#ff6b35" strokeWidth="2" opacity="0.5" />
+            <text x={sx - 15} y={(r2 + r3) / 2 - roadW - 14} textAnchor="middle"
+              fill="#ff6b35" fontSize="10" fontFamily="Orbitron, sans-serif" fontWeight="700">
               ЧЕКПОИНТ 2
             </text>
           </g>
 
-          {/* FINISH — neon portal */}
+          {/* ========== FINISH ========== */}
           <g>
-            <ellipse cx={rowEndX} cy={row3Y} rx="30" ry="50"
-              fill="#ffd600" opacity="0.05" />
-            <line x1={rowEndX} y1={row3Y - 45} x2={rowEndX} y2={row3Y + 45}
-              stroke="url(#finishGrad)" strokeWidth="4" filter="url(#neonGlowStrong)" />
-            {/* Animated pulse */}
-            <line x1={rowEndX - 15} y1={row3Y - 45} x2={rowEndX - 15} y2={row3Y + 45}
-              stroke="#ffd600" strokeWidth="1" opacity="0.3">
-              <animate attributeName="opacity" values="0.1;0.5;0.1" dur="1.5s" repeatCount="indefinite" />
+            <rect x={ex - 6} y={r3 - roadW} width="12" height={roadW * 2}
+              fill="url(#checker)" opacity="0.8" />
+            {/* Neon glow lines beside finish */}
+            <line x1={ex - 12} y1={r3 - roadW} x2={ex - 12} y2={r3 + roadW}
+              stroke="#ffd600" strokeWidth="2" opacity="0.5" filter="url(#glow)">
+              <animate attributeName="opacity" values="0.3;0.7;0.3" dur="1.5s" repeatCount="indefinite" />
             </line>
-            <line x1={rowEndX + 15} y1={row3Y - 45} x2={rowEndX + 15} y2={row3Y + 45}
-              stroke="#ffd600" strokeWidth="1" opacity="0.3">
-              <animate attributeName="opacity" values="0.1;0.5;0.1" dur="1.5s" repeatCount="indefinite" />
+            <line x1={ex + 12} y1={r3 - roadW} x2={ex + 12} y2={r3 + roadW}
+              stroke="#ffd600" strokeWidth="2" opacity="0.5" filter="url(#glow)">
+              <animate attributeName="opacity" values="0.3;0.7;0.3" dur="1.5s" repeatCount="indefinite" />
             </line>
-            <text x={rowEndX} y={row3Y + 62} textAnchor="middle"
-              fill="#ffd600" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="900"
-              letterSpacing="3" filter="url(#neonGlow)">
+            <text x={ex} y={r3 + roadW + 18} textAnchor="middle"
+              fill="#ffd600" fontSize="11" fontFamily="Orbitron, sans-serif"
+              fontWeight="900" letterSpacing="3" filter="url(#glow)">
               FINISH
             </text>
           </g>
 
-          {/* ===== CREW CARS ===== */}
+          {/* ========== CARS (top-down view) ========== */}
           {sorted.map((crew, index) => {
-            const cols = 4;
-            const col = index % cols;
-            const row = Math.floor(index / cols);
-            const x = rowStartX - 35 - col * 32;
-            const y = row1Y - 22 + row * 14;
+            // Grid: 2 rows of cars across the road width, staggered behind start
+            const row = index % 5;
+            const col = Math.floor(index / 5);
+            const x = sx - 20 - col * 30;
+            const y = r1 - 36 + row * 18;
 
             const isHovered = hoveredCrew === crew.id;
             const rank = index + 1;
@@ -387,75 +249,51 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 onMouseEnter={() => setHoveredCrew(crew.id)}
                 onMouseLeave={() => setHoveredCrew(null)}
               >
-                <rect x={x - 24} y={y - 18} width="48" height="36" fill="transparent" />
+                {/* Hit area */}
+                <rect x={x - 16} y={y - 10} width="32" height="20" fill="transparent" />
 
                 <g transform={`translate(${x}, ${y})`}>
-                  {/* Neon ground glow */}
-                  <ellipse cx={0} cy={8} rx={14} ry={3}
-                    fill={crew.color} opacity={isHovered ? 0.5 : 0.2}
-                    filter="url(#softGlow)" />
+                  {/* Ground glow under car */}
+                  <ellipse cx={0} cy={0} rx={12} ry={6}
+                    fill={crew.color} opacity={isHovered ? 0.3 : 0.1} />
 
-                  {/* Light trail behind car */}
-                  <rect x={-18} y={1} width={8} height={2} rx={1}
-                    fill={crew.color} opacity={0.25} filter="url(#softGlow)" />
+                  {/* === TOP-DOWN CAR === */}
+                  <g filter={isHovered ? 'url(#glowStrong)' : 'url(#glow)'}>
+                    {/* Body — rounded rectangle, pointing right */}
+                    <rect x={-11} y={-5} width="22" height="10" rx="4" ry="3"
+                      fill={crew.color} opacity="0.95" />
 
-                  {/* Wheels with neon rim */}
-                  <circle cx={-7} cy={4} r={3} fill="#0a0a12" stroke="#333355" strokeWidth="0.8" />
-                  <circle cx={7} cy={4} r={3} fill="#0a0a12" stroke="#333355" strokeWidth="0.8" />
-                  <circle cx={-7} cy={4} r={1.2} fill={crew.color} opacity="0.4" />
-                  <circle cx={7} cy={4} r={1.2} fill={crew.color} opacity="0.4" />
+                    {/* Darker center cabin stripe */}
+                    <rect x={-4} y={-4} width="8" height="8" rx="2"
+                      fill="#00000040" />
 
-                  {/* Car body */}
-                  <g filter={isHovered ? 'url(#carGlow)' : 'url(#softGlow)'}>
-                    {/* Main body */}
-                    <path
-                      d="M-13,3 L-13,0 L-10,-2 L-6,-4 L-2,-5.5 L3,-5.5 L7,-4 L10,-2 L12,0 L13,3 Z"
-                      fill={crew.color}
-                      opacity={0.95}
-                    />
-                    {/* Hood accent */}
-                    <path
-                      d="M-10,-2 L-6,-4 L-2,-5.5 L3,-5.5 L7,-4 L10,-2 L7,-1 L-7,-1 Z"
-                      fill={crew.color}
-                      opacity={0.7}
-                    />
-                    {/* Roof / cabin dark */}
-                    <path
-                      d="M-4,-4.5 L0,-6 L4,-4.5 L6,-3.5 L-5,-3.5 Z"
-                      fill="#0a0a15"
-                      opacity="0.6"
-                    />
+                    {/* Windshield (front) */}
+                    <rect x={7} y={-3} width="3" height="6" rx="1"
+                      fill="rgba(0,212,255,0.4)" />
+
+                    {/* Rear window */}
+                    <rect x={-10} y={-2.5} width="2" height="5" rx="0.8"
+                      fill="rgba(255,255,255,0.15)" />
                   </g>
 
-                  {/* Windshield - cyan glass */}
-                  <path
-                    d="M-3,-4.5 L0.5,-5.5 L4,-4 L5.5,-3 L-4,-3 Z"
-                    fill="rgba(0,212,255,0.35)"
-                  />
-
-                  {/* Neon accent stripe on body */}
-                  <line x1={-12} y1={1} x2={12} y2={1}
-                    stroke={crew.color} strokeWidth="0.6" opacity="0.6" />
+                  {/* Wheels — 4 small dark rects */}
+                  <rect x={5} y={-7} width="4" height="2.5" rx="0.8" fill="#222" stroke={crew.color} strokeWidth="0.4" opacity="0.8" />
+                  <rect x={5} y={4.5} width="4" height="2.5" rx="0.8" fill="#222" stroke={crew.color} strokeWidth="0.4" opacity="0.8" />
+                  <rect x={-8} y={-7} width="4" height="2.5" rx="0.8" fill="#222" stroke={crew.color} strokeWidth="0.4" opacity="0.8" />
+                  <rect x={-8} y={4.5} width="4" height="2.5" rx="0.8" fill="#222" stroke={crew.color} strokeWidth="0.4" opacity="0.8" />
 
                   {/* Headlights */}
-                  <circle cx={12} cy={1} r={1} fill="#ffffff" opacity="0.9" />
-                  <circle cx={12} cy={1} r={2.5} fill="#ffffff" opacity="0.15" />
+                  <circle cx={11.5} cy={-2.5} r="1" fill="#fff" opacity="0.8" />
+                  <circle cx={11.5} cy={2.5} r="1" fill="#fff" opacity="0.8" />
 
-                  {/* Tail light */}
-                  <rect x={-14} y={0} width={1.5} height={3} rx={0.5}
-                    fill="#ff3366" opacity="0.8" />
+                  {/* Tail lights */}
+                  <circle cx={-11} cy={-2.5} r="0.8" fill="#ff3366" opacity="0.8" />
+                  <circle cx={-11} cy={2.5} r="0.8" fill="#ff3366" opacity="0.8" />
 
-                  {/* Rank number */}
-                  <text
-                    x={0}
-                    y={0}
-                    textAnchor="middle"
-                    fill="#fff"
-                    fontSize="5"
-                    fontFamily="Orbitron, sans-serif"
-                    fontWeight="700"
-                    opacity="0.95"
-                  >
+                  {/* Number on roof */}
+                  <text x={0} y={1.5} textAnchor="middle"
+                    fill="#fff" fontSize="5.5" fontFamily="Orbitron, sans-serif"
+                    fontWeight="800">
                     {rank}
                   </text>
                 </g>
@@ -463,18 +301,11 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 {/* Hover tooltip */}
                 {isHovered && (
                   <g>
-                    <rect
-                      x={x - 52} y={y - 52} width="104" height="36" rx="8"
-                      fill="#0a0a15" stroke={crew.color} strokeWidth="1.5"
-                      opacity={0.95} filter="url(#softGlow)"
-                    />
-                    <text x={x} y={y - 35} textAnchor="middle" fill="#fff"
+                    <rect x={x - 50} y={y - 30} width="100" height="22" rx="6"
+                      fill="#0d0d18" stroke={crew.color} strokeWidth="1" opacity="0.95" />
+                    <text x={x} y={y - 15} textAnchor="middle" fill="#fff"
                       fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600">
-                      {crew.teamName}
-                    </text>
-                    <text x={x} y={y - 22} textAnchor="middle" fill={crew.color}
-                      fontSize="9" fontFamily="Orbitron, sans-serif" fontWeight="700">
-                      #{rank}
+                      {crew.teamName} · #{rank}
                     </text>
                   </g>
                 )}
