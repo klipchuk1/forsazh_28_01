@@ -132,8 +132,8 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
           <path d={zPath} fill="none" stroke="#161625" strokeWidth={roadW * 2}
             strokeLinecap="round" strokeLinejoin="round" />
 
-          {/* Kerb stripes — red/white on edges */}
-          <path d={zPath} fill="none" stroke="#ff336640" strokeWidth={roadW * 2 + 2}
+          {/* Kerb stripes — subtle cyan on edges */}
+          <path d={zPath} fill="none" stroke="#00d4ff18" strokeWidth={roadW * 2 + 2}
             strokeLinecap="round" strokeLinejoin="round"
             strokeDasharray="8,8" />
 
