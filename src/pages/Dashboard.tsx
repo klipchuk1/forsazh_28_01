@@ -8,7 +8,6 @@ import Track from '../components/Track';
 import Leaderboard from '../components/Leaderboard';
 import TeamCards from '../components/TeamCards';
 import TeamDetail from '../components/TeamDetail';
-import CountdownTimer from '../components/CountdownTimer';
 import LandingPage from '../components/LandingPage';
 import AnimatedSection from '../components/AnimatedSection';
 import headerBg from '../assets/header-bg.png';
@@ -102,10 +101,6 @@ export default function Dashboard() {
           На старт
         </motion.div>
       </motion.div>
-
-      <AnimatedSection delay={0.1}>
-        <CountdownTimer />
-      </AnimatedSection>
 
       <AnimatedSection delay={0.1}>
         <ErrorBoundary label="StatsBar">
