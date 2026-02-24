@@ -47,11 +47,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
   const trackWidth = 1600;
   const trackHeight = 450;
 
-  const warmupCenterX = 140;
-  const warmupCenterY = 200;
-  const warmupRadius = 120;
-
-  const rowStartX = 360;
+  const rowStartX = 120;
   const rowEndX = trackWidth - 80;
   const rowLength = rowEndX - rowStartX;
 
@@ -175,81 +171,6 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               </feMerge>
             </filter>
           </defs>
-
-          {/* Warmup circular track */}
-          <g>
-            <circle
-              cx={warmupCenterX}
-              cy={warmupCenterY}
-              r={warmupRadius + 20}
-              fill="none"
-              stroke="#00d4ff20"
-              strokeWidth="2"
-              strokeDasharray="8,4"
-            />
-
-            <circle
-              cx={warmupCenterX}
-              cy={warmupCenterY}
-              r={warmupRadius}
-              fill="none"
-              stroke="url(#trackGrad)"
-              strokeWidth="35"
-              opacity="0.6"
-            />
-
-            <circle
-              cx={warmupCenterX}
-              cy={warmupCenterY}
-              r={warmupRadius}
-              fill="none"
-              stroke="#ffffff15"
-              strokeWidth="2"
-              strokeDasharray="6,8"
-            />
-
-            <text
-              x={warmupCenterX}
-              y={warmupCenterY - 12}
-              textAnchor="middle"
-              fill="#00d4ff"
-              fontSize="14"
-              fontFamily="Rajdhani, sans-serif"
-              fontWeight="700"
-              letterSpacing="1.2"
-            >
-              ФЕВРАЛЬ
-            </text>
-            <text
-              x={warmupCenterX}
-              y={warmupCenterY + 8}
-              textAnchor="middle"
-              fill="#00d4ff90"
-              fontSize="11"
-              fontFamily="Rajdhani, sans-serif"
-              fontWeight="600"
-            >
-              Прогревочный круг
-            </text>
-            <text
-              x={warmupCenterX}
-              y={warmupCenterY + 30}
-              textAnchor="middle"
-              fill="#FFD600"
-              fontSize="15"
-              fontFamily="Rajdhani, sans-serif"
-              fontWeight="800"
-              letterSpacing="1.5"
-            >
-              Поиск точек
-              <animate
-                attributeName="opacity"
-                values="1;0.3;1"
-                dur="1.5s"
-                repeatCount="indefinite"
-              />
-            </text>
-          </g>
 
           {/* Z-shaped track - simple straight lines */}
           <path
@@ -394,15 +315,14 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             <text x={rowEndX} y={row3Y + 63} textAnchor="middle" fill="#ffd600" fontSize="11" fontFamily="Orbitron, sans-serif" fontWeight="700">FINISH</text>
           </g>
 
-          {/* Crew cars - all in warmup zone since we're before start */}
+          {/* Crew cars - lined up at start */}
           {sorted.map((crew, index) => {
-            // Distribute all cars around warmup circle
-            const warmupProgress = index / sorted.length;
-            const angle = Math.PI * 0.5 + warmupProgress * Math.PI * 2;
-            const radiusOffset = ((index % 3) - 1) * 10;
-
-            const x = warmupCenterX + Math.cos(angle) * (warmupRadius + radiusOffset);
-            const y = warmupCenterY + Math.sin(angle) * (warmupRadius + radiusOffset);
+            // Place cars in a grid near the start line
+            const cols = 4;
+            const col = index % cols;
+            const row = Math.floor(index / cols);
+            const x = rowStartX - 30 - col * 28;
+            const y = row1Y - 20 + row * 12;
 
             const isHovered = hoveredCrew === crew.id;
             const rank = index + 1;
@@ -470,7 +390,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                       {crew.teamName}
                     </text>
                     <text x={x} y={y - 20} textAnchor="middle" fill={crew.color} fontSize="8" fontFamily="Orbitron, sans-serif" fontWeight="700">
-                      Прогрев
+                      #{rank}
                     </text>
                   </g>
                 )}
