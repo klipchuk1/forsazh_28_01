@@ -191,42 +191,103 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               >
                 <rect x={x - 22} y={y - 16} width="44" height="32" fill="transparent" />
 
-                <g transform={`translate(${x}, ${y}) scale(1.5)`}>
-                  {/* Underglow */}
-                  <ellipse cx={0} cy={0} rx={14} ry={7}
-                    fill={crew.color} opacity={isHovered ? 0.35 : 0.12} />
+                <g transform={`translate(${x}, ${y}) scale(1.8)`}>
+                  {/* Underglow reflection */}
+                  <ellipse cx={0} cy={0} rx={15} ry={8}
+                    fill={crew.color} opacity={isHovered ? 0.4 : 0.1} />
 
-                  {/* Car body */}
-                  <rect x={-11} y={-5} width="22" height="10" rx="4.5" ry="3"
-                    fill={crew.color} />
-                  {/* Highlight */}
-                  <rect x={-7} y={-4} width="14" height="2" rx="1"
-                    fill="#fff" opacity="0.2" />
-                  {/* Cabin */}
-                  <rect x={-2} y={-3.5} width="8" height="7" rx="2"
-                    fill="#00000050" />
-                  {/* Windshield */}
-                  <rect x={4.5} y={-2.8} width="3" height="5.6" rx="1"
-                    fill="rgba(0,200,255,0.4)" />
+                  {/* ===== RACING CAR — top-down, pointing right ===== */}
 
-                  {/* Wheels */}
-                  <rect x={6.5} y={-7} width="4" height="2.5" rx="0.8" fill="#111" stroke="#444" strokeWidth="0.3" />
-                  <rect x={6.5} y={4.5} width="4" height="2.5" rx="0.8" fill="#111" stroke="#444" strokeWidth="0.3" />
-                  <rect x={-9.5} y={-7} width="4" height="2.5" rx="0.8" fill="#111" stroke="#444" strokeWidth="0.3" />
-                  <rect x={-9.5} y={4.5} width="4" height="2.5" rx="0.8" fill="#111" stroke="#444" strokeWidth="0.3" />
+                  {/* Rear wing / spoiler */}
+                  <rect x={-14} y={-7.5} width="1.5" height="15" rx="0.5"
+                    fill="#222" stroke="#555" strokeWidth="0.3" />
+                  <rect x={-15.5} y={-8.5} width="4" height="1.2" rx="0.4" fill="#333" />
+                  <rect x={-15.5} y={7.3} width="4" height="1.2" rx="0.4" fill="#333" />
+
+                  {/* Main body — aerodynamic shape (path) */}
+                  <path d={`
+                    M -12 -5.5
+                    C -12 -6.5, -10 -7, -7 -7
+                    L 2 -6
+                    C 6 -5.5, 10 -4, 13 -2
+                    C 14 -1, 14 1, 13 2
+                    C 10 4, 6 5.5, 2 6
+                    L -7 7
+                    C -10 7, -12 6.5, -12 5.5
+                    Z
+                  `} fill={crew.color} />
+
+                  {/* Body panel lines */}
+                  <path d="M -7 -7 L -7 7" stroke="#00000030" strokeWidth="0.4" />
+                  <path d="M 2 -6 L 2 6" stroke="#00000025" strokeWidth="0.3" />
+
+                  {/* Top highlight / reflection streak */}
+                  <path d={`
+                    M -6 -5.5 L 8 -3.5 C 10 -3, 11 -2, 11 -1.5
+                    L 8 -2 L -6 -4 Z
+                  `} fill="#ffffff" opacity="0.18" />
+
+                  {/* Cockpit / cabin glass */}
+                  <path d={`
+                    M 0 -4.5
+                    C 3 -4, 6 -3, 8 -1.5
+                    C 8.5 0, 8.5 0, 8 1.5
+                    C 6 3, 3 4, 0 4.5
+                    C -1 4.5, -2 4, -2 3
+                    L -2 -3
+                    C -2 -4, -1 -4.5, 0 -4.5 Z
+                  `} fill="#0a1828" opacity="0.7" />
+
+                  {/* Windshield glass — lighter */}
+                  <path d={`
+                    M 3 -3.5 C 5 -3, 7 -2, 8 -1
+                    C 8.3 0, 8.3 0, 8 1
+                    C 7 2, 5 3, 3 3.5
+                    L 2 3 L 2 -3 Z
+                  `} fill="#1a5a8a" opacity="0.5" />
+
+                  {/* Side air intakes */}
+                  <rect x={-5} y={-7.2} width="4" height="1" rx="0.5"
+                    fill="#111" opacity="0.6" />
+                  <rect x={-5} y={6.2} width="4" height="1" rx="0.5"
+                    fill="#111" opacity="0.6" />
+
+                  {/* Front wheels */}
+                  <rect x={5} y={-8.5} width="5" height="2.8" rx="1"
+                    fill="#1a1a1a" stroke="#3a3a3a" strokeWidth="0.4" />
+                  <rect x={5} y={5.7} width="5" height="2.8" rx="1"
+                    fill="#1a1a1a" stroke="#3a3a3a" strokeWidth="0.4" />
+                  {/* Front wheel rims */}
+                  <circle cx={7.5} cy={-7.1} r="0.6" fill="#666" />
+                  <circle cx={7.5} cy={7.1} r="0.6" fill="#666" />
+
+                  {/* Rear wheels (wider) */}
+                  <rect x={-10} y={-9} width="5.5" height="3" rx="1"
+                    fill="#1a1a1a" stroke="#3a3a3a" strokeWidth="0.4" />
+                  <rect x={-10} y={6} width="5.5" height="3" rx="1"
+                    fill="#1a1a1a" stroke="#3a3a3a" strokeWidth="0.4" />
+                  {/* Rear wheel rims */}
+                  <circle cx={-7.2} cy={-7.5} r="0.7" fill="#666" />
+                  <circle cx={-7.2} cy={7.5} r="0.7" fill="#666" />
 
                   {/* Headlights */}
-                  <circle cx={11.5} cy={-2.5} r="1" fill="#fff" opacity="0.9" />
-                  <circle cx={11.5} cy={2.5} r="1" fill="#fff" opacity="0.9" />
+                  <ellipse cx={13.2} cy={-1.5} rx="0.8" ry="1.2" fill="#ffffcc" opacity="0.95" />
+                  <ellipse cx={13.2} cy={1.5} rx="0.8" ry="1.2" fill="#ffffcc" opacity="0.95" />
 
                   {/* Tail lights */}
-                  <circle cx={-11.5} cy={-2.5} r="0.9" fill="#ff2244" opacity="0.9" />
-                  <circle cx={-11.5} cy={2.5} r="0.9" fill="#ff2244" opacity="0.9" />
+                  <rect x={-13} y={-5.5} width="1.5" height="2.5" rx="0.5"
+                    fill="#ff2244" opacity="0.9" />
+                  <rect x={-13} y={3} width="1.5" height="2.5" rx="0.5"
+                    fill="#ff2244" opacity="0.9" />
 
-                  {/* Number */}
-                  <text x={0.5} y={1.8} textAnchor="middle" dominantBaseline="middle"
-                    fill="#fff" fontSize="5.5" fontFamily="Orbitron, sans-serif"
-                    fontWeight="800">
+                  {/* Exhaust pipes */}
+                  <circle cx={-13.5} cy={-1.5} r="0.6" fill="#444" stroke="#222" strokeWidth="0.3" />
+                  <circle cx={-13.5} cy={1.5} r="0.6" fill="#444" stroke="#222" strokeWidth="0.3" />
+
+                  {/* Number on roof */}
+                  <text x={0} y={0.5} textAnchor="middle" dominantBaseline="middle"
+                    fill="#fff" fontSize="5" fontFamily="Orbitron, sans-serif"
+                    fontWeight="800" style={{ filter: 'drop-shadow(0 0 1px rgba(0,0,0,0.8))' }}>
                     {rank}
                   </text>
                 </g>
