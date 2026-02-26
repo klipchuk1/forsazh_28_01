@@ -111,9 +111,8 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
               border: '1px solid rgba(255,255,255,0.06)',
               position: 'relative',
             }}>
-              {/* Background video — forsazh.mp4 */}
               <video
-                src="/forsazh.mp4"
+                src={videoSrc}
                 autoPlay
                 muted
                 loop
@@ -123,23 +122,6 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                   height: '100%',
                   objectFit: 'cover',
                   display: 'block',
-                }}
-              />
-              {/* Overlay crew video on top */}
-              <video
-                src={videoSrc}
-                autoPlay
-                muted
-                loop
-                playsInline
-                style={{
-                  position: 'absolute',
-                  top: 0, left: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  opacity: 0.85,
-                  mixBlendMode: 'screen',
                 }}
               />
               {/* Crew name overlay on video */}
