@@ -14,126 +14,137 @@ function Speedometer({
   color: string;
   index: number;
 }) {
-  const size = 100;
-  const cx = size / 2;
-  const cy = size / 2 + 8;
-  const r = 38;
+  const w = 120;
+  const h = 80;
+  const cx = w / 2;
+  const cy = 65;
+  const r = 45;
 
-  // Arc from -135° to +135° (270° sweep)
-  const startAngle = -225;
-  const endAngle = 45;
-  const sweepAngle = endAngle - startAngle; // 270
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
 
-  // Tick positions for labels
-  const labelAngles = labels.map((_, i) => {
-    const t = i / (labels.length - 1);
-    return startAngle + t * sweepAngle;
-  });
+  // t=0 → 210° (8 o'clock), t=1 → -30° (4 o'clock) — 240° sweep
+  const angleAtFn = (t: number) => 210 - t * 240;
 
-  // Needle angle
-  const needleAngle = startAngle + needlePosition * sweepAngle;
-
-  // Arc path helper
-  const polarToXY = (angleDeg: number, radius: number) => {
-    const rad = (angleDeg * Math.PI) / 180;
-    return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+  const ptAt = (t: number, radius: number) => {
+    const a = toRad(angleAtFn(t));
+    return { x: cx + radius * Math.cos(a), y: cy - radius * Math.sin(a) };
   };
 
-  // Background arc
-  const arcStart = polarToXY(startAngle, r);
-  const arcEnd = polarToXY(endAngle, r);
-  const bgArc = `M ${arcStart.x} ${arcStart.y} A ${r} ${r} 0 1 1 ${arcEnd.x} ${arcEnd.y}`;
+  // Background arc path
+  const arcPts = Array.from({ length: 50 }, (_, i) => ptAt(i / 49, r));
+  const bgPath = `M ${arcPts[0].x} ${arcPts[0].y} ` +
+    arcPts.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
 
-  // Filled arc (up to needle)
-  const fillEnd = polarToXY(needleAngle, r);
-  const largeArc = needlePosition > 0.5 ? 1 : 0;
-  const fillArc = `M ${arcStart.x} ${arcStart.y} A ${r} ${r} 0 ${largeArc} 1 ${fillEnd.x} ${fillEnd.y}`;
+  // Filled arc (up to needle position)
+  const filledPts = arcPts.slice(0, Math.round(needlePosition * 49) + 1);
+  const fillPath = filledPts.length > 1
+    ? `M ${filledPts[0].x} ${filledPts[0].y} ` + filledPts.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')
+    : '';
 
-  // Small tick marks
-  const ticks = Array.from({ length: 21 }, (_, i) => {
-    const t = i / 20;
-    const angle = startAngle + t * sweepAngle;
-    const isMajor = i % 5 === 0;
-    const inner = polarToXY(angle, r - (isMajor ? 7 : 4));
-    const outer = polarToXY(angle, r);
-    return { inner, outer, isMajor };
+  // Tick marks
+  const ticks = Array.from({ length: 13 }, (_, i) => {
+    const t = i / 12;
+    const isMajor = i % 3 === 0;
+    const outer = ptAt(t, r);
+    const inner = ptAt(t, r - (isMajor ? 8 : 5));
+    return { outer, inner, isMajor, t };
   });
 
-  // Needle tip
-  const needleTip = polarToXY(needleAngle, r - 10);
-  const needleBase1 = polarToXY(needleAngle + 90, 3);
-  const needleBase2 = polarToXY(needleAngle - 90, 3);
+  // Label positions
+  const labelPositions = labels.map((_, i) => {
+    const t = i / (labels.length - 1);
+    return ptAt(t, r + 13);
+  });
+
+  // Needle
+  const needleTip = ptAt(needlePosition, r - 12);
+  const perpAngle = toRad(angleAtFn(needlePosition) + 90);
+  const needleBase1 = { x: cx + 3 * Math.cos(perpAngle), y: cy - 3 * Math.sin(perpAngle) };
+  const needleBase2 = { x: cx - 3 * Math.cos(perpAngle), y: cy + 3 * Math.sin(perpAngle) };
 
   return (
-    <svg width={size} height={size - 10} viewBox={`0 0 ${size} ${size - 10}`}>
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} overflow="visible">
       <defs>
-        <linearGradient id={`gauge-grad-${index}`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={color} stopOpacity="1" />
+        <linearGradient id={`gg-${index}`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.9" />
         </linearGradient>
-        <filter id={`needle-glow-${index}`}>
-          <feGaussianBlur stdDeviation="2" result="b" />
-          <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
       </defs>
 
       {/* Background arc */}
-      <path d={bgArc} fill="none" stroke="#ffffff08" strokeWidth="6" strokeLinecap="round" />
+      <path d={bgPath} fill="none" stroke="#ffffff10" strokeWidth="5" strokeLinecap="round" />
 
-      {/* Filled arc */}
-      <motion.path
-        d={fillArc}
-        fill="none"
-        stroke={`url(#gauge-grad-${index})`}
-        strokeWidth="6"
-        strokeLinecap="round"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.5, delay: 0.5 + index * 0.15, ease: 'easeOut' }}
-      />
+      {/* Colored filled arc */}
+      {fillPath && (
+        <motion.path
+          d={fillPath}
+          fill="none"
+          stroke={`url(#gg-${index})`}
+          strokeWidth="5"
+          strokeLinecap="round"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 1.5, delay: 0.5 + index * 0.2, ease: 'easeOut' }}
+        />
+      )}
 
       {/* Tick marks */}
       {ticks.map((tick, i) => (
         <line key={i}
           x1={tick.inner.x} y1={tick.inner.y}
           x2={tick.outer.x} y2={tick.outer.y}
-          stroke={tick.isMajor ? '#ffffff40' : '#ffffff15'}
-          strokeWidth={tick.isMajor ? 1.5 : 0.8}
+          stroke={tick.isMajor ? '#ffffff50' : '#ffffff18'}
+          strokeWidth={tick.isMajor ? 1.5 : 0.7}
           strokeLinecap="round"
         />
       ))}
 
-      {/* Labels around arc */}
-      {labels.map((label, i) => {
-        const angle = labelAngles[i];
-        const pos = polarToXY(angle, r + 12);
-        return (
-          <text key={i} x={pos.x} y={pos.y}
-            textAnchor="middle" dominantBaseline="middle"
-            fill="#ffffff80" fontSize="7" fontFamily="Rajdhani, sans-serif" fontWeight="600">
-            {label}
-          </text>
-        );
-      })}
+      {/* Labels */}
+      {labels.map((label, i) => (
+        <text key={i}
+          x={labelPositions[i].x}
+          y={labelPositions[i].y}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fill="#ffffffaa"
+          fontSize="8"
+          fontFamily="Rajdhani, sans-serif"
+          fontWeight="700"
+        >
+          {label}
+        </text>
+      ))}
 
-      {/* Needle */}
-      <motion.g
-        filter={`url(#needle-glow-${index})`}
-        initial={{ rotate: startAngle, originX: `${cx}px`, originY: `${cy}px` }}
-        animate={{ rotate: needleAngle }}
-        transition={{ duration: 1.2, delay: 0.8 + index * 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
-        style={{ transformOrigin: `${cx}px ${cy}px` }}
-      >
-        <polygon
-          points={`${needleTip.x},${needleTip.y} ${needleBase1.x},${needleBase1.y} ${needleBase2.x},${needleBase2.y}`}
-          fill={color}
-          opacity="0.9"
-        />
-      </motion.g>
+      {/* Needle — animated */}
+      <motion.polygon
+        points={`${needleTip.x},${needleTip.y} ${needleBase1.x},${needleBase1.y} ${needleBase2.x},${needleBase2.y}`}
+        fill={color}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.9 }}
+        transition={{ duration: 0.8, delay: 1 + index * 0.2 }}
+      />
+
+      {/* Needle glow */}
+      <motion.line
+        x1={cx} y1={cy}
+        x2={needleTip.x} y2={needleTip.y}
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.6 }}
+        transition={{ duration: 0.8, delay: 1 + index * 0.2 }}
+      />
 
       {/* Center cap */}
-      <circle cx={cx} cy={cy} r="4" fill="#1a1a2e" stroke={color} strokeWidth="1.5" />
-      <circle cx={cx} cy={cy} r="1.5" fill={color} />
+      <circle cx={cx} cy={cy} r="4.5" fill="#1a1a2e" stroke="#ffffff20" strokeWidth="1" />
+      <motion.circle
+        cx={cx} cy={cy} r="2.5"
+        fill={color}
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.4, delay: 1.2 + index * 0.2 }}
+      />
     </svg>
   );
 }
@@ -166,7 +177,7 @@ function StatCard({
       style={{
         '--stat-color': color,
         position: 'relative',
-        overflow: 'hidden',
+        overflow: 'visible',
       } as React.CSSProperties}
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -178,7 +189,7 @@ function StatCard({
         transition: { duration: 0.25 },
       }}
     >
-      {/* Animated gradient border — top line */}
+      {/* Animated top border */}
       <motion.div
         style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
@@ -198,9 +209,9 @@ function StatCard({
         pointerEvents: 'none',
       }} />
 
-      {/* Content layout: left info + right speedometer */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {/* Left side — icon, value, label */}
+      {/* Layout: left info + right speedometer */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        {/* Left */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="stat-card-icon" style={{
             background: `${color}18`,
@@ -239,7 +250,7 @@ function StatCard({
           </motion.div>
         </div>
 
-        {/* Right side — Speedometer */}
+        {/* Right — Speedometer */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
