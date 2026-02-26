@@ -31,6 +31,7 @@ type Crew = {
   };
   color: string;
   glowColor: string;
+  videoUrl?: string;
   metrics: {
     connectedPoints: KPIMetric;
     salesVolume: KPIMetric;
@@ -73,6 +74,7 @@ type CrewRow = {
   checkpoint1: boolean;
   checkpoint2: boolean;
   sort_order: number;
+  video_url?: string;
 };
 
 type MetricRow = {
