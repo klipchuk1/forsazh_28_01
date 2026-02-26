@@ -13,7 +13,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
     .sort((a, b) => b.metrics.connectedPoints.fact / b.metrics.connectedPoints.target - a.metrics.connectedPoints.fact / a.metrics.connectedPoints.target)
     .findIndex((c) => c.id === crew.id) + 1;
 
-  const videoSrc = crew.videoUrl || '/forsazh.mp4';
+  const videoSrc = crew.videoUrl || '/crew-sample.mp4';
 
   const metrics = [
     { label: 'Подключённые точки', fact: crew.metrics.connectedPoints.fact, target: crew.metrics.connectedPoints.target, color: '#ff3366', icon: '📍' },
