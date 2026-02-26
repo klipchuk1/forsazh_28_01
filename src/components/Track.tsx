@@ -189,122 +189,29 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 onMouseEnter={() => setHoveredCrew(crew.id)}
                 onMouseLeave={() => setHoveredCrew(null)}
               >
-                <rect x={x - 22} y={y - 16} width="44" height="32" fill="transparent" />
+                {/* Hit area */}
+                <rect x={x - 28} y={y - 18} width="56" height="36" fill="transparent" />
 
-                <g transform={`translate(${x}, ${y}) scale(1.8)`}>
-                  {/* Underglow */}
-                  <ellipse cx={0} cy={0} rx={14} ry={8}
-                    fill={crew.color} opacity={isHovered ? 0.35 : 0.08} />
+                {/* Car PNG sprite */}
+                <g transform={`translate(${x}, ${y})`}>
+                  {/* Underglow in crew color */}
+                  <ellipse cx={0} cy={0} rx={22} ry={12}
+                    fill={crew.color} opacity={isHovered ? 0.35 : 0.1} />
 
-                  {/* ===== SPORTS CAR — top-down, pointing right ===== */}
+                  {/* Car image — 400x300 sprite scaled down, centered */}
+                  <image
+                    href={`/cars/car-${((crew.id - 1) % 12) + 1}.png`}
+                    x={-26} y={-16}
+                    width="52" height="32"
+                    preserveAspectRatio="xMidYMid meet"
+                    style={{ filter: isHovered ? 'brightness(1.2) drop-shadow(0 0 6px ' + crew.color + ')' : undefined }}
+                  />
 
-                  {/* Shadow under car */}
-                  <ellipse cx={0} cy={0.5} rx={13} ry={7}
-                    fill="#000" opacity="0.2" />
-
-                  {/* Rear wheels (wider, behind body) */}
-                  <rect x={-9} y={-9.2} width="5" height="3.2" rx="1.2"
-                    fill="#1a1a1a" stroke="#333" strokeWidth="0.5" />
-                  <rect x={-9} y={6} width="5" height="3.2" rx="1.2"
-                    fill="#1a1a1a" stroke="#333" strokeWidth="0.5" />
-
-                  {/* Front wheels */}
-                  <rect x={6} y={-8.5} width="4.5" height="2.8" rx="1"
-                    fill="#1a1a1a" stroke="#333" strokeWidth="0.5" />
-                  <rect x={6} y={5.7} width="4.5" height="2.8" rx="1"
-                    fill="#1a1a1a" stroke="#333" strokeWidth="0.5" />
-
-                  {/* Main body — rounded sports car */}
-                  <path d={`
-                    M -11 0
-                    C -11 -5, -9 -7, -5 -7.5
-                    L 4 -6.5
-                    C 8 -5.5, 11 -4, 13 -1.5
-                    C 13.5 0, 13.5 0, 13 1.5
-                    C 11 4, 8 5.5, 4 6.5
-                    L -5 7.5
-                    C -9 7, -11 5, -11 0
-                    Z
-                  `} fill={crew.color} />
-
-                  {/* Racing stripes (two parallel lines) */}
-                  <path d={`M -10 -1.8 L 12 -1.8`}
-                    stroke="#ffffff" strokeWidth="1.2" opacity="0.35" />
-                  <path d={`M -10 1.8 L 12 1.8`}
-                    stroke="#ffffff" strokeWidth="1.2" opacity="0.35" />
-
-                  {/* Hood (front section) — slightly darker */}
-                  <path d={`
-                    M 4 -5.5 C 7 -4.5, 10 -3, 12 -1
-                    C 12.5 0, 12.5 0, 12 1
-                    C 10 3, 7 4.5, 4 5.5
-                    L 4 -5.5 Z
-                  `} fill="#00000015" />
-
-                  {/* Hood scoop / air intake */}
-                  <rect x={7} y={-1.5} width="3" height="3" rx="1"
-                    fill="#00000030" />
-                  <rect x={7.5} y={-0.8} width="2" height="1.6" rx="0.5"
-                    fill="#00000020" />
-
-                  {/* Windshield — large, tinted */}
-                  <path d={`
-                    M 1 -5 C 3 -4.5, 4 -4, 4 -3.5
-                    L 4 3.5 C 4 4, 3 4.5, 1 5
-                    C 0 5, -1 4.5, -1 3.5
-                    L -1 -3.5
-                    C -1 -4.5, 0 -5, 1 -5 Z
-                  `} fill="#1a4a6a" opacity="0.65" />
-
-                  {/* Windshield reflection */}
-                  <path d={`
-                    M 1 -4.5 C 2.5 -4, 3.5 -3.5, 3.5 -3
-                    L 3.5 -1 L -0.5 -1 L -0.5 -3.5
-                    C -0.5 -4, 0 -4.5, 1 -4.5 Z
-                  `} fill="#fff" opacity="0.12" />
-
-                  {/* Rear window */}
-                  <path d={`
-                    M -6 -4.5 C -5 -5, -4 -5, -3 -4.5
-                    L -3 4.5 C -4 5, -5 5, -6 4.5
-                    L -6 -4.5 Z
-                  `} fill="#0a1828" opacity="0.5" />
-
-                  {/* Body highlight — top shine */}
-                  <path d={`
-                    M -8 -6 C -4 -7, 2 -6.5, 8 -4.5
-                    C 10 -3.5, 11 -2.5, 11 -2
-                    L 8 -3 C 4 -5, -2 -5.5, -8 -4.5 Z
-                  `} fill="#fff" opacity="0.15" />
-
-                  {/* Side mirrors */}
-                  <ellipse cx={3} cy={-7.8} rx="1.2" ry="0.8"
-                    fill={crew.color} stroke="#00000030" strokeWidth="0.3" />
-                  <ellipse cx={3} cy={7.8} rx="1.2" ry="0.8"
-                    fill={crew.color} stroke="#00000030" strokeWidth="0.3" />
-
-                  {/* Headlights */}
-                  <path d={`M 12 -2.5 C 13 -2, 13 -1, 12.5 -0.5 L 11.5 -1 Z`}
-                    fill="#ffffdd" opacity="0.9" />
-                  <path d={`M 12 2.5 C 13 2, 13 1, 12.5 0.5 L 11.5 1 Z`}
-                    fill="#ffffdd" opacity="0.9" />
-
-                  {/* Tail lights */}
-                  <path d={`M -10.5 -3 C -11 -2, -11 -1, -10.5 -0.5 L -9.5 -1 Z`}
-                    fill="#ff2244" opacity="0.9" />
-                  <path d={`M -10.5 3 C -11 2, -11 1, -10.5 0.5 L -9.5 1 Z`}
-                    fill="#ff2244" opacity="0.9" />
-
-                  {/* Wheel rim details */}
-                  <circle cx={-6.5} cy={-7.6} r="0.8" fill="#555" />
-                  <circle cx={-6.5} cy={7.6} r="0.8" fill="#555" />
-                  <circle cx={8.2} cy={-7.1} r="0.7" fill="#555" />
-                  <circle cx={8.2} cy={7.1} r="0.7" fill="#555" />
-
-                  {/* Number on roof */}
-                  <text x={-1} y={0.5} textAnchor="middle" dominantBaseline="middle"
-                    fill="#fff" fontSize="5" fontFamily="Orbitron, sans-serif"
-                    fontWeight="800" style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.9))' }}>
+                  {/* Number badge */}
+                  <circle cx={-16} cy={-10} r="6" fill={crew.color} stroke="#fff" strokeWidth="0.8" />
+                  <text x={-16} y={-9.5} textAnchor="middle" dominantBaseline="middle"
+                    fill="#fff" fontSize="6" fontFamily="Orbitron, sans-serif"
+                    fontWeight="800">
                     {rank}
                   </text>
                 </g>
