@@ -123,6 +123,7 @@ export function generateMockData(): Crew[] {
       },
       color: colors[index].color,
       glowColor: colors[index].glow,
+      awards: [],
       metrics: {
         connectedPoints: { target: connectedTarget, fact: connectedFact },
         salesVolume: { target: salesTarget, fact: salesFact },

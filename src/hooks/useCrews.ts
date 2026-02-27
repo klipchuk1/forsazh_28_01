@@ -11,7 +11,9 @@ export function useCrews() {
     try {
       const { data, error: err } = await supabase.rpc('get_crews_full');
       if (err) throw err;
-      setCrews(data ?? []);
+      // Ensure awards array exists on every crew (in case RPC doesn't return it yet)
+      const crewsData = (data ?? []).map((c: Crew) => ({ ...c, awards: c.awards ?? [] }));
+      setCrews(crewsData);
       setError(null);
     } catch {
       // Fallback to mock data if Supabase is not configured or unreachable
@@ -32,6 +34,7 @@ export function useCrews() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'crew_metrics' }, () => fetchCrews())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'crew_segment_scores' }, () => fetchCrews())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'weekly_history' }, () => fetchCrews())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'crew_awards' }, () => fetchCrews())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };

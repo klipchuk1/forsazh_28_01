@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Crew } from '../data/types';
 import VoteButton from './VoteButton';
+import AwardBadge from './AwardBadge';
 
 interface TeamDetailProps {
   crew: Crew;
@@ -89,6 +90,21 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
           </div>
           <VoteButton crewId={crew.id} color={crew.color} />
         </div>
+
+        {/* Awards section */}
+        {crew.awards && crew.awards.length > 0 && (
+          <div style={{
+            padding: '14px 24px',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            display: 'flex', alignItems: 'center', gap: '8px',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+          }}>
+            {crew.awards.map((award, i) => (
+              <AwardBadge key={award.label + award.month} award={award} index={i} />
+            ))}
+          </div>
+        )}
 
         {/* Main content: video + metrics */}
         <div style={{

@@ -1,4 +1,11 @@
 // Types for Forsazh project
+type Award = {
+  label: string;
+  category: string;
+  place: number;
+  month: string;
+};
+
 type KPIMetric = {
   target: number;
   fact: number;
@@ -32,6 +39,7 @@ type Crew = {
   color: string;
   glowColor: string;
   videoUrl?: string;
+  awards: Award[];
   metrics: {
     connectedPoints: KPIMetric;
     salesVolume: KPIMetric;
@@ -85,4 +93,4 @@ type MetricRow = {
   fact: number;
 };
 
-export type { Crew, KPIMetric, WeeklyData, AppState, SegmentScores, SegmentKey, Segment, CrewRow, MetricRow };
+export type { Award, Crew, KPIMetric, WeeklyData, AppState, SegmentScores, SegmentKey, Segment, CrewRow, MetricRow };

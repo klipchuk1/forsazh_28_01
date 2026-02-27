@@ -233,6 +233,105 @@ INSERT INTO segments (key, label, start_date, end_date, weight) VALUES
 -- - weekly_history
 
 
+-- 7. CREW AWARDS TABLE
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS crew_awards (
+  id          SERIAL PRIMARY KEY,
+  crew_id     INTEGER NOT NULL REFERENCES crews(id) ON DELETE CASCADE,
+  award_label TEXT NOT NULL,
+  category    TEXT NOT NULL,
+  place       INTEGER NOT NULL DEFAULT 0,
+  month       TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(crew_id, award_label, month)
+);
+
+ALTER TABLE crew_awards ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can read crew_awards" ON crew_awards
+  FOR SELECT USING (true);
+
+CREATE POLICY "Admin can manage crew_awards" ON crew_awards
+  FOR ALL USING (auth.role() = 'authenticated');
+
+
+-- 8. UPDATED RPC: get_crews_full (with awards)
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION get_crews_full()
+RETURNS JSON AS $$
+  SELECT COALESCE(json_agg(row_to_json(t)), '[]'::json)
+  FROM (
+    SELECT
+      c.id,
+      c.team_name AS "teamName",
+      json_build_object('name', c.driver_name, 'avatar', c.driver_avatar) AS driver,
+      json_build_object('name', c.navigator_name, 'avatar', c.navigator_avatar) AS navigator,
+      c.color,
+      c.glow_color AS "glowColor",
+      c.checkpoint1,
+      c.checkpoint2,
+      json_build_object(
+        'connectedPoints', json_build_object(
+          'target', COALESCE((SELECT target FROM crew_metrics WHERE crew_id = c.id AND metric = 'connected_points'), 0),
+          'fact', COALESCE((SELECT fact FROM crew_metrics WHERE crew_id = c.id AND metric = 'connected_points'), 0)
+        ),
+        'salesVolume', json_build_object(
+          'target', COALESCE((SELECT target FROM crew_metrics WHERE crew_id = c.id AND metric = 'sales_volume'), 0),
+          'fact', COALESCE((SELECT fact FROM crew_metrics WHERE crew_id = c.id AND metric = 'sales_volume'), 0)
+        ),
+        'skuCount', json_build_object(
+          'target', COALESCE((SELECT target FROM crew_metrics WHERE crew_id = c.id AND metric = 'sku_count'), 0),
+          'fact', COALESCE((SELECT fact FROM crew_metrics WHERE crew_id = c.id AND metric = 'sku_count'), 0)
+        )
+      ) AS metrics,
+      (
+        SELECT COALESCE(json_agg(
+          json_build_object(
+            'week', wh.week,
+            'connectedPoints', wh.connected_points,
+            'salesVolume', wh.sales_volume,
+            'skuCount', wh.sku_count
+          ) ORDER BY wh.week
+        ), '[]'::json)
+        FROM weekly_history wh WHERE wh.crew_id = c.id
+      ) AS "weeklyHistory",
+      json_build_object(
+        'warmup', json_build_object(
+          'target', COALESCE((SELECT target FROM crew_segment_scores WHERE crew_id = c.id AND segment_key = 'warmup'), 0),
+          'fact', COALESCE((SELECT fact FROM crew_segment_scores WHERE crew_id = c.id AND segment_key = 'warmup'), 0)
+        ),
+        'lap1', json_build_object(
+          'target', COALESCE((SELECT target FROM crew_segment_scores WHERE crew_id = c.id AND segment_key = 'lap1'), 0),
+          'fact', COALESCE((SELECT fact FROM crew_segment_scores WHERE crew_id = c.id AND segment_key = 'lap1'), 0)
+        ),
+        'lap2', json_build_object(
+          'target', COALESCE((SELECT target FROM crew_segment_scores WHERE crew_id = c.id AND segment_key = 'lap2'), 0),
+          'fact', COALESCE((SELECT fact FROM crew_segment_scores WHERE crew_id = c.id AND segment_key = 'lap2'), 0)
+        ),
+        'lap3', json_build_object(
+          'target', COALESCE((SELECT target FROM crew_segment_scores WHERE crew_id = c.id AND segment_key = 'lap3'), 0),
+          'fact', COALESCE((SELECT fact FROM crew_segment_scores WHERE crew_id = c.id AND segment_key = 'lap3'), 0)
+        )
+      ) AS "segmentScores",
+      (
+        SELECT COALESCE(json_agg(
+          json_build_object(
+            'label', ca.award_label,
+            'category', ca.category,
+            'place', ca.place,
+            'month', ca.month
+          )
+        ), '[]'::json)
+        FROM crew_awards ca WHERE ca.crew_id = c.id
+      ) AS awards
+    FROM crews c
+    ORDER BY c.sort_order, c.id
+  ) t;
+$$ LANGUAGE sql STABLE;
+
+
 -- ============================================================
 -- DONE! Now create an admin user:
 -- Go to Supabase Dashboard -> Authentication -> Users -> Add User
