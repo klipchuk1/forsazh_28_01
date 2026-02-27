@@ -98,7 +98,7 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 1.2, type: 'spring', stiffness: 200 }}
         >
           <span className="pulse-dot"></span>
-          На старт
+          Гонка началась
         </motion.div>
       </motion.div>
 
