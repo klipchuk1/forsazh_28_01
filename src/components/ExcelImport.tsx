@@ -10,8 +10,16 @@ export interface ParsedAward {
   month: string;
 }
 
+export interface ParsedCrew {
+  teamName: string;
+  driverName: string;
+  navigatorName: string;
+  score: number;
+}
+
 export interface ImportResult {
   crews: Crew[];
+  parsedCrews: ParsedCrew[];
   awards: ParsedAward[];
 }
 
@@ -61,8 +69,22 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
       const crewsSheet = workbook.Sheets[crewsSheetName];
       const crewRows: string[][] = XLSX.utils.sheet_to_json(crewsSheet, { header: 1 });
 
+      // --- Parse raw crew data from Excel (independent of existingCrews) ---
+      const parsedCrews: ParsedCrew[] = [];
+      for (let i = 1; i < crewRows.length; i++) {
+        const row = crewRows[i];
+        const teamName = row[0] ? String(row[0]).trim() : '';
+        if (!teamName) continue;
+        parsedCrews.push({
+          teamName,
+          driverName: row[1] ? String(row[1]).trim() : '',
+          navigatorName: row[2] ? String(row[2]).trim() : '',
+          score: row[3] !== undefined && row[3] !== '' ? Number(row[3]) : 0,
+        });
+      }
+
+      // Also update existingCrews if they exist (backward compat)
       const updatedCrews = existingCrews.map((crew) => {
-        // Match by crew name (e.g. "Экипаж 1" matches crew with id 1)
         const dataRow = crewRows.find((row) => {
           if (!row[0]) return false;
           const rowName = String(row[0]).trim().toLowerCase();
@@ -131,7 +153,7 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
         }
       }
 
-      onImport({ crews: updatedCrews, awards });
+      onImport({ crews: updatedCrews, parsedCrews, awards });
     };
     reader.readAsArrayBuffer(file);
 
