@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import '../styles.css';
 import type { Crew } from '../data/types';
-import { mockCrews } from '../data/mockData';
+import { useCrews } from '../hooks/useCrews';
 import StatsBar from '../components/StatsBar';
 import Track from '../components/Track';
 import Leaderboard from '../components/Leaderboard';
@@ -43,7 +43,7 @@ class ErrorBoundary extends React.Component<
 }
 
 export default function Dashboard() {
-  const [crews] = useState<Crew[]>(mockCrews);
+  const { crews, loading } = useCrews();
   const [selectedCrew, setSelectedCrew] = useState<Crew | null>(null);
 
   const handleCrewClick = (crew: Crew) => {
@@ -51,6 +51,16 @@ export default function Dashboard() {
   };
 
   if (SHOW_LANDING) return <LandingPage />;
+
+  if (loading) {
+    return (
+      <div className="app-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ color: 'var(--text-secondary)', fontFamily: "'Rajdhani', sans-serif", fontSize: '18px' }}>
+          Загрузка данных...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
