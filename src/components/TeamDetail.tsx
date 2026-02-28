@@ -91,21 +91,6 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
           <VoteButton crewId={crew.id} color={crew.color} />
         </div>
 
-        {/* Awards section */}
-        {crew.awards && crew.awards.length > 0 && (
-          <div style={{
-            padding: '14px 24px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            display: 'flex', alignItems: 'center', gap: '8px',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-          }}>
-            {crew.awards.map((award, i) => (
-              <AwardBadge key={award.label + award.month} award={award} index={i} />
-            ))}
-          </div>
-        )}
-
         {/* Main content: video + metrics */}
         <div style={{
           display: 'grid',
@@ -265,6 +250,38 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
             })}
           </div>
         </div>
+
+        {/* Awards section — bottom */}
+        {crew.awards && crew.awards.length > 0 && (
+          <div style={{
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            padding: '16px 24px 20px',
+          }}>
+            <div style={{
+              fontFamily: "'Orbitron', sans-serif",
+              fontSize: '11px',
+              fontWeight: 700,
+              color: 'var(--text-secondary)',
+              textTransform: 'uppercase',
+              letterSpacing: '2px',
+              marginBottom: '14px',
+              textAlign: 'center',
+            }}>
+              Награды
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}>
+              {crew.awards.map((award, i) => (
+                <AwardBadge key={award.label + award.month} award={award} index={i} />
+              ))}
+            </div>
+          </div>
+        )}
       </motion.div>
     </motion.div>
     </AnimatePresence>
