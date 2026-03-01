@@ -9,6 +9,7 @@ interface TeamCardsProps {
 }
 
 function getBarStatus(fact: number, target: number): 'on-track' | 'behind' | 'ahead' {
+  if (target <= 0) return 'behind';
   const ratio = fact / target;
   if (ratio >= 1) return 'ahead';
   if (ratio >= 0.7) return 'on-track';
@@ -16,11 +17,7 @@ function getBarStatus(fact: number, target: number): 'on-track' | 'behind' | 'ah
 }
 
 function getRank(crews: Crew[], crewId: number): number {
-  const sorted = [...crews].sort((a, b) => {
-    const scoreA = (a.metrics.connectedPoints.fact / a.metrics.connectedPoints.target);
-    const scoreB = (b.metrics.connectedPoints.fact / b.metrics.connectedPoints.target);
-    return scoreB - scoreA;
-  });
+  const sorted = [...crews].sort((a, b) => b.totalScore - a.totalScore);
   return sorted.findIndex((c) => c.id === crewId) + 1;
 }
 
@@ -36,9 +33,14 @@ export default function TeamCards({ crews, onCrewClick }: TeamCardsProps) {
       <div className="team-cards-grid">
         {crews.map((crew, index) => {
           const rank = getRank(crews, crew.id);
-          const pct = Math.round((crew.metrics.connectedPoints.fact / crew.metrics.connectedPoints.target) * 100);
-          const salesPct = Math.round((crew.metrics.salesVolume.fact / crew.metrics.salesVolume.target) * 100);
-          const skuPct = Math.round((crew.metrics.skuCount.fact / crew.metrics.skuCount.target) * 100);
+          const distPct = crew.metrics.distribution.target > 0
+            ? Math.round((crew.metrics.distribution.fact / crew.metrics.distribution.target) * 100) : 0;
+          const contractsPct = crew.metrics.contracts.target > 0
+            ? Math.round((crew.metrics.contracts.fact / crew.metrics.contracts.target) * 100) : 0;
+          const ligaPct = crew.metrics.ligaPro.target > 0
+            ? Math.round((crew.metrics.ligaPro.fact / crew.metrics.ligaPro.target) * 100) : 0;
+          const contactsPct = crew.metrics.contacts.target > 0
+            ? Math.round((crew.metrics.contacts.fact / crew.metrics.contacts.target) * 100) : 0;
 
           return (
             <motion.div
@@ -76,34 +78,53 @@ export default function TeamCards({ crews, onCrewClick }: TeamCardsProps) {
                 </div>
               </div>
 
+              {/* Score badge */}
+              <div style={{
+                textAlign: 'center', padding: '6px', margin: '0 0 6px',
+                fontFamily: 'Orbitron, sans-serif', fontSize: '16px', fontWeight: '700',
+                color: crew.color,
+              }}>
+                {crew.totalScore} <span style={{ fontSize: '11px', opacity: 0.6 }}>/ {crew.finishTarget}</span>
+              </div>
+
               <div className="team-card-metrics">
                 <div className="metric-mini">
-                  <div className="metric-mini-value">{crew.metrics.connectedPoints.fact}</div>
-                  <div className="metric-mini-label">Точки</div>
+                  <div className="metric-mini-value">{crew.metrics.distribution.fact}</div>
+                  <div className="metric-mini-label">Дистриб.</div>
                   <div className="metric-mini-bar">
                     <div
-                      className={`metric-mini-bar-fill ${getBarStatus(crew.metrics.connectedPoints.fact, crew.metrics.connectedPoints.target)}`}
-                      style={{ width: `${Math.min(pct, 100)}%` }}
+                      className={`metric-mini-bar-fill ${getBarStatus(crew.metrics.distribution.fact, crew.metrics.distribution.target)}`}
+                      style={{ width: `${Math.min(distPct, 100)}%` }}
                     />
                   </div>
                 </div>
                 <div className="metric-mini">
-                  <div className="metric-mini-value">{(crew.metrics.salesVolume.fact / 1000).toFixed(1)}k</div>
-                  <div className="metric-mini-label">Продажи</div>
+                  <div className="metric-mini-value">{crew.metrics.contracts.fact}</div>
+                  <div className="metric-mini-label">Контракты</div>
                   <div className="metric-mini-bar">
                     <div
-                      className={`metric-mini-bar-fill ${getBarStatus(crew.metrics.salesVolume.fact, crew.metrics.salesVolume.target)}`}
-                      style={{ width: `${Math.min(salesPct, 100)}%` }}
+                      className={`metric-mini-bar-fill ${getBarStatus(crew.metrics.contracts.fact, crew.metrics.contracts.target)}`}
+                      style={{ width: `${Math.min(contractsPct, 100)}%` }}
                     />
                   </div>
                 </div>
                 <div className="metric-mini">
-                  <div className="metric-mini-value">{crew.metrics.skuCount.fact}</div>
-                  <div className="metric-mini-label">СКЮ</div>
+                  <div className="metric-mini-value">{crew.metrics.ligaPro.fact}</div>
+                  <div className="metric-mini-label">ЛигаПро</div>
                   <div className="metric-mini-bar">
                     <div
-                      className={`metric-mini-bar-fill ${getBarStatus(crew.metrics.skuCount.fact, crew.metrics.skuCount.target)}`}
-                      style={{ width: `${Math.min(skuPct, 100)}%` }}
+                      className={`metric-mini-bar-fill ${getBarStatus(crew.metrics.ligaPro.fact, crew.metrics.ligaPro.target)}`}
+                      style={{ width: `${Math.min(ligaPct, 100)}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="metric-mini">
+                  <div className="metric-mini-value">{crew.metrics.contacts.fact}</div>
+                  <div className="metric-mini-label">Контакты</div>
+                  <div className="metric-mini-bar">
+                    <div
+                      className={`metric-mini-bar-fill ${getBarStatus(crew.metrics.contacts.fact, crew.metrics.contacts.target)}`}
+                      style={{ width: `${Math.min(contactsPct, 100)}%` }}
                     />
                   </div>
                 </div>

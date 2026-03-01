@@ -71,11 +71,13 @@ export default function CrewsPage() {
                 <th>#</th>
                 <th>Цвет</th>
                 <th>Команда</th>
-                <th>Водитель</th>
-                <th>Штурман</th>
-                <th>Точки</th>
-                <th>Продажи</th>
-                <th>SKU</th>
+                <th>Пилот ITMS</th>
+                <th>Пилот SNS</th>
+                <th>Очки</th>
+                <th>Дистриб.</th>
+                <th>Контракты</th>
+                <th>ЛигаПро</th>
+                <th>Контакты</th>
                 <th></th>
               </tr>
             </thead>
@@ -97,14 +99,20 @@ export default function CrewsPage() {
                   <td style={{ fontWeight: 600, color: crew.color }}>{crew.teamName}</td>
                   <td>{crew.driver.name}</td>
                   <td>{crew.navigator.name}</td>
-                  <td style={{ fontFamily: "'Orbitron', sans-serif", fontSize: '12px' }}>
-                    {crew.metrics.connectedPoints.fact}/{crew.metrics.connectedPoints.target}
+                  <td style={{ fontFamily: "'Orbitron', sans-serif", fontSize: '12px', fontWeight: 700 }}>
+                    {crew.totalScore}
                   </td>
                   <td style={{ fontFamily: "'Orbitron', sans-serif", fontSize: '12px' }}>
-                    {crew.metrics.salesVolume.fact}/{crew.metrics.salesVolume.target}
+                    {crew.metrics.distribution.fact}/{crew.metrics.distribution.target}
                   </td>
                   <td style={{ fontFamily: "'Orbitron', sans-serif", fontSize: '12px' }}>
-                    {crew.metrics.skuCount.fact}/{crew.metrics.skuCount.target}
+                    {crew.metrics.contracts.fact}/{crew.metrics.contracts.target}
+                  </td>
+                  <td style={{ fontFamily: "'Orbitron', sans-serif", fontSize: '12px' }}>
+                    {crew.metrics.ligaPro.fact}/{crew.metrics.ligaPro.target}
+                  </td>
+                  <td style={{ fontFamily: "'Orbitron', sans-serif", fontSize: '12px' }}>
+                    {crew.metrics.contacts.fact}/{crew.metrics.contacts.target}
                   </td>
                   <td>
                     <div className="admin-table-actions">
@@ -128,7 +136,6 @@ export default function CrewsPage() {
         </div>
       )}
 
-      {/* Create/Edit modal */}
       {showForm && (
         <CrewForm
           crew={editCrew}
@@ -137,7 +144,6 @@ export default function CrewsPage() {
         />
       )}
 
-      {/* Delete confirmation */}
       {deleteTarget && (
         <div className="admin-modal-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '420px' }}>

@@ -11,15 +11,20 @@ interface TeamDetailProps {
 
 export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
   const rank = [...crews]
-    .sort((a, b) => b.metrics.connectedPoints.fact / b.metrics.connectedPoints.target - a.metrics.connectedPoints.fact / a.metrics.connectedPoints.target)
+    .sort((a, b) => b.totalScore - a.totalScore)
     .findIndex((c) => c.id === crew.id) + 1;
 
   const videoSrc = crew.videoUrl || '/crew-sample.mp4';
 
+  const overallPct = crew.finishTarget > 0
+    ? Math.round((crew.totalScore / crew.finishTarget) * 100)
+    : 0;
+
   const metrics = [
-    { label: 'Подключённые точки', fact: crew.metrics.connectedPoints.fact, target: crew.metrics.connectedPoints.target, color: '#ff3366', icon: '📍' },
-    { label: 'Объём продаж', fact: crew.metrics.salesVolume.fact, target: crew.metrics.salesVolume.target, color: '#00d4ff', icon: '💰' },
-    { label: 'Количество СКЮ', fact: crew.metrics.skuCount.fact, target: crew.metrics.skuCount.target, color: '#a855f7', icon: '📦' },
+    { label: 'Дистрибуция', fact: crew.metrics.distribution.fact, target: crew.metrics.distribution.target, color: '#ff3366', icon: '📊' },
+    { label: 'Контракты', fact: crew.metrics.contracts.fact, target: crew.metrics.contracts.target, color: '#00d4ff', icon: '📝' },
+    { label: 'Лига Про', fact: crew.metrics.ligaPro.fact, target: crew.metrics.ligaPro.target, color: '#a855f7', icon: '🏆' },
+    { label: 'Контакты', fact: crew.metrics.contacts.fact, target: crew.metrics.contacts.target, color: '#00ff88', icon: '📞' },
   ];
 
   return (
@@ -150,38 +155,38 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
           <div style={{
             padding: '20px 24px 20px 12px',
             display: 'flex', flexDirection: 'column',
-            gap: '12px',
+            gap: '10px',
           }}>
             {/* Overall progress */}
             <div style={{
               textAlign: 'center',
-              padding: '16px',
+              padding: '14px',
               borderRadius: '14px',
               background: `linear-gradient(135deg, ${crew.color}08, ${crew.color}15)`,
               border: `1px solid ${crew.color}30`,
             }}>
               <div style={{
-                fontFamily: 'Orbitron, sans-serif', fontSize: '36px', fontWeight: '900',
+                fontFamily: 'Orbitron, sans-serif', fontSize: '32px', fontWeight: '900',
                 color: crew.color,
                 lineHeight: 1,
               }}>
-                {Math.round((crew.metrics.connectedPoints.fact / crew.metrics.connectedPoints.target) * 100)}%
+                {crew.totalScore} <span style={{ fontSize: '16px', opacity: 0.6 }}>/ {crew.finishTarget}</span>
               </div>
               <div style={{
                 fontSize: '10px', color: 'var(--text-secondary)',
                 textTransform: 'uppercase', letterSpacing: '2px', marginTop: '6px',
               }}>
-                Общий прогресс
+                Общий счёт · {overallPct}%
               </div>
             </div>
 
             {/* Metric cards */}
             {metrics.map((m) => {
-              const pct = Math.round((m.fact / m.target) * 100);
+              const pct = m.target > 0 ? Math.round((m.fact / m.target) * 100) : 0;
               const isComplete = pct >= 100;
               return (
                 <div key={m.label} style={{
-                  padding: '14px 16px',
+                  padding: '12px 16px',
                   borderRadius: '14px',
                   background: 'var(--bg-secondary)',
                   border: '1px solid rgba(255,255,255,0.06)',
@@ -204,7 +209,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                         {m.icon} {m.label}
                       </div>
                       <div style={{
-                        fontFamily: 'Orbitron, sans-serif', fontSize: '22px', fontWeight: '700',
+                        fontFamily: 'Orbitron, sans-serif', fontSize: '20px', fontWeight: '700',
                         color: m.color, marginTop: '4px',
                       }}>
                         {m.fact.toLocaleString('ru-RU')}
@@ -225,7 +230,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
 
                   {/* Progress bar */}
                   <div style={{
-                    marginTop: '8px', height: '4px',
+                    marginTop: '6px', height: '4px',
                     background: 'rgba(255,255,255,0.05)', borderRadius: '2px',
                     overflow: 'hidden',
                   }}>
@@ -240,7 +245,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                   </div>
 
                   <div style={{
-                    fontSize: '10px', marginTop: '4px', fontWeight: '600',
+                    fontSize: '10px', marginTop: '3px', fontWeight: '600',
                     color: isComplete ? 'var(--accent-green)' : pct >= 70 ? 'var(--accent-gold)' : 'var(--accent-primary)',
                   }}>
                     {isComplete ? '✓ План выполнен!' : pct >= 70 ? '~ На курсе' : '⚠ Отстаёт'}

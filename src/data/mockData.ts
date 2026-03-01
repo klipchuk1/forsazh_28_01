@@ -1,25 +1,25 @@
 import type { Crew, SegmentScores } from './types';
 
 const crewNames = [
-  { team: 'Молния', driver: 'Виктор Соrokин', navigator: 'Анна Петрова' },
+  { team: 'Молния', driver: 'Виктор Сорокин', navigator: 'Анна Петрова' },
   { team: 'Торнадо', driver: 'Дмитрий Волков', navigator: 'Мария Иванова' },
   { team: 'Стихия', driver: 'Алексей Кузнецов', navigator: 'Елена Смирнова' },
   { team: 'Ураган', driver: 'Сергей Попов', navigator: 'Ольга Козлова' },
   { team: 'Фантом', driver: 'Иван Новиков', navigator: 'Наталья Соколова' },
   { team: 'Вихрь', driver: 'Павел Морозов', navigator: 'Юлия Борисова' },
-  { team: 'Метеор', driver: 'Роман Зеленов', navigator: 'Полина Кarpова' },
+  { team: 'Метеор', driver: 'Роман Зеленов', navigator: 'Полина Карпова' },
   { team: 'Конкорд', driver: 'Никита Тихонов', navigator: 'Виктория Лукьянова' },
-  { team: ' Younker', driver: 'Антон Семёнов', navigator: 'Полина Беляева' },
+  { team: 'Юнкер', driver: 'Антон Семёнов', navigator: 'Полина Беляева' },
   { team: 'Экзит', driver: 'Денис Фролов', navigator: 'Галина Чёрная' },
   { team: 'Валкайрия', driver: 'Константин Орлов', navigator: 'Людмила Степанова' },
-  { team: 'Драгон', driver: 'Фёдор Горбачёв', navigator: 'Надежда القасим' },
+  { team: 'Драгон', driver: 'Фёдор Горбачёв', navigator: 'Надежда Касимова' },
   { team: 'Тайфун', driver: 'Геннадий Рогозин', navigator: 'Ирина Калинина' },
   { team: 'Нейтрон', driver: 'Станислав Петров', navigator: 'Светлана Ломова' },
   { team: 'Аист', driver: 'Виталий Касаткин', navigator: 'Валентина Шарова' },
   { team: 'Пульсар', driver: 'Олег Шестаков', navigator: 'Дарья Кириллова' },
-  { team: 'Кнайт', driver: 'Марк Резниченко', navigator: 'Людмила Вашенко' },
+  { team: 'Кнайт', driver: 'Марк Резниченко', navigator: 'Людмила Ващенко' },
   { team: 'Аэро', driver: 'Степан Матвеев', navigator: 'Ксения Гаврилова' },
-  { team: 'Фаэнон', driver: 'Георг Беrestин', navigator: 'Анастасия Овчарова' },
+  { team: 'Фаэтон', driver: 'Георгий Берестин', navigator: 'Анастасия Овчарова' },
 ];
 
 const colors = [
@@ -49,6 +49,15 @@ const factPercentages = [
   118, 62, 97, 45, 108, 83, 71, 93, 76
 ];
 
+// Targets from Трасса sheet
+const TARGETS = {
+  distribution: 1440,
+  contracts: 640,
+  ligaPro: 560,
+  contacts: 540,
+  finish: 3180,
+};
+
 function generateWeeklyHistory(crewIndex: number, currentFact: number, target: number): { week: number; connectedPoints: number; salesVolume: number; skuCount: number }[] {
   const weeks: { week: number; connectedPoints: number; salesVolume: number; skuCount: number }[] = [];
   const totalWeeks = 12;
@@ -69,11 +78,6 @@ function generateWeeklyHistory(crewIndex: number, currentFact: number, target: n
   return weeks;
 }
 
-// Distributes total target/fact across 4 segments sequentially.
-// Warmup (Feb 16-28) is shorter → smaller weight.
-// Fact fills segments left-to-right; any excess lands in lap3 (over-achievement).
-// When the backend supplies real per-segment points, just populate segmentScores
-// and getTrackPosition in Track.tsx will place cars correctly.
 function generateSegmentScores(target: number, fact: number): SegmentScores {
   const weights = [0.2, 0.27, 0.27, 0.26];
   const targets = weights.map(w => Math.round(target * w));
@@ -100,15 +104,14 @@ function generateSegmentScores(target: number, fact: number): SegmentScores {
 
 export function generateMockData(): Crew[] {
   return crewNames.map((crew, index) => {
-    const connectedTarget = 25 + Math.floor(Math.random() * 15);
-    const salesTarget = connectedTarget * 120 + Math.floor(Math.random() * 500);
-    const skuTarget = 40 + Math.floor(Math.random() * 30);
-
     const factPct = factPercentages[index] / 100;
 
-    const connectedFact = Math.round(connectedTarget * factPct);
-    const salesFact = Math.round(salesTarget * factPct * (0.9 + Math.random() * 0.2));
-    const skuFact = Math.round(skuTarget * factPct * (0.85 + Math.random() * 0.3));
+    const distFact = Math.round(TARGETS.distribution * factPct);
+    const contractsFact = Math.round(TARGETS.contracts * factPct * (0.9 + Math.random() * 0.2));
+    const ligaProFact = Math.round(TARGETS.ligaPro * factPct * (0.85 + Math.random() * 0.3));
+    const contactsFact = Math.round(TARGETS.contacts * factPct * (0.9 + Math.random() * 0.2));
+
+    const totalScore = distFact + contractsFact + ligaProFact + contactsFact;
 
     return {
       id: index + 1,
@@ -124,15 +127,18 @@ export function generateMockData(): Crew[] {
       color: colors[index].color,
       glowColor: colors[index].glow,
       awards: [],
+      totalScore,
+      finishTarget: TARGETS.finish,
       metrics: {
-        connectedPoints: { target: connectedTarget, fact: connectedFact },
-        salesVolume: { target: salesTarget, fact: salesFact },
-        skuCount: { target: skuTarget, fact: skuFact },
+        distribution: { target: TARGETS.distribution, fact: distFact },
+        contracts: { target: TARGETS.contracts, fact: contractsFact },
+        ligaPro: { target: TARGETS.ligaPro, fact: ligaProFact },
+        contacts: { target: TARGETS.contacts, fact: contactsFact },
       },
-      weeklyHistory: generateWeeklyHistory(index, connectedFact, connectedTarget),
+      weeklyHistory: generateWeeklyHistory(index, totalScore, TARGETS.finish),
       checkpoint1: factPct > 0.3,
       checkpoint2: factPct > 0.65,
-      segmentScores: generateSegmentScores(connectedTarget, connectedFact),
+      segmentScores: generateSegmentScores(TARGETS.finish, totalScore),
     };
   });
 }

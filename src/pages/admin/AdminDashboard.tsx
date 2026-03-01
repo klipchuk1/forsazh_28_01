@@ -8,23 +8,15 @@ export default function AdminDashboard() {
   const totalCrews = crews.length;
   const avgCompletion = totalCrews > 0
     ? Math.round(crews.reduce((sum, c) => {
-        const pct = c.metrics.connectedPoints.target > 0
-          ? (c.metrics.connectedPoints.fact / c.metrics.connectedPoints.target) * 100
+        const pct = c.finishTarget > 0
+          ? (c.totalScore / c.finishTarget) * 100
           : 0;
         return sum + pct;
       }, 0) / totalCrews)
     : 0;
 
   const topCrew = crews.length > 0
-    ? crews.reduce((best, c) => {
-        const bestPct = best.metrics.connectedPoints.target > 0
-          ? best.metrics.connectedPoints.fact / best.metrics.connectedPoints.target
-          : 0;
-        const cPct = c.metrics.connectedPoints.target > 0
-          ? c.metrics.connectedPoints.fact / c.metrics.connectedPoints.target
-          : 0;
-        return cPct > bestPct ? c : best;
-      })
+    ? crews.reduce((best, c) => c.totalScore > best.totalScore ? c : best)
     : null;
 
   return (

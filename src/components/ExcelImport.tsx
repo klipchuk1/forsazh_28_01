@@ -12,15 +12,30 @@ export interface ParsedAward {
 
 export interface ParsedCrew {
   teamName: string;
+  regionItms: string;
+  branchSns: string;
   driverName: string;
   navigatorName: string;
   score: number;
+  distribution: number;
+  contracts: number;
+  ligaPro: number;
+  contacts: number;
+}
+
+export interface TrackTargets {
+  distribution: number;
+  contracts: number;
+  ligaPro: number;
+  contacts: number;
+  finish: number;
 }
 
 export interface ImportResult {
   crews: Crew[];
   parsedCrews: ParsedCrew[];
   awards: ParsedAward[];
+  trackTargets: TrackTargets;
 }
 
 interface ExcelImportProps {
@@ -64,12 +79,50 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
       const data = new Uint8Array(evt.target?.result as ArrayBuffer);
       const workbook = XLSX.read(data, { type: 'array' });
 
-      // --- Parse "Экипажи" sheet (crews + scores) ---
+      // --- Parse "Трасса" sheet for targets ---
+      const trackTargets: TrackTargets = {
+        distribution: 1440,
+        contracts: 640,
+        ligaPro: 560,
+        contacts: 540,
+        finish: 3180,
+      };
+
+      const trackSheetName = workbook.SheetNames.find(n => n.includes('Трасса') || n.includes('трасса'));
+      if (trackSheetName) {
+        const trackSheet = workbook.Sheets[trackSheetName];
+        const trackRows: (string | number)[][] = XLSX.utils.sheet_to_json(trackSheet, { header: 1 });
+        // Row 3 (index 3) contains target values: [label, dist, contracts, liga, contacts, finish]
+        // Try to find the row with "Финиш" or numeric targets
+        for (const row of trackRows) {
+          const label = row[0] ? String(row[0]).trim().toLowerCase() : '';
+          if (label.includes('финиш') || label.includes('finish')) {
+            if (row[1] !== undefined && row[1] !== '') trackTargets.distribution = Number(row[1]) || trackTargets.distribution;
+            if (row[2] !== undefined && row[2] !== '') trackTargets.contracts = Number(row[2]) || trackTargets.contracts;
+            if (row[3] !== undefined && row[3] !== '') trackTargets.ligaPro = Number(row[3]) || trackTargets.ligaPro;
+            if (row[4] !== undefined && row[4] !== '') trackTargets.contacts = Number(row[4]) || trackTargets.contacts;
+            if (row[5] !== undefined && row[5] !== '') trackTargets.finish = Number(row[5]) || trackTargets.finish;
+            break;
+          }
+        }
+      }
+
+      // --- Parse "Экипажи" sheet (crews + scores + new metrics) ---
       const crewsSheetName = workbook.SheetNames.find(n => n.includes('Экипаж') && !n.includes('наград')) || workbook.SheetNames[0];
       const crewsSheet = workbook.Sheets[crewsSheetName];
-      const crewRows: string[][] = XLSX.utils.sheet_to_json(crewsSheet, { header: 1 });
+      const crewRows: (string | number)[][] = XLSX.utils.sheet_to_json(crewsSheet, { header: 1 });
 
-      // --- Parse raw crew data from Excel (independent of existingCrews) ---
+      // New column layout:
+      // [0] Название экипажа
+      // [1] Регион ITMS
+      // [2] Филиал СНС
+      // [3] Пилот ITMS (driver)
+      // [4] Пилот SNS (navigator)
+      // [5] Очки (total score)
+      // [6] Дистрибуция
+      // [7] Контракты
+      // [8] Лига Про
+      // [9] Контакты
       const parsedCrews: ParsedCrew[] = [];
       for (let i = 1; i < crewRows.length; i++) {
         const row = crewRows[i];
@@ -77,44 +130,17 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
         if (!teamName) continue;
         parsedCrews.push({
           teamName,
-          driverName: row[1] ? String(row[1]).trim() : '',
-          navigatorName: row[2] ? String(row[2]).trim() : '',
-          score: row[3] !== undefined && row[3] !== '' ? Number(row[3]) : 0,
+          regionItms: row[1] ? String(row[1]).trim() : '',
+          branchSns: row[2] ? String(row[2]).trim() : '',
+          driverName: row[3] ? String(row[3]).trim() : '',
+          navigatorName: row[4] ? String(row[4]).trim() : '',
+          score: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : 0,
+          distribution: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : 0,
+          contracts: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : 0,
+          ligaPro: row[8] !== undefined && row[8] !== '' ? Number(row[8]) : 0,
+          contacts: row[9] !== undefined && row[9] !== '' ? Number(row[9]) : 0,
         });
       }
-
-      // Also update existingCrews if they exist (backward compat)
-      const updatedCrews = existingCrews.map((crew) => {
-        const dataRow = crewRows.find((row) => {
-          if (!row[0]) return false;
-          const rowName = String(row[0]).trim().toLowerCase();
-          return rowName === crew.teamName.toLowerCase() ||
-                 rowName === `экипаж ${crew.id}`;
-        });
-
-        if (dataRow) {
-          return {
-            ...crew,
-            driver: { ...crew.driver, name: dataRow[1] ? String(dataRow[1]).trim() : crew.driver.name },
-            navigator: { ...crew.navigator, name: dataRow[2] ? String(dataRow[2]).trim() : crew.navigator.name },
-            metrics: {
-              connectedPoints: {
-                target: crew.metrics.connectedPoints.target,
-                fact: dataRow[3] !== undefined && dataRow[3] !== '' ? Number(dataRow[3]) : crew.metrics.connectedPoints.fact,
-              },
-              salesVolume: {
-                target: crew.metrics.salesVolume.target,
-                fact: crew.metrics.salesVolume.fact,
-              },
-              skuCount: {
-                target: crew.metrics.skuCount.target,
-                fact: crew.metrics.skuCount.fact,
-              },
-            },
-          };
-        }
-        return crew;
-      });
 
       // --- Parse awards sheet (e.g. "Экипажи награды Март") ---
       const awards: ParsedAward[] = [];
@@ -127,14 +153,11 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
         const monthMatch = awardsSheetName.match(/(Март|Апрель|Май)/i);
         const month = monthMatch ? monthMatch[1] : 'Март';
 
-        // Row 0: header ["Название Экипажа", "Март", ...]
-        // Row 1+: data ["Экипаж 1", "#1 по дистрибуции", "#2 по контрактованию", ...]
         for (let i = 1; i < awardsRows.length; i++) {
           const row = awardsRows[i];
           const crewName = row[0] ? String(row[0]).trim() : '';
           if (!crewName) continue;
 
-          // Columns 1+ contain award labels
           for (let col = 1; col < row.length; col++) {
             const label = row[col] ? String(row[col]).trim() : '';
             if (!label) continue;
@@ -153,11 +176,10 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
         }
       }
 
-      onImport({ crews: updatedCrews, parsedCrews, awards });
+      onImport({ crews: existingCrews, parsedCrews, awards, trackTargets });
     };
     reader.readAsArrayBuffer(file);
 
-    // Reset input so the same file can be re-imported
     if (fileRef.current) fileRef.current.value = '';
   };
 
@@ -171,7 +193,7 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
         Импортировать из Excel
       </button>
       <div className="import-hint">
-        Формат: Admin.xlsx с вкладками «Экипажи» и «Экипажи награды»
+        Формат: Admin.xlsx с вкладками «Экипажи», «Трасса» и «Экипажи награды»
       </div>
     </div>
   );

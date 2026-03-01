@@ -4,9 +4,10 @@ import { useCrews } from '../../hooks/useCrews';
 import { supabase } from '../../lib/supabase';
 
 interface MetricValues {
-  connectedPoints: { target: string; fact: string };
-  salesVolume: { target: string; fact: string };
-  skuCount: { target: string; fact: string };
+  distribution: { target: string; fact: string };
+  contracts: { target: string; fact: string };
+  ligaPro: { target: string; fact: string };
+  contacts: { target: string; fact: string };
 }
 
 type MetricsMap = Record<number, MetricValues>;
@@ -23,9 +24,10 @@ export default function KpiPage() {
     const initial: MetricsMap = {};
     for (const c of crews) {
       initial[c.id] = {
-        connectedPoints: { target: String(c.metrics.connectedPoints.target), fact: String(c.metrics.connectedPoints.fact) },
-        salesVolume: { target: String(c.metrics.salesVolume.target), fact: String(c.metrics.salesVolume.fact) },
-        skuCount: { target: String(c.metrics.skuCount.target), fact: String(c.metrics.skuCount.fact) },
+        distribution: { target: String(c.metrics.distribution.target), fact: String(c.metrics.distribution.fact) },
+        contracts: { target: String(c.metrics.contracts.target), fact: String(c.metrics.contracts.fact) },
+        ligaPro: { target: String(c.metrics.ligaPro.target), fact: String(c.metrics.ligaPro.fact) },
+        contacts: { target: String(c.metrics.contacts.target), fact: String(c.metrics.contacts.fact) },
       };
     }
     setValues(initial);
@@ -55,9 +57,10 @@ export default function KpiPage() {
       const v = values[crewId];
       if (!v) continue;
       upserts.push(
-        { crew_id: crewId, metric: 'connected_points', target: Number(v.connectedPoints.target) || 0, fact: Number(v.connectedPoints.fact) || 0 },
-        { crew_id: crewId, metric: 'sales_volume', target: Number(v.salesVolume.target) || 0, fact: Number(v.salesVolume.fact) || 0 },
-        { crew_id: crewId, metric: 'sku_count', target: Number(v.skuCount.target) || 0, fact: Number(v.skuCount.fact) || 0 },
+        { crew_id: crewId, metric: 'distribution', target: Number(v.distribution.target) || 0, fact: Number(v.distribution.fact) || 0 },
+        { crew_id: crewId, metric: 'contracts', target: Number(v.contracts.target) || 0, fact: Number(v.contracts.fact) || 0 },
+        { crew_id: crewId, metric: 'liga_pro', target: Number(v.ligaPro.target) || 0, fact: Number(v.ligaPro.fact) || 0 },
+        { crew_id: crewId, metric: 'contacts', target: Number(v.contacts.target) || 0, fact: Number(v.contacts.fact) || 0 },
       );
     }
 
@@ -106,11 +109,14 @@ export default function KpiPage() {
             <thead>
               <tr>
                 <th rowSpan={2} style={{ verticalAlign: 'bottom' }}>Экипаж</th>
-                <th colSpan={2} style={{ textAlign: 'center', borderLeft: '1px solid var(--border-subtle)' }}>Точки подключения</th>
-                <th colSpan={2} style={{ textAlign: 'center', borderLeft: '1px solid var(--border-subtle)' }}>Объём продаж</th>
-                <th colSpan={2} style={{ textAlign: 'center', borderLeft: '1px solid var(--border-subtle)' }}>SKU</th>
+                <th colSpan={2} style={{ textAlign: 'center', borderLeft: '1px solid var(--border-subtle)' }}>Дистрибуция</th>
+                <th colSpan={2} style={{ textAlign: 'center', borderLeft: '1px solid var(--border-subtle)' }}>Контракты</th>
+                <th colSpan={2} style={{ textAlign: 'center', borderLeft: '1px solid var(--border-subtle)' }}>Лига Про</th>
+                <th colSpan={2} style={{ textAlign: 'center', borderLeft: '1px solid var(--border-subtle)' }}>Контакты</th>
               </tr>
               <tr>
+                <th style={{ borderLeft: '1px solid var(--border-subtle)' }}>План</th>
+                <th>Факт</th>
                 <th style={{ borderLeft: '1px solid var(--border-subtle)' }}>План</th>
                 <th>Факт</th>
                 <th style={{ borderLeft: '1px solid var(--border-subtle)' }}>План</th>
@@ -133,48 +139,64 @@ export default function KpiPage() {
                     <td style={{ borderLeft: '1px solid var(--border-subtle)' }}>
                       <input
                         type="number"
-                        value={v.connectedPoints.target}
-                        onChange={e => updateValue(crew.id, 'connectedPoints', 'target', e.target.value)}
+                        value={v.distribution.target}
+                        onChange={e => updateValue(crew.id, 'distribution', 'target', e.target.value)}
                         className={`admin-kpi-input ${isDirty ? 'dirty' : ''}`}
                       />
                     </td>
                     <td>
                       <input
                         type="number"
-                        value={v.connectedPoints.fact}
-                        onChange={e => updateValue(crew.id, 'connectedPoints', 'fact', e.target.value)}
+                        value={v.distribution.fact}
+                        onChange={e => updateValue(crew.id, 'distribution', 'fact', e.target.value)}
                         className={`admin-kpi-input ${isDirty ? 'dirty' : ''}`}
                       />
                     </td>
                     <td style={{ borderLeft: '1px solid var(--border-subtle)' }}>
                       <input
                         type="number"
-                        value={v.salesVolume.target}
-                        onChange={e => updateValue(crew.id, 'salesVolume', 'target', e.target.value)}
+                        value={v.contracts.target}
+                        onChange={e => updateValue(crew.id, 'contracts', 'target', e.target.value)}
                         className={`admin-kpi-input ${isDirty ? 'dirty' : ''}`}
                       />
                     </td>
                     <td>
                       <input
                         type="number"
-                        value={v.salesVolume.fact}
-                        onChange={e => updateValue(crew.id, 'salesVolume', 'fact', e.target.value)}
+                        value={v.contracts.fact}
+                        onChange={e => updateValue(crew.id, 'contracts', 'fact', e.target.value)}
                         className={`admin-kpi-input ${isDirty ? 'dirty' : ''}`}
                       />
                     </td>
                     <td style={{ borderLeft: '1px solid var(--border-subtle)' }}>
                       <input
                         type="number"
-                        value={v.skuCount.target}
-                        onChange={e => updateValue(crew.id, 'skuCount', 'target', e.target.value)}
+                        value={v.ligaPro.target}
+                        onChange={e => updateValue(crew.id, 'ligaPro', 'target', e.target.value)}
                         className={`admin-kpi-input ${isDirty ? 'dirty' : ''}`}
                       />
                     </td>
                     <td>
                       <input
                         type="number"
-                        value={v.skuCount.fact}
-                        onChange={e => updateValue(crew.id, 'skuCount', 'fact', e.target.value)}
+                        value={v.ligaPro.fact}
+                        onChange={e => updateValue(crew.id, 'ligaPro', 'fact', e.target.value)}
+                        className={`admin-kpi-input ${isDirty ? 'dirty' : ''}`}
+                      />
+                    </td>
+                    <td style={{ borderLeft: '1px solid var(--border-subtle)' }}>
+                      <input
+                        type="number"
+                        value={v.contacts.target}
+                        onChange={e => updateValue(crew.id, 'contacts', 'target', e.target.value)}
+                        className={`admin-kpi-input ${isDirty ? 'dirty' : ''}`}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={v.contacts.fact}
+                        onChange={e => updateValue(crew.id, 'contacts', 'fact', e.target.value)}
                         className={`admin-kpi-input ${isDirty ? 'dirty' : ''}`}
                       />
                     </td>

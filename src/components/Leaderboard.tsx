@@ -5,38 +5,23 @@ interface LeaderboardProps {
   onCrewClick: (crew: Crew) => void;
 }
 
-function getScore(crew: Crew): number {
-  const cp = crew.metrics.connectedPoints;
-  const sv = crew.metrics.salesVolume;
-  const sk = crew.metrics.skuCount;
-  return Math.round(
-    (cp.fact / cp.target) * 50 +
-    (sv.fact / sv.target) * 30 +
-    (sk.fact / sk.target) * 20
-  );
-}
-
-function getProgressPercent(crew: Crew): number {
-  return Math.round((crew.metrics.connectedPoints.fact / crew.metrics.connectedPoints.target) * 100);
+function getOverallPct(crew: Crew): number {
+  if (crew.finishTarget <= 0) return 0;
+  return Math.round((crew.totalScore / crew.finishTarget) * 100);
 }
 
 export default function Leaderboard({ crews, onCrewClick }: LeaderboardProps) {
-  const sortedByScore = [...crews].sort((a, b) => getScore(b) - getScore(a));
-  const sortedByPoints = [...crews].sort((a, b) =>
-    b.metrics.connectedPoints.fact - a.metrics.connectedPoints.fact
-  );
+  const sortedByScore = [...crews].sort((a, b) => b.totalScore - a.totalScore);
 
-  const renderRow = (crew: Crew, rank: number, showPercent: boolean) => {
-    const pct = showPercent ? getProgressPercent(crew) : getScore(crew);
-    let barColor = crew.color;
-    let displayValue = showPercent ? `${pct}%` : `${pct}pts`;
+  const renderRow = (crew: Crew, rank: number) => {
+    const pct = getOverallPct(crew);
 
     let rankClass = 'rank-default';
     if (rank === 1) rankClass = 'rank-1';
     else if (rank === 2) rankClass = 'rank-2';
     else if (rank === 3) rankClass = 'rank-3';
 
-    const barWidth = Math.min(pct / (showPercent ? 120 : 120), 1) * 100;
+    const barWidth = Math.min(pct / 120, 1) * 100;
 
     return (
       <div
@@ -59,12 +44,12 @@ export default function Leaderboard({ crews, onCrewClick }: LeaderboardProps) {
               className="leaderboard-progress-fill"
               style={{
                 width: `${barWidth}%`,
-                background: barColor,
-                boxShadow: `0 0 6px ${barColor}60`,
+                background: crew.color,
+                boxShadow: `0 0 6px ${crew.color}60`,
               }}
             />
           </div>
-          <span className="leaderboard-percent" style={{ color: barColor }}>{displayValue}</span>
+          <span className="leaderboard-percent" style={{ color: crew.color }}>{crew.totalScore}pts</span>
         </div>
       </div>
     );
@@ -74,19 +59,10 @@ export default function Leaderboard({ crews, onCrewClick }: LeaderboardProps) {
     <div className="leaderboard-grid">
       <div className="leaderboard-panel">
         <div className="section-header" style={{ marginBottom: '12px' }}>
-          <span className="section-title">🏆 Рейтинг по Overall</span>
+          <span className="section-title">🏆 Рейтинг экипажей</span>
         </div>
         <div className="leaderboard-table">
-          {sortedByScore.slice(0, 10).map((crew, i) => renderRow(crew, i + 1, false))}
-        </div>
-      </div>
-
-      <div className="leaderboard-panel">
-        <div className="section-header" style={{ marginBottom: '12px' }}>
-          <span className="section-title">🎯 Рейтинг по точкам</span>
-        </div>
-        <div className="leaderboard-table">
-          {sortedByPoints.slice(0, 10).map((crew, i) => renderRow(crew, i + 1, true))}
+          {sortedByScore.map((crew, i) => renderRow(crew, i + 1))}
         </div>
       </div>
     </div>

@@ -40,10 +40,13 @@ type Crew = {
   glowColor: string;
   videoUrl?: string;
   awards: Award[];
+  totalScore: number;
+  finishTarget: number;
   metrics: {
-    connectedPoints: KPIMetric;
-    salesVolume: KPIMetric;
-    skuCount: KPIMetric;
+    distribution: KPIMetric;
+    contracts: KPIMetric;
+    ligaPro: KPIMetric;
+    contacts: KPIMetric;
   };
   weeklyHistory: WeeklyData[];
   checkpoint1: boolean;
@@ -88,7 +91,7 @@ type CrewRow = {
 type MetricRow = {
   id: number;
   crew_id: number;
-  metric: 'connected_points' | 'sales_volume' | 'sku_count';
+  metric: 'distribution' | 'contracts' | 'liga_pro' | 'contacts';
   target: number;
   fact: number;
 };

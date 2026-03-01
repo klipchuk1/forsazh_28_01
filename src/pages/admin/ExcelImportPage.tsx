@@ -50,6 +50,8 @@ export default function ExcelImportPage() {
       let updatedCrewCount = 0;
       let updatedAwardCount = 0;
 
+      const targets = result.trackTargets;
+
       // Build a map of crew name -> DB crew (refresh from DB first)
       const { data: dbCrews } = await supabase.from('crews').select('id, team_name');
       const crewMap = new Map<string, number>(); // name.toLowerCase() -> id
@@ -57,11 +59,10 @@ export default function ExcelImportPage() {
         crewMap.set(c.team_name.toLowerCase(), c.id);
       }
 
-      // Use raw parsed crew data from Excel (works even when DB is empty)
+      // Use raw parsed crew data from Excel
       const parsedCrews: ParsedCrew[] = result.parsedCrews;
 
       // --- 1. Create crews that don't exist yet ---
-      // Collect all crew names from both parsedCrews and awards
       const allCrewNames = new Set<string>();
       for (const pc of parsedCrews) {
         allCrewNames.add(pc.teamName);
@@ -70,14 +71,12 @@ export default function ExcelImportPage() {
         allCrewNames.add(award.crewName);
       }
 
-      // Create missing crews
       for (const name of allCrewNames) {
         if (!crewMap.has(name.toLowerCase())) {
           const numMatch = name.match(/(\d+)/);
           const idx = numMatch ? parseInt(numMatch[1]) - 1 : crewMap.size;
           const colorSet = crewColors[idx % crewColors.length];
 
-          // Find matching Excel data for this crew
           const pc = parsedCrews.find(c =>
             c.teamName.toLowerCase() === name.toLowerCase()
           );
@@ -86,7 +85,7 @@ export default function ExcelImportPage() {
             .from('crews')
             .insert({
               team_name: name,
-              driver_name: pc?.driverName || 'Гонщик',
+              driver_name: pc?.driverName || 'Пилот',
               driver_avatar: '',
               navigator_name: pc?.navigatorName || 'Штурман',
               navigator_avatar: '',
@@ -114,15 +113,16 @@ export default function ExcelImportPage() {
 
         // Update names
         await supabase.from('crews').update({
-          driver_name: pc.driverName || 'Гонщик',
+          driver_name: pc.driverName || 'Пилот',
           navigator_name: pc.navigatorName || 'Штурман',
         }).eq('id', crewId);
 
-        // Upsert metrics (score goes to connected_points fact)
+        // Upsert new metrics with targets from Трасса sheet
         const metricsToUpsert = [
-          { crew_id: crewId, metric: 'connected_points' as const, target: 100, fact: pc.score || 0 },
-          { crew_id: crewId, metric: 'sales_volume' as const, target: 100, fact: 0 },
-          { crew_id: crewId, metric: 'sku_count' as const, target: 100, fact: 0 },
+          { crew_id: crewId, metric: 'distribution' as const, target: targets.distribution, fact: pc.distribution },
+          { crew_id: crewId, metric: 'contracts' as const, target: targets.contracts, fact: pc.contracts },
+          { crew_id: crewId, metric: 'liga_pro' as const, target: targets.ligaPro, fact: pc.ligaPro },
+          { crew_id: crewId, metric: 'contacts' as const, target: targets.contacts, fact: pc.contacts },
         ];
 
         await supabase.from('crew_metrics').upsert(metricsToUpsert, { onConflict: 'crew_id,metric' });
@@ -152,7 +152,6 @@ export default function ExcelImportPage() {
           }
 
           if (awardsWithIds.length > 0) {
-            // Delete old awards for this month for these crews
             const crewIds = [...new Set(awardsWithIds.map(a => a.crew_id))];
             await supabase.from('crew_awards').delete().in('crew_id', crewIds).eq('month', month);
 
@@ -232,8 +231,8 @@ export default function ExcelImportPage() {
           Формат файла
         </h3>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-          <strong>Вкладка «Экипажи»:</strong> Название экипажа | Имя 1 | Имя 2 | Очки<br />
-          <strong>Вкладка «Награды»:</strong> Список возможных наград по месяцам<br />
+          <strong>Вкладка «Экипажи»:</strong> Название | Регион ITMS | Филиал СНС | Пилот ITMS | Пилот SNS | Очки | Дистрибуция | Контракты | Лига Про | Контакты<br />
+          <strong>Вкладка «Трасса»:</strong> Финишная строка с целями по каждой метрике<br />
           <strong>Вкладка «Экипажи награды»:</strong> Название экипажа | Награда 1 | Награда 2 | ...
         </p>
         <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px', opacity: 0.7 }}>
