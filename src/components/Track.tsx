@@ -38,16 +38,20 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
     }
   }, []);
 
-  const getPointOnPath = useCallback((t: number): { x: number; y: number; facingLeft: boolean } => {
+  const getPointOnPath = useCallback((t: number): { x: number; y: number; angle: number } => {
     const path = pathRef.current;
-    if (!path) return { x: sx, y: r1, facingLeft: false };
+    if (!path) return { x: sx, y: r1, angle: 0 };
     const totalLen = path.getTotalLength();
     const len = Math.max(0, Math.min(t, 1)) * totalLen;
     const pt = path.getPointAtLength(len);
-    // Sample a tiny bit ahead to determine travel direction
+    // Sample a tiny bit ahead to determine tangent direction
     const ahead = path.getPointAtLength(Math.min(len + 2, totalLen));
-    const facingLeft = ahead.x < pt.x;
-    return { x: pt.x, y: pt.y, facingLeft };
+    const dx = ahead.x - pt.x;
+    const dy = ahead.y - pt.y;
+    // atan2 gives angle in radians; convert to degrees
+    // Car sprites face right by default (0°), so angle=0 means moving right
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    return { x: pt.x, y: pt.y, angle };
   }, [pathReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -163,11 +167,12 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             const t = getTrackPosition(crew);
             const pt = getPointOnPath(t);
 
-            // Spread cars across lane width so they don't overlap
+            // Offset perpendicular to the path so cars spread across lane width
+            const angleRad = pt.angle * (Math.PI / 180);
             const laneOffset = ((crew.id % 5) - 2) * 16;
-            const x = pt.x;
-            const y = pt.y + laneOffset;
-            const flip = pt.facingLeft;
+            // Perpendicular direction: rotate tangent 90°
+            const x = pt.x + laneOffset * Math.sin(angleRad) * -1;
+            const y = pt.y + laneOffset * Math.cos(angleRad);
 
             const isHovered = hoveredCrew === crew.id;
             const rank = index + 1;
@@ -181,8 +186,8 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 onMouseEnter={() => setHoveredCrew(crew.id)}
                 onMouseLeave={() => setHoveredCrew(null)}
               >
-                <rect x={x - 28} y={y - 18} width="56" height="36" fill="transparent" />
-                <g transform={`translate(${x}, ${y})${flip ? ' scale(-1,1)' : ''}`}>
+                <rect x={x - 28} y={y - 28} width="56" height="56" fill="transparent" />
+                <g transform={`translate(${x}, ${y}) rotate(${pt.angle})`}>
                   <ellipse cx={0} cy={0} rx={22} ry={12}
                     fill={crew.color} opacity={isHovered ? 0.35 : 0.15} />
                   <image
@@ -192,22 +197,22 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                     preserveAspectRatio="xMidYMid meet"
                     style={{ filter: isHovered ? 'brightness(1.2) drop-shadow(0 0 6px ' + crew.color + ')' : undefined }}
                   />
-                  <circle cx={-16} cy={-10} r="6" fill={crew.color} stroke="#fff" strokeWidth="0.8" />
-                  <text x={-16} y={-9.5} textAnchor="middle" dominantBaseline="middle"
-                    fill="#fff" fontSize="6" fontFamily="Orbitron, sans-serif"
-                    fontWeight="800"
-                    transform={flip ? 'scale(-1,1)' : ''}
-                    style={flip ? { transformOrigin: '-16px -9.5px', transformBox: 'fill-box' } : undefined}
-                  >
+                </g>
+                {/* Rank badge — counter-rotated so it stays upright */}
+                <g transform={`translate(${x}, ${y})`}>
+                  <circle cx={0} cy={-14} r="7" fill={crew.color} stroke="#fff" strokeWidth="0.8" />
+                  <text x={0} y={-13.5} textAnchor="middle" dominantBaseline="middle"
+                    fill="#fff" fontSize="6.5" fontFamily="Orbitron, sans-serif"
+                    fontWeight="800">
                     {rank}
                   </text>
                 </g>
 
                 {isHovered && (
                   <g>
-                    <rect x={x - 60} y={y - 38} width="120" height="22" rx="5"
+                    <rect x={x - 60} y={y - 42} width="120" height="22" rx="5"
                       fill="#0c0c1a" stroke={crew.color} strokeWidth="1" opacity="0.95" />
-                    <text x={x} y={y - 23} textAnchor="middle" fill="#fff"
+                    <text x={x} y={y - 27} textAnchor="middle" fill="#fff"
                       fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600">
                       {crew.teamName} · {crew.totalScore}pts
                     </text>
