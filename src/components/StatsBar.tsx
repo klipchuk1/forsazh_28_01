@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useCounterAnimation } from '../hooks/useCounterAnimation';
 
-/* Speedometer gauge */
+/* easeOutBack — overshoots slightly then settles */
+function easeOutBack(t: number): number {
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+}
+
+/* Speedometer gauge with animated needle */
 function Speedometer({
   labels,
   needlePosition,
@@ -14,6 +21,35 @@ function Speedometer({
   color: string;
   index: number;
 }) {
+  const [pos, setPos] = useState(0);
+  const rafRef = useRef(0);
+
+  useEffect(() => {
+    const delay = 600 + index * 200;
+    const duration = 1800;
+
+    const timeout = setTimeout(() => {
+      const startTime = performance.now();
+      function tick(now: number) {
+        const elapsed = now - startTime;
+        if (elapsed >= duration) {
+          setPos(needlePosition);
+          return;
+        }
+        const t = elapsed / duration;
+        const eased = easeOutBack(t);
+        setPos(Math.max(0, Math.min(1, needlePosition * eased)));
+        rafRef.current = requestAnimationFrame(tick);
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    }, delay);
+
+    return () => {
+      clearTimeout(timeout);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [needlePosition, index]);
+
   const w = 120;
   const h = 80;
   const cx = w / 2;
@@ -35,8 +71,9 @@ function Speedometer({
   const bgPath = `M ${arcPts[0].x} ${arcPts[0].y} ` +
     arcPts.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
 
-  // Filled arc (up to needle position)
-  const filledPts = arcPts.slice(0, Math.round(needlePosition * 49) + 1);
+  // Filled arc (follows animated pos)
+  const filledCount = Math.round(pos * 49) + 1;
+  const filledPts = arcPts.slice(0, filledCount);
   const fillPath = filledPts.length > 1
     ? `M ${filledPts[0].x} ${filledPts[0].y} ` + filledPts.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')
     : '';
@@ -56,9 +93,9 @@ function Speedometer({
     return ptAt(t, r + 13);
   });
 
-  // Needle
-  const needleTip = ptAt(needlePosition, r - 12);
-  const perpAngle = toRad(angleAtFn(needlePosition) + 90);
+  // Needle — uses animated pos
+  const needleTip = ptAt(pos, r - 12);
+  const perpAngle = toRad(angleAtFn(pos) + 90);
   const needleBase1 = { x: cx + 3 * Math.cos(perpAngle), y: cy - 3 * Math.sin(perpAngle) };
   const needleBase2 = { x: cx - 3 * Math.cos(perpAngle), y: cy + 3 * Math.sin(perpAngle) };
 
@@ -74,17 +111,14 @@ function Speedometer({
       {/* Background arc */}
       <path d={bgPath} fill="none" stroke="#ffffff10" strokeWidth="5" strokeLinecap="round" />
 
-      {/* Colored filled arc */}
+      {/* Colored filled arc — grows with needle */}
       {fillPath && (
-        <motion.path
+        <path
           d={fillPath}
           fill="none"
           stroke={`url(#gg-${index})`}
           strokeWidth="5"
           strokeLinecap="round"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: 1.5, delay: 0.5 + index * 0.2, ease: 'easeOut' }}
         />
       )}
 
@@ -115,25 +149,21 @@ function Speedometer({
         </text>
       ))}
 
-      {/* Needle — animated */}
-      <motion.polygon
+      {/* Needle — sweeps from 0 to target */}
+      <polygon
         points={`${needleTip.x},${needleTip.y} ${needleBase1.x},${needleBase1.y} ${needleBase2.x},${needleBase2.y}`}
         fill={color}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.9 }}
-        transition={{ duration: 0.8, delay: 1 + index * 0.2 }}
+        opacity="0.9"
       />
 
       {/* Needle glow */}
-      <motion.line
+      <line
         x1={cx} y1={cy}
         x2={needleTip.x} y2={needleTip.y}
         stroke={color}
         strokeWidth="1.5"
         strokeLinecap="round"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.6 }}
-        transition={{ duration: 0.8, delay: 1 + index * 0.2 }}
+        opacity="0.6"
       />
 
       {/* Center cap */}
@@ -143,7 +173,7 @@ function Speedometer({
         fill={color}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ duration: 0.4, delay: 1.2 + index * 0.2 }}
+        transition={{ duration: 0.4, delay: 0.5 + index * 0.2 }}
       />
     </svg>
   );
