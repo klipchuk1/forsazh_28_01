@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { gsap } from 'gsap';
 import type { Crew } from '../data/types';
 
@@ -9,11 +9,12 @@ interface TrackProps {
 
 function getTrackPosition(crew: Crew): number {
   if (crew.finishTarget <= 0) return 0;
-  return Math.min(crew.totalScore / crew.finishTarget, 1.15);
+  return Math.min(crew.totalScore / crew.finishTarget, 1.0);
 }
 
 export default function Track({ crews, onCrewClick }: TrackProps) {
   const [hoveredCrew, setHoveredCrew] = useState<number | null>(null);
+  const [pathReady, setPathReady] = useState(false);
 
   const W = 1600;
   const H = 600;
@@ -27,10 +28,26 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
   const sorted = [...crews].sort((a, b) => getTrackPosition(b) - getTrackPosition(a));
   const carsRef = useRef<(SVGGElement | null)[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
+  const pathRef = useRef<SVGPathElement>(null);
   const animatedRef = useRef(false);
 
+  // Signal when path element is mounted so we can compute positions
   useEffect(() => {
-    if (animatedRef.current) return;
+    if (pathRef.current) {
+      setPathReady(true);
+    }
+  }, []);
+
+  const getPointOnPath = useCallback((t: number): { x: number; y: number } => {
+    const path = pathRef.current;
+    if (!path) return { x: sx, y: r1 };
+    const totalLen = path.getTotalLength();
+    const pt = path.getPointAtLength(Math.max(0, Math.min(t, 1)) * totalLen);
+    return { x: pt.x, y: pt.y };
+  }, [pathReady]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (animatedRef.current || !pathReady) return;
     animatedRef.current = true;
     carsRef.current.forEach((el, i) => {
       if (!el) return;
@@ -39,7 +56,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
         { opacity: 1, scale: 1, duration: 0.5, delay: 0.3 + i * 0.05, ease: 'back.out(1.4)' }
       );
     });
-  }, [sorted.length]);
+  }, [sorted.length, pathReady]);
 
   const cr = 44;
   const zPath = (() => {
@@ -85,6 +102,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
           <rect width={W} height={H} fill="#0c0c1a" />
 
+          {/* Hidden path for getPointAtLength calculations */}
+          <path ref={pathRef} d={zPath} fill="none" stroke="none" />
+
+          {/* Road layers */}
           <path d={zPath} fill="none" stroke="#ffffff12" strokeWidth={roadW * 2 + 4}
             strokeLinecap="round" strokeLinejoin="round" />
           <path d={zPath} fill="none" stroke="#1e1e32" strokeWidth={roadW * 2}
@@ -98,6 +119,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
           <path d={zPath} fill="none" stroke="#ffffff" strokeWidth="1.5"
             strokeDasharray="18,26" opacity="0.25" />
 
+          {/* Stage labels */}
           <text x={sx + (ex - sx) / 2} y={r1 - roadW - 14} textAnchor="middle"
             fill="#a855f7" fontSize="13" fontFamily="Orbitron, sans-serif"
             fontWeight="700" letterSpacing="2" opacity="0.85">
@@ -114,6 +136,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             ЭТАП 3 — МАЙ
           </text>
 
+          {/* Start */}
           <rect x={sx - 6} y={r1 - roadW} width="12" height={roadW * 2}
             fill="url(#checker)" opacity="0.85" />
           <text x={sx} y={r1 - roadW - 18} textAnchor="middle"
@@ -122,6 +145,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             START
           </text>
 
+          {/* Finish */}
           <rect x={ex - 6} y={r3 - roadW} width="12" height={roadW * 2}
             fill="url(#checker)" opacity="0.85" />
           <text x={ex} y={r3 + roadW + 20} textAnchor="middle"
@@ -130,11 +154,17 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             FINISH
           </text>
 
+          {/* Cars positioned along the track path */}
           {sorted.map((crew, index) => {
-            const row = index % 4;
-            const col = Math.floor(index / 4);
-            const x = sx - 28 - col * 46;
-            const y = r1 - 30 + row * 22;
+            const t = getTrackPosition(crew);
+            const pt = getPointOnPath(t);
+
+            // Spread cars across lane width so they don't overlap
+            // Use a deterministic offset based on crew id
+            const laneOffset = ((crew.id % 5) - 2) * 16;
+            const x = pt.x;
+            const y = pt.y + laneOffset;
+
             const isHovered = hoveredCrew === crew.id;
             const rank = index + 1;
 
@@ -150,7 +180,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 <rect x={x - 28} y={y - 18} width="56" height="36" fill="transparent" />
                 <g transform={`translate(${x}, ${y})`}>
                   <ellipse cx={0} cy={0} rx={22} ry={12}
-                    fill={crew.color} opacity={isHovered ? 0.35 : 0.1} />
+                    fill={crew.color} opacity={isHovered ? 0.35 : 0.15} />
                   <image
                     href={`/cars/car-${((crew.id - 1) % 12) + 1}.png`}
                     x={-26} y={-16}
@@ -168,9 +198,9 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
                 {isHovered && (
                   <g>
-                    <rect x={x - 55} y={y - 34} width="110" height="22" rx="5"
+                    <rect x={x - 60} y={y - 38} width="120" height="22" rx="5"
                       fill="#0c0c1a" stroke={crew.color} strokeWidth="1" opacity="0.95" />
-                    <text x={x} y={y - 19} textAnchor="middle" fill="#fff"
+                    <text x={x} y={y - 23} textAnchor="middle" fill="#fff"
                       fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600">
                       {crew.teamName} · {crew.totalScore}pts
                     </text>
