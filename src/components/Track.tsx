@@ -38,12 +38,16 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
     }
   }, []);
 
-  const getPointOnPath = useCallback((t: number): { x: number; y: number } => {
+  const getPointOnPath = useCallback((t: number): { x: number; y: number; facingLeft: boolean } => {
     const path = pathRef.current;
-    if (!path) return { x: sx, y: r1 };
+    if (!path) return { x: sx, y: r1, facingLeft: false };
     const totalLen = path.getTotalLength();
-    const pt = path.getPointAtLength(Math.max(0, Math.min(t, 1)) * totalLen);
-    return { x: pt.x, y: pt.y };
+    const len = Math.max(0, Math.min(t, 1)) * totalLen;
+    const pt = path.getPointAtLength(len);
+    // Sample a tiny bit ahead to determine travel direction
+    const ahead = path.getPointAtLength(Math.min(len + 2, totalLen));
+    const facingLeft = ahead.x < pt.x;
+    return { x: pt.x, y: pt.y, facingLeft };
   }, [pathReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -160,10 +164,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             const pt = getPointOnPath(t);
 
             // Spread cars across lane width so they don't overlap
-            // Use a deterministic offset based on crew id
             const laneOffset = ((crew.id % 5) - 2) * 16;
             const x = pt.x;
             const y = pt.y + laneOffset;
+            const flip = pt.facingLeft;
 
             const isHovered = hoveredCrew === crew.id;
             const rank = index + 1;
@@ -178,7 +182,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 onMouseLeave={() => setHoveredCrew(null)}
               >
                 <rect x={x - 28} y={y - 18} width="56" height="36" fill="transparent" />
-                <g transform={`translate(${x}, ${y})`}>
+                <g transform={`translate(${x}, ${y})${flip ? ' scale(-1,1)' : ''}`}>
                   <ellipse cx={0} cy={0} rx={22} ry={12}
                     fill={crew.color} opacity={isHovered ? 0.35 : 0.15} />
                   <image
@@ -191,7 +195,10 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                   <circle cx={-16} cy={-10} r="6" fill={crew.color} stroke="#fff" strokeWidth="0.8" />
                   <text x={-16} y={-9.5} textAnchor="middle" dominantBaseline="middle"
                     fill="#fff" fontSize="6" fontFamily="Orbitron, sans-serif"
-                    fontWeight="800">
+                    fontWeight="800"
+                    transform={flip ? 'scale(-1,1)' : ''}
+                    style={flip ? { transformOrigin: '-16px -9.5px', transformBox: 'fill-box' } : undefined}
+                  >
                     {rank}
                   </text>
                 </g>
