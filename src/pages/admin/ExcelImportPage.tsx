@@ -168,6 +168,24 @@ export default function ExcelImportPage() {
         }
       }
 
+      // --- 4. Update segment scores for current month ---
+      const monthIdx = new Date().getMonth() + 1; // 1-based
+      const segmentMap: Record<number, string> = { 2: 'warmup', 3: 'lap1', 4: 'lap2', 5: 'lap3' };
+      const currentSegment = segmentMap[monthIdx] || 'lap1';
+
+      const segmentUpserts: { crew_id: number; segment_key: string; target: number; fact: number }[] = [];
+      for (const pc of parsedCrews) {
+        const crewId = crewMap.get(pc.teamName.toLowerCase());
+        if (!crewId) continue;
+        const monthScore = pc.score;
+        const monthTarget = Math.round(targets.finish * 0.27); // ~27% per month
+        segmentUpserts.push({ crew_id: crewId, segment_key: currentSegment, target: monthTarget, fact: monthScore });
+      }
+
+      if (segmentUpserts.length > 0) {
+        await supabase.from('crew_segment_scores').upsert(segmentUpserts, { onConflict: 'crew_id,segment_key' });
+      }
+
       setImportResult({ createdCrews: createdCrewCount, updatedCrews: updatedCrewCount, updatedAwards: updatedAwardCount });
       refetch();
     } catch (e) {
