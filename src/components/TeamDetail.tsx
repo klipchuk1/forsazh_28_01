@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Crew } from '../data/types';
 import VoteButton from './VoteButton';
@@ -26,6 +27,30 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
     { label: 'Лига Про', fact: crew.metrics.ligaPro.fact, target: crew.metrics.ligaPro.target, color: '#a855f7', icon: '🏆' },
     { label: 'Контакты', fact: crew.metrics.contacts.fact, target: crew.metrics.contacts.target, color: '#00ff88', icon: '📞' },
   ];
+
+  const [animated, setAnimated] = useState(false);
+  const [countProgress, setCountProgress] = useState(0); // 0..1
+
+  useEffect(() => {
+    const tAnim = setTimeout(() => setAnimated(true), 50);
+
+    // Animate counter from 0 to 1 over ~1.2s
+    const duration = 1200;
+    const start = performance.now();
+    let raf: number;
+    const tick = (now: number) => {
+      const elapsed = now - start - 50; // account for 50ms delay
+      if (elapsed < 0) { raf = requestAnimationFrame(tick); return; }
+      const t = Math.min(elapsed / duration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      setCountProgress(eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    return () => { clearTimeout(tAnim); cancelAnimationFrame(raf); };
+  }, []);
 
   return (
     <AnimatePresence>
@@ -170,13 +195,13 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                 color: crew.color,
                 lineHeight: 1,
               }}>
-                {crew.totalScore} <span style={{ fontSize: '16px', opacity: 0.6 }}>/ {crew.finishTarget}</span>
+                {Math.round(crew.totalScore * countProgress)} <span style={{ fontSize: '16px', opacity: 0.6 }}>/ {crew.finishTarget}</span>
               </div>
               <div style={{
                 fontSize: '10px', color: 'var(--text-secondary)',
                 textTransform: 'uppercase', letterSpacing: '2px', marginTop: '6px',
               }}>
-                Общий счёт · {overallPct}%
+                Общий счёт · {Math.round(overallPct * countProgress)}%
               </div>
             </div>
 
@@ -212,7 +237,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                         fontFamily: 'Orbitron, sans-serif', fontSize: '20px', fontWeight: '700',
                         color: m.color, marginTop: '4px',
                       }}>
-                        {m.fact.toLocaleString('ru-RU')}
+                        {Math.round(m.fact * countProgress).toLocaleString('ru-RU')}
                       </div>
                     </div>
                     <div style={{
@@ -220,7 +245,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                       color: isComplete ? 'var(--accent-green)' : pct >= 70 ? 'var(--accent-gold)' : 'var(--accent-primary)',
                       marginTop: '14px',
                     }}>
-                      {pct}%
+                      {Math.round(pct * countProgress)}%
                     </div>
                   </div>
 
@@ -247,26 +272,28 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                       {/* Fill */}
                       <div style={{
                         position: 'absolute', top: '1px', bottom: '1px', left: '1px',
-                        width: `calc(${Math.min(pct, 100)}% - 2px)`,
+                        width: animated ? `calc(${Math.min(pct, 100)}% - 2px)` : '0%',
                         borderRadius: '6px',
                         background: `linear-gradient(90deg, ${m.color}40, ${m.color}90, ${m.color})`,
                         boxShadow: isComplete
                           ? `0 0 12px ${m.color}80, inset 0 1px 0 rgba(255,255,255,0.2)`
                           : `0 0 8px ${m.color}50, inset 0 1px 0 rgba(255,255,255,0.15)`,
-                        transition: 'width 0.8s ease',
-                        animation: isComplete ? 'gaugePulse 2s ease-in-out infinite' : undefined,
+                        transition: 'width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                        animation: isComplete && animated ? 'gaugePulse 2s ease-in-out infinite' : undefined,
                       }} />
                       {/* Needle marker at fill edge */}
                       {pct > 3 && pct <= 100 && (
                         <div style={{
                           position: 'absolute',
-                          left: `${Math.min(pct, 100)}%`,
+                          left: animated ? `${Math.min(pct, 100)}%` : '0%',
                           top: '0', bottom: '0',
                           width: '2px',
                           background: '#fff',
                           boxShadow: `0 0 6px #fff, 0 0 12px ${m.color}`,
                           transform: 'translateX(-2px)',
                           borderRadius: '1px',
+                          transition: 'left 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                          opacity: animated ? 1 : 0,
                         }} />
                       )}
                       {/* Tick marks overlay */}
