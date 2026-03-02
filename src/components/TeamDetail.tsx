@@ -224,28 +224,66 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                     </div>
                   </div>
 
-                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                    План: {m.target.toLocaleString('ru-RU')}
-                  </div>
-
-                  {/* Progress bar */}
-                  <div style={{
-                    marginTop: '6px', height: '4px',
-                    background: 'rgba(255,255,255,0.05)', borderRadius: '2px',
-                    overflow: 'hidden',
-                  }}>
+                  {/* Fuel gauge */}
+                  <div style={{ marginTop: '8px' }}>
+                    {/* Scale labels */}
                     <div style={{
-                      height: '100%',
-                      width: `${Math.min(pct, 100)}%`,
-                      background: `linear-gradient(90deg, ${m.color}, ${m.color}cc)`,
-                      borderRadius: '2px',
-                      boxShadow: `0 0 10px ${m.color}40`,
-                      transition: 'width 0.8s ease',
-                    }} />
+                      display: 'flex', justifyContent: 'space-between',
+                      fontSize: '8px', color: 'var(--text-secondary)', marginBottom: '3px',
+                      fontFamily: 'Orbitron, sans-serif', letterSpacing: '0.5px', opacity: 0.6,
+                    }}>
+                      <span>0</span>
+                      <span>План: {m.target.toLocaleString('ru-RU')}</span>
+                    </div>
+                    {/* Gauge track */}
+                    <div style={{
+                      height: '14px',
+                      borderRadius: '7px',
+                      background: `repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 9%, transparent 9%, transparent 10%)`,
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}>
+                      {/* Fill */}
+                      <div style={{
+                        position: 'absolute', top: '1px', bottom: '1px', left: '1px',
+                        width: `calc(${Math.min(pct, 100)}% - 2px)`,
+                        borderRadius: '6px',
+                        background: `linear-gradient(90deg, ${m.color}40, ${m.color}90, ${m.color})`,
+                        boxShadow: isComplete
+                          ? `0 0 12px ${m.color}80, inset 0 1px 0 rgba(255,255,255,0.2)`
+                          : `0 0 8px ${m.color}50, inset 0 1px 0 rgba(255,255,255,0.15)`,
+                        transition: 'width 0.8s ease',
+                        animation: isComplete ? 'gaugePulse 2s ease-in-out infinite' : undefined,
+                      }} />
+                      {/* Needle marker at fill edge */}
+                      {pct > 3 && pct <= 100 && (
+                        <div style={{
+                          position: 'absolute',
+                          left: `${Math.min(pct, 100)}%`,
+                          top: '0', bottom: '0',
+                          width: '2px',
+                          background: '#fff',
+                          boxShadow: `0 0 6px #fff, 0 0 12px ${m.color}`,
+                          transform: 'translateX(-2px)',
+                          borderRadius: '1px',
+                        }} />
+                      )}
+                      {/* Tick marks overlay */}
+                      {[25, 50, 75].map(tick => (
+                        <div key={tick} style={{
+                          position: 'absolute',
+                          left: `${tick}%`,
+                          top: '2px', bottom: '2px',
+                          width: '1px',
+                          background: 'rgba(255,255,255,0.1)',
+                        }} />
+                      ))}
+                    </div>
                   </div>
 
                   <div style={{
-                    fontSize: '10px', marginTop: '3px', fontWeight: '600',
+                    fontSize: '10px', marginTop: '4px', fontWeight: '600',
                     color: isComplete ? 'var(--accent-green)' : pct >= 70 ? 'var(--accent-gold)' : 'var(--accent-primary)',
                   }}>
                     {isComplete ? '✓ План выполнен!' : pct >= 70 ? '~ На курсе' : '⚠ Отстаёт'}
