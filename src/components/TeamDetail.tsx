@@ -31,6 +31,17 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
   const [animated, setAnimated] = useState(false);
   const [countProgress, setCountProgress] = useState(0); // 0..1
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, []);
+
   useEffect(() => {
     const tAnim = setTimeout(() => setAnimated(true), 50);
 
@@ -64,6 +75,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
         background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
         zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '20px',
+        overflowY: 'auto',
       }} onClick={onClose}>
       <motion.div
         className="detail-modal"
@@ -78,7 +90,8 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
           borderRadius: '20px',
           maxWidth: '900px',
           width: '100%',
-          overflow: 'hidden',
+          maxHeight: 'calc(100vh - 40px)',
+          overflowY: 'auto',
           position: 'relative',
           borderTop: `3px solid ${crew.color}`,
           boxShadow: `0 0 60px ${crew.glowColor}, 0 20px 60px rgba(0,0,0,0.5)`,
