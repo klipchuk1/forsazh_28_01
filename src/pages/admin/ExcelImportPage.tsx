@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Upload, CheckCircle, Trophy, Users } from 'lucide-react';
 import ExcelImport from '../../components/ExcelImport';
-import type { ImportResult, ParsedCrew } from '../../components/ExcelImport';
+import type { ImportResult, ParsedCrew, ParsedCrewMonthly } from '../../components/ExcelImport';
 import { useCrews } from '../../hooks/useCrews';
 import { supabase } from '../../lib/supabase';
 
@@ -168,18 +168,24 @@ export default function ExcelImportPage() {
         }
       }
 
-      // --- 4. Update segment scores for current month ---
-      const monthIdx = new Date().getMonth() + 1; // 1-based
-      const segmentMap: Record<number, string> = { 2: 'warmup', 3: 'lap1', 4: 'lap2', 5: 'lap3' };
-      const currentSegment = segmentMap[monthIdx] || 'lap1';
+      // --- 4. Update segment scores from "Экипажи по месяцам" sheet ---
+      const monthlyCrews: ParsedCrewMonthly[] = result.parsedMonthly;
+      const monthToSegment: Record<string, string> = { march: 'lap1', april: 'lap2', may: 'lap3' };
+      const monthTarget = Math.round(targets.finish * 0.27);
 
       const segmentUpserts: { crew_id: number; segment_key: string; target: number; fact: number }[] = [];
-      for (const pc of parsedCrews) {
-        const crewId = crewMap.get(pc.teamName.toLowerCase());
+      for (const mc of monthlyCrews) {
+        const crewId = crewMap.get(mc.teamName.toLowerCase());
         if (!crewId) continue;
-        const monthScore = pc.score;
-        const monthTarget = Math.round(targets.finish * 0.27); // ~27% per month
-        segmentUpserts.push({ crew_id: crewId, segment_key: currentSegment, target: monthTarget, fact: monthScore });
+
+        for (const m of mc.months) {
+          const segKey = monthToSegment[m.month];
+          if (!segKey) continue;
+          const fact = m.distribution + m.contracts + m.ligaPro + m.contacts;
+          if (fact > 0) {
+            segmentUpserts.push({ crew_id: crewId, segment_key: segKey, target: monthTarget, fact });
+          }
+        }
       }
 
       if (segmentUpserts.length > 0) {

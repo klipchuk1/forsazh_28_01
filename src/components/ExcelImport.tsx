@@ -31,9 +31,24 @@ export interface TrackTargets {
   finish: number;
 }
 
+export interface MonthlyMetrics {
+  month: 'march' | 'april' | 'may';
+  distribution: number;
+  contracts: number;
+  ligaPro: number;
+  contacts: number;
+}
+
+export interface ParsedCrewMonthly {
+  teamName: string;
+  score: number;
+  months: MonthlyMetrics[];
+}
+
 export interface ImportResult {
   crews: Crew[];
   parsedCrews: ParsedCrew[];
+  parsedMonthly: ParsedCrewMonthly[];
   awards: ParsedAward[];
   trackTargets: TrackTargets;
 }
@@ -176,7 +191,50 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
         }
       }
 
-      onImport({ crews: existingCrews, parsedCrews, awards, trackTargets });
+      // --- Parse "Экипажи по месяцам" sheet ---
+      const parsedMonthly: ParsedCrewMonthly[] = [];
+      const monthlySheetName = workbook.SheetNames.find(n => n.includes('по месяцам'));
+      if (monthlySheetName) {
+        const monthlySheet = workbook.Sheets[monthlySheetName];
+        const monthlyRows: (string | number)[][] = XLSX.utils.sheet_to_json(monthlySheet, { header: 1 });
+        // Row 0: month headers (cols 6-9 = Март, 10-13 = Апрель, 14-17 = Май)
+        // Row 1: column headers
+        // Row 2+: data
+        for (let i = 2; i < monthlyRows.length; i++) {
+          const row = monthlyRows[i];
+          const teamName = row[0] ? String(row[0]).trim() : '';
+          if (!teamName) continue;
+
+          const score = row[5] !== undefined && row[5] !== '' ? Number(row[5]) : 0;
+          const months: MonthlyMetrics[] = [
+            {
+              month: 'march',
+              distribution: Number(row[6]) || 0,
+              contracts: Number(row[7]) || 0,
+              ligaPro: Number(row[8]) || 0,
+              contacts: Number(row[9]) || 0,
+            },
+            {
+              month: 'april',
+              distribution: Number(row[10]) || 0,
+              contracts: Number(row[11]) || 0,
+              ligaPro: Number(row[12]) || 0,
+              contacts: Number(row[13]) || 0,
+            },
+            {
+              month: 'may',
+              distribution: Number(row[14]) || 0,
+              contracts: Number(row[15]) || 0,
+              ligaPro: Number(row[16]) || 0,
+              contacts: Number(row[17]) || 0,
+            },
+          ];
+
+          parsedMonthly.push({ teamName, score, months });
+        }
+      }
+
+      onImport({ crews: existingCrews, parsedCrews, parsedMonthly, awards, trackTargets });
     };
     reader.readAsArrayBuffer(file);
 
