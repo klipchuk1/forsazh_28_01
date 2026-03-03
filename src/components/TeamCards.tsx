@@ -69,7 +69,13 @@ export default function TeamCards({ crews, onCrewClick }: TeamCardsProps) {
                 <div className="team-card-info">
                   <div className="team-card-name">{crew.teamName}</div>
                   <div className="team-card-members">
-                    🚗 {crew.driver.name.split(' ')[0]} · 🧭 {crew.navigator.name.split(' ')[0]}
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="#ff4466" style={{ verticalAlign: '-1px', marginRight: '2px' }}>
+                      <circle cx="6" cy="3" r="2.5"/><path d="M1.5 11.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5"/>
+                    </svg>
+                    {crew.driver.name.split(' ')[0]} · <svg width="12" height="12" viewBox="0 0 12 12" fill="#00d4ff" style={{ verticalAlign: '-1px', marginRight: '2px' }}>
+                      <circle cx="6" cy="3" r="2.5"/><path d="M1.5 11.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5"/>
+                    </svg>
+                    {crew.navigator.name.split(' ')[0]}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

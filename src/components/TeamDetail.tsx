@@ -134,8 +134,14 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
               fontFamily: 'Orbitron, sans-serif', fontSize: isMobile ? '14px' : '18px', fontWeight: '700',
               color: crew.color, letterSpacing: '2px', textTransform: 'uppercase', margin: 0,
             }}>{crew.teamName}</h2>
-            <p style={{ fontSize: isMobile ? '10px' : '12px', color: 'var(--text-secondary)', marginTop: '3px' }}>
-              {crew.driver.name} · {crew.navigator.name}
+            <p style={{ fontSize: isMobile ? '10px' : '12px', color: 'var(--text-secondary)', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '3px', margin: 0, marginTop: '3px' }}>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="#ff4466" style={{ flexShrink: 0 }}>
+                <circle cx="6" cy="3" r="2.5"/><path d="M1.5 11.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5"/>
+              </svg>
+              {crew.driver.name} · <svg width="11" height="11" viewBox="0 0 12 12" fill="#00d4ff" style={{ flexShrink: 0 }}>
+                <circle cx="6" cy="3" r="2.5"/><path d="M1.5 11.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5"/>
+              </svg>
+              {crew.navigator.name}
             </p>
           </div>
           <VoteButton crewId={crew.id} color={crew.color} />
