@@ -172,7 +172,6 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                 src={videoSrc}
                 autoPlay
                 muted
-                loop
                 playsInline
                 style={{
                   width: '100%',
