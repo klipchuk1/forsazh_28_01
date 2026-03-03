@@ -52,17 +52,20 @@ export default function ExcelImportPage() {
 
       const targets = result.trackTargets;
 
-      // Build a map of crew name -> DB crew (refresh from DB first)
-      const { data: dbCrews } = await supabase.from('crews').select('id, team_name');
+      // Build maps for matching: by name and by members (driver+navigator)
+      const { data: dbCrews } = await supabase.from('crews').select('id, team_name, driver_name, navigator_name');
       const crewMap = new Map<string, number>(); // name.toLowerCase() -> id
+      const memberMap = new Map<string, number>(); // "driver|navigator" -> id
       for (const c of (dbCrews || [])) {
         crewMap.set(c.team_name.toLowerCase(), c.id);
+        const memberKey = `${(c.driver_name || '').toLowerCase()}|${(c.navigator_name || '').toLowerCase()}`;
+        memberMap.set(memberKey, c.id);
       }
 
       // Use raw parsed crew data from Excel
       const parsedCrews: ParsedCrew[] = result.parsedCrews;
 
-      // --- 1. Create crews that don't exist yet ---
+      // --- 1. Match or create crews ---
       const allCrewNames = new Set<string>();
       for (const pc of parsedCrews) {
         allCrewNames.add(pc.teamName);
@@ -73,36 +76,47 @@ export default function ExcelImportPage() {
 
       for (const name of allCrewNames) {
         if (!crewMap.has(name.toLowerCase())) {
-          const numMatch = name.match(/(\d+)/);
-          const idx = numMatch ? parseInt(numMatch[1]) - 1 : crewMap.size;
-          const colorSet = crewColors[idx % crewColors.length];
-
+          // Try matching by driver+navigator names (crew was renamed)
           const pc = parsedCrews.find(c =>
             c.teamName.toLowerCase() === name.toLowerCase()
           );
+          const memberKey = `${(pc?.driverName || '').toLowerCase()}|${(pc?.navigatorName || '').toLowerCase()}`;
+          const existingId = pc ? memberMap.get(memberKey) : undefined;
 
-          const { data: newCrew, error: createErr } = await supabase
-            .from('crews')
-            .insert({
-              team_name: name,
-              driver_name: pc?.driverName || 'Пилот',
-              driver_avatar: '',
-              navigator_name: pc?.navigatorName || 'Штурман',
-              navigator_avatar: '',
-              color: colorSet.color,
-              glow_color: colorSet.glow,
-              sort_order: idx,
-            })
-            .select('id')
-            .single();
+          if (existingId) {
+            // Crew was renamed — update name in DB and reuse existing id
+            await supabase.from('crews').update({ team_name: name }).eq('id', existingId);
+            crewMap.set(name.toLowerCase(), existingId);
+            updatedCrewCount++;
+          } else {
+            // Truly new crew — create it
+            const numMatch = name.match(/(\d+)/);
+            const idx = numMatch ? parseInt(numMatch[1]) - 1 : crewMap.size;
+            const colorSet = crewColors[idx % crewColors.length];
 
-          if (createErr) {
-            console.error('Failed to create crew:', name, createErr.message);
-            continue;
+            const { data: newCrew, error: createErr } = await supabase
+              .from('crews')
+              .insert({
+                team_name: name,
+                driver_name: pc?.driverName || 'Пилот',
+                driver_avatar: '',
+                navigator_name: pc?.navigatorName || 'Штурман',
+                navigator_avatar: '',
+                color: colorSet.color,
+                glow_color: colorSet.glow,
+                sort_order: idx,
+              })
+              .select('id')
+              .single();
+
+            if (createErr) {
+              console.error('Failed to create crew:', name, createErr.message);
+              continue;
+            }
+
+            crewMap.set(name.toLowerCase(), newCrew.id);
+            createdCrewCount++;
           }
-
-          crewMap.set(name.toLowerCase(), newCrew.id);
-          createdCrewCount++;
         }
       }
 
