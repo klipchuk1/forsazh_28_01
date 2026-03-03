@@ -30,6 +30,13 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
 
   const [animated, setAnimated] = useState(false);
   const [countProgress, setCountProgress] = useState(0); // 0..1
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -74,7 +81,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
         background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
         zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '20px',
+        padding: isMobile ? '8px' : '20px',
         overflowY: 'auto',
       }} onClick={onClose}>
       <motion.div
@@ -87,10 +94,10 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
         style={{
           background: 'var(--bg-card)',
           border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '20px',
+          borderRadius: isMobile ? '14px' : '20px',
           maxWidth: '900px',
           width: '100%',
-          maxHeight: 'calc(100vh - 40px)',
+          maxHeight: isMobile ? 'calc(100vh - 16px)' : 'calc(100vh - 40px)',
           overflowY: 'auto',
           position: 'relative',
           borderTop: `3px solid ${crew.color}`,
@@ -109,25 +116,25 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
 
         {/* Header */}
         <div style={{
-          padding: '20px 24px 16px',
-          display: 'flex', alignItems: 'center', gap: '14px',
+          padding: isMobile ? '14px 14px 12px' : '20px 24px 16px',
+          display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '14px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}>
           <div style={{
-            width: '48px', height: '48px', borderRadius: '12px',
+            width: isMobile ? '38px' : '48px', height: isMobile ? '38px' : '48px', borderRadius: '12px',
             background: `${crew.color}15`, border: `2px solid ${crew.color}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'Orbitron, sans-serif', fontSize: '18px', fontWeight: '700',
+            fontFamily: 'Orbitron, sans-serif', fontSize: isMobile ? '14px' : '18px', fontWeight: '700',
             color: crew.color, flexShrink: 0,
           }}>
             #{rank}
           </div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <h2 style={{
-              fontFamily: 'Orbitron, sans-serif', fontSize: '18px', fontWeight: '700',
+              fontFamily: 'Orbitron, sans-serif', fontSize: isMobile ? '14px' : '18px', fontWeight: '700',
               color: crew.color, letterSpacing: '2px', textTransform: 'uppercase', margin: 0,
             }}>{crew.teamName}</h2>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '3px' }}>
+            <p style={{ fontSize: isMobile ? '10px' : '12px', color: 'var(--text-secondary)', marginTop: '3px' }}>
               {crew.driver.name} · {crew.navigator.name}
             </p>
           </div>
@@ -137,14 +144,14 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
         {/* Main content: video + metrics */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
           gap: '0',
-          minHeight: '340px',
+          minHeight: isMobile ? 'auto' : '340px',
         }}>
 
           {/* LEFT — Video */}
           <div style={{
-            padding: '20px 12px 20px 24px',
+            padding: isMobile ? '12px 12px 0' : '20px 12px 20px 24px',
             display: 'flex', flexDirection: 'column',
           }}>
             <div style={{
@@ -191,24 +198,24 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
 
           {/* RIGHT — KPI Cards */}
           <div style={{
-            padding: '20px 24px 20px 12px',
+            padding: isMobile ? '12px' : '20px 24px 20px 12px',
             display: 'flex', flexDirection: 'column',
-            gap: '10px',
+            gap: isMobile ? '8px' : '10px',
           }}>
             {/* Overall progress */}
             <div style={{
               textAlign: 'center',
-              padding: '14px',
-              borderRadius: '14px',
+              padding: isMobile ? '10px' : '14px',
+              borderRadius: isMobile ? '10px' : '14px',
               background: `linear-gradient(135deg, ${crew.color}08, ${crew.color}15)`,
               border: `1px solid ${crew.color}30`,
             }}>
               <div style={{
-                fontFamily: 'Orbitron, sans-serif', fontSize: '32px', fontWeight: '900',
+                fontFamily: 'Orbitron, sans-serif', fontSize: isMobile ? '24px' : '32px', fontWeight: '900',
                 color: crew.color,
                 lineHeight: 1,
               }}>
-                {Math.round(crew.totalScore * countProgress)} <span style={{ fontSize: '16px', opacity: 0.6 }}>/ {crew.finishTarget}</span>
+                {Math.round(crew.totalScore * countProgress)} <span style={{ fontSize: isMobile ? '13px' : '16px', opacity: 0.6 }}>/ {crew.finishTarget}</span>
               </div>
               <div style={{
                 fontSize: '10px', color: 'var(--text-secondary)',
@@ -224,8 +231,8 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
               const isComplete = pct >= 100;
               return (
                 <div key={m.label} style={{
-                  padding: '12px 16px',
-                  borderRadius: '14px',
+                  padding: isMobile ? '10px 12px' : '12px 16px',
+                  borderRadius: isMobile ? '10px' : '14px',
                   background: 'var(--bg-secondary)',
                   border: '1px solid rgba(255,255,255,0.06)',
                   position: 'relative',
@@ -247,7 +254,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                         {m.icon} {m.label}
                       </div>
                       <div style={{
-                        fontFamily: 'Orbitron, sans-serif', fontSize: '20px', fontWeight: '700',
+                        fontFamily: 'Orbitron, sans-serif', fontSize: isMobile ? '16px' : '20px', fontWeight: '700',
                         color: m.color, marginTop: '4px',
                       }}>
                         {Math.round(m.fact * countProgress).toLocaleString('ru-RU')}

@@ -837,37 +837,71 @@ body::before {
   .countdown-separator { font-size: 36px; }
 }
 
-@media (max-width: 640px) {
-  .app-container { padding: 0 12px 40px; }
-  .header { padding: 36px 16px 32px; min-height: 150px; }
-  .logo-title { font-size: 28px; letter-spacing: 4px; }
-  .logo-brand { font-size: 12px; }
-  .stats-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 768px) {
+  .app-container { padding: 0 10px 40px; }
+
+  /* Header */
+  .header { padding: 32px 16px 28px; min-height: 140px; margin-bottom: 20px; }
+  .logo-title { font-size: 32px; letter-spacing: 3px; }
+  .logo-brand { font-size: 14px; }
+  .header-badge { font-size: 10px; padding: 5px 10px; }
+
+  /* Stats */
+  .stats-bar { grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; }
   .stat-card { padding: 16px; }
-  .team-cards-grid { grid-template-columns: 1fr; }
-  .track-container { padding: 12px; }
+  .stat-card-value { font-size: 22px; }
+
+  /* Track */
+  .track-container { padding: 10px; margin-bottom: 20px; border-radius: 12px; }
+  .track-container .section-title { font-size: 16px !important; }
+
+  /* Leaderboard */
+  .leaderboard-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
+  .leaderboard-panel { padding: 14px; border-radius: 12px; }
+  .leaderboard-row { grid-template-columns: 28px 1fr 55px; gap: 8px; padding: 8px 10px; }
+  .leaderboard-team-name { font-size: 12px; }
+  .leaderboard-team-members { font-size: 9px; }
+  .leaderboard-progress-bar { width: 35px; }
+  .leaderboard-percent { font-size: 10px; }
+
+  /* Team cards */
+  .team-cards-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; }
+  .team-card { padding: 14px; border-radius: 12px; }
+  .team-card-header { gap: 10px; margin-bottom: 12px; }
+  .team-card-avatar { width: 30px; height: 30px; }
+  .team-card-name { font-size: 14px; }
+  .team-card-members { font-size: 10px; }
+  .team-card-metrics { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .metric-mini { padding: 6px 3px; border-radius: 6px; }
+  .metric-mini-value { font-size: 12px; }
+  .metric-mini-label { font-size: 8px; }
+
+  /* Countdown */
   .countdown-timer { padding: 20px; }
   .countdown-display { gap: 6px; }
   .countdown-value { font-size: 32px; width: 72px; padding: 8px 10px; }
   .countdown-separator { font-size: 28px; }
   .countdown-unit { font-size: 9px; }
-  .leaderboard-row { grid-template-columns: 32px 1fr 60px; }
-  .leaderboard-progress-bar { width: 40px; }
-  .detail-modal { padding: 20px; }
-  .detail-header { flex-wrap: wrap; gap: 12px; }
-  .detail-header-percent { margin-left: 0; }
-  .detail-metrics-row { grid-template-columns: 1fr; }
-  .detail-charts-row { grid-template-columns: 1fr; }
+
+  /* Section headers */
+  .section-header { margin-bottom: 12px; }
+  .section-title { font-size: 14px; letter-spacing: 1.5px; }
 }
 
-@media (max-width: 380px) {
-  .header { padding: 28px 12px 24px; min-height: 120px; }
-  .logo-title { font-size: 22px; letter-spacing: 3px; }
-  .logo-brand { font-size: 10px; gap: 8px; }
-  .countdown-value { font-size: 28px; width: 64px; }
-  .countdown-separator { font-size: 24px; }
+@media (max-width: 420px) {
+  .header { padding: 24px 12px 20px; min-height: 120px; }
+  .logo-title { font-size: 26px; letter-spacing: 2px; }
+  .logo-brand { font-size: 11px; gap: 6px; }
+  .header-badge { font-size: 9px; padding: 4px 8px; gap: 4px; }
+
   .stat-card-value { font-size: 20px; }
-  .stats-bar { gap: 8px; }
+  .stat-card-label { font-size: 10px; }
+
+  .team-card-metrics { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .metric-mini-value { font-size: 11px; }
+
+  .leaderboard-row { grid-template-columns: 24px 1fr 50px; }
+  .leaderboard-rank { font-size: 11px; width: 24px; height: 24px; }
 }
 
 /* ============ ANIMATIONS ============ */
