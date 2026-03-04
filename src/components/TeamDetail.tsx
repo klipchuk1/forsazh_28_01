@@ -262,7 +262,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                         fontFamily: 'Orbitron, sans-serif', fontSize: isMobile ? '16px' : '20px', fontWeight: '700',
                         color: m.color, marginTop: '4px',
                       }}>
-                        {Math.round(m.fact * countProgress).toLocaleString('ru-RU')}pts
+                        {Math.round(m.fact * countProgress).toLocaleString('ru-RU')}<span style={{ fontSize: '0.6em', opacity: 0.7 }}>pts</span>
                       </div>
                     </div>
                     <div style={{
@@ -283,7 +283,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                       fontFamily: 'Orbitron, sans-serif', letterSpacing: '0.5px', opacity: 0.6,
                     }}>
                       <span>0</span>
-                      <span>План: {m.target.toLocaleString('ru-RU')}</span>
+                      <span>План: {m.target.toLocaleString('ru-RU')}pts</span>
                     </div>
                     {/* Gauge track */}
                     <div style={{
