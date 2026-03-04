@@ -25,7 +25,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
     { label: 'Дистрибуция', fact: crew.metrics.distribution.fact, target: crew.metrics.distribution.target, color: '#ff3366', icon: '📊' },
     { label: 'Контракты', fact: crew.metrics.contracts.fact, target: crew.metrics.contracts.target, color: '#00d4ff', icon: '📝' },
     { label: 'Лига Про', fact: crew.metrics.ligaPro.fact, target: crew.metrics.ligaPro.target, color: '#a855f7', icon: '🏆' },
-    { label: 'Контакты', fact: crew.metrics.contacts.fact, target: crew.metrics.contacts.target, color: '#00ff88', icon: '📞' },
+    { label: 'Контакты', fact: crew.metrics.contacts.fact, target: crew.metrics.contacts.target, color: '#00ff88', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-1px', display: 'inline' }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
   ];
 
   const [animated, setAnimated] = useState(false);
