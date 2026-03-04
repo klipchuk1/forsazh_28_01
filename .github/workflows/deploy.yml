@@ -18,13 +18,13 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Deploy via FTPS
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy via SSH
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: 185.218.16.37
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          local-dir: ./dist/
-          server-dir: /www/pilotforsazh.ru/
-          protocol: ftps
-          port: 21
+          host: 37.140.192.78
+          username: u3435356
+          key: ${{ secrets.SSH_KEY }}
+          source: dist/*
+          target: ~/www/pilotforsazh.ru
+          strip_components: 1
+          rm: true
