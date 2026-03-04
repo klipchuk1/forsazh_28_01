@@ -18,7 +18,7 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Deploy via FTP
+      - name: Deploy via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: 185.218.16.37
@@ -26,3 +26,5 @@ jobs:
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./dist/
           server-dir: /www/pilotforsazh.ru/
+          protocol: ftps
+          port: 21
