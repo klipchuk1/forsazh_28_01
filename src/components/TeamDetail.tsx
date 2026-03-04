@@ -262,7 +262,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                         fontFamily: 'Orbitron, sans-serif', fontSize: isMobile ? '16px' : '20px', fontWeight: '700',
                         color: m.color, marginTop: '4px',
                       }}>
-                        {Math.round(m.fact * countProgress).toLocaleString('ru-RU')}
+                        {Math.round(m.fact * countProgress).toLocaleString('ru-RU')}pts
                       </div>
                     </div>
                     <div style={{
@@ -334,12 +334,6 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
                     </div>
                   </div>
 
-                  <div style={{
-                    fontSize: '10px', marginTop: '4px', fontWeight: '600',
-                    color: isComplete ? 'var(--accent-green)' : pct >= 70 ? 'var(--accent-gold)' : 'var(--accent-primary)',
-                  }}>
-                    {isComplete ? '✓ План выполнен!' : pct >= 70 ? '~ На курсе' : '⚠ Отстаёт'}
-                  </div>
                 </div>
               );
             })}
