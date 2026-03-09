@@ -167,6 +167,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
               background: '#000',
               border: '1px solid rgba(255,255,255,0.06)',
               position: 'relative',
+              aspectRatio: '3 / 4',
             }}>
               <video
                 src={videoSrc}
