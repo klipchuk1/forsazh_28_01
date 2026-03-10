@@ -26,10 +26,10 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: 37.140.192.78
-          username: u3435356
+          host: 193.17.182.201
+          username: admin
           key: ${{ secrets.SSH_KEY }}
           source: dist/*
-          target: ~/www/pilotforsazh.ru
+          target: /var/www/pilotforsazh.ru
           strip_components: 1
           rm: true
