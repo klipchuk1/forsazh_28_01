@@ -24,12 +24,11 @@ jobs:
         run: npm run build
 
       - name: Deploy via SSH
-        uses: appleboy/scp-action@v0.1.7
+        uses: easingthemes/ssh-deploy@main
         with:
-          host: 193.17.182.201
-          username: admin
-          key: ${{ secrets.SSH_KEY }}
-          source: dist/*
-          target: /var/www/pilotforsazh.ru
-          strip_components: 1
-          rm: true
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          REMOTE_HOST: 193.17.182.201
+          REMOTE_USER: admin
+          SOURCE: dist/
+          TARGET: /var/www/pilotforsazh.ru/
+          ARGS: "-avz --delete"
