@@ -10,7 +10,7 @@ interface VoteButtonProps {
 function getVoterId(): string {
   let id = localStorage.getItem('forsazh_voter_id');
   if (!id) {
-    id = crypto.randomUUID();
+    id = Math.random().toString(36).substring(2) + Date.now().toString(36);
     localStorage.setItem('forsazh_voter_id', id);
   }
   return id;
