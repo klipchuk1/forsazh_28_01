@@ -81,37 +81,45 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
         background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
         zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: isMobile ? '8px' : '20px',
+        padding: isMobile ? '0' : '20px',
         overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
       }} onClick={onClose}>
       <motion.div
         className="detail-modal"
-        initial={{ opacity: 0, scale: 0.92, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.92, y: 20 }}
-        transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+        initial={{ opacity: 0, ...(isMobile ? { y: '100%' } : { scale: 0.92, y: 20 }) }}
+        animate={{ opacity: 1, ...(isMobile ? { y: 0 } : { scale: 1, y: 0 }) }}
+        exit={{ opacity: 0, ...(isMobile ? { y: '100%' } : { scale: 0.92, y: 20 }) }}
+        transition={{ duration: isMobile ? 0.3 : 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
         onClick={(e) => e.stopPropagation()}
         style={{
           background: 'var(--bg-card)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: isMobile ? '14px' : '20px',
-          maxWidth: '900px',
+          border: isMobile ? 'none' : '1px solid rgba(255,255,255,0.08)',
+          borderRadius: isMobile ? '16px 16px 0 0' : '20px',
+          maxWidth: isMobile ? '100%' : '900px',
           width: '100%',
-          maxHeight: isMobile ? 'calc(100vh - 16px)' : 'calc(100vh - 40px)',
+          maxHeight: isMobile ? '95vh' : 'calc(100vh - 40px)',
+          height: isMobile ? '95vh' : 'auto',
           overflowY: 'auto',
-          position: 'relative',
+          WebkitOverflowScrolling: 'touch',
+          position: isMobile ? 'fixed' : 'relative',
+          bottom: isMobile ? '0' : 'auto',
+          left: isMobile ? '0' : 'auto',
           borderTop: `3px solid ${crew.color}`,
-          boxShadow: `0 0 60px ${crew.glowColor}, 0 20px 60px rgba(0,0,0,0.5)`,
+          boxShadow: isMobile
+            ? `0 -4px 30px ${crew.glowColor}, 0 -10px 40px rgba(0,0,0,0.5)`
+            : `0 0 60px ${crew.glowColor}, 0 20px 60px rgba(0,0,0,0.5)`,
         }}
       >
-        {/* Close button */}
+        {/* Close button — bigger touch target on mobile */}
         <button onClick={onClose} style={{
-          position: 'absolute', top: '12px', right: '14px', zIndex: 10,
-          background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)',
-          color: '#fff', fontSize: '18px', cursor: 'pointer', lineHeight: 1,
-          width: '32px', height: '32px', borderRadius: '50%',
+          position: 'absolute', top: isMobile ? '8px' : '12px', right: isMobile ? '8px' : '14px', zIndex: 10,
+          background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)',
+          color: '#fff', fontSize: isMobile ? '22px' : '18px', cursor: 'pointer', lineHeight: 1,
+          width: isMobile ? '40px' : '32px', height: isMobile ? '40px' : '32px', borderRadius: '50%',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(4px)',
+          WebkitTapHighlightColor: 'transparent',
         }}>×</button>
 
         {/* Header */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { gsap } from 'gsap';
 import type { Crew } from '../data/types';
 
@@ -15,6 +15,21 @@ function getTrackPosition(crew: Crew): number {
 export default function Track({ crews, onCrewClick }: TrackProps) {
   const [hoveredCrew, setHoveredCrew] = useState<number | null>(null);
   const [pathReady, setPathReady] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(true);
+  const scrollWrapperRef = useRef<HTMLDivElement>(null);
+
+  const isMobile = useMemo(() => typeof window !== 'undefined' && window.innerWidth < 768, []);
+
+  // Hide scroll hint after user scrolls
+  useEffect(() => {
+    const wrapper = scrollWrapperRef.current;
+    if (!wrapper || !isMobile) return;
+    const handleScroll = () => {
+      if (wrapper.scrollLeft > 20) setShowScrollHint(false);
+    };
+    wrapper.addEventListener('scroll', handleScroll, { passive: true });
+    return () => wrapper.removeEventListener('scroll', handleScroll);
+  }, [isMobile]);
 
   const W = 1600;
   const H = 600;
@@ -89,7 +104,8 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
         </span>
       </div>
 
-      <div className="track-svg-wrapper">
+      <div className="track-svg-wrapper" ref={scrollWrapperRef} style={{ position: 'relative' }}>
+        {isMobile && showScrollHint && <div className="track-scroll-hint" />}
         <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
           <defs>
             <filter id="glow">
@@ -222,6 +238,11 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
             );
           })}
         </svg>
+        {isMobile && showScrollHint && (
+          <div className="track-scroll-label">
+            <span>&#8592; листай &#8594;</span>
+          </div>
+        )}
       </div>
     </div>
   );
