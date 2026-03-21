@@ -8,8 +8,9 @@ interface TrackProps {
 }
 
 function getTrackPosition(crew: Crew): number {
-  if (crew.finishTarget <= 0) return 0;
-  return Math.min(crew.totalScore / crew.finishTarget, 1.0);
+  if (!crew.finishTarget || crew.finishTarget <= 0) return 0;
+  const pos = crew.totalScore / crew.finishTarget;
+  return Number.isFinite(pos) ? Math.min(pos, 1.0) : 0;
 }
 
 export default function Track({ crews, onCrewClick }: TrackProps) {

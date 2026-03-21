@@ -180,8 +180,15 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
               <video
                 src={videoSrc}
                 autoPlay
+                loop
                 muted
                 playsInline
+                onError={(e) => {
+                  const el = e.currentTarget;
+                  if (el.src !== '/crew-sample.mp4') {
+                    el.src = '/crew-sample.mp4';
+                  }
+                }}
                 style={{
                   width: '100%',
                   height: '100%',

@@ -17,6 +17,7 @@ export default function CrewForm({ crew, onClose, onSaved }: CrewFormProps) {
   const [driverAvatar, setDriverAvatar] = useState(crew?.driver.avatar ?? '');
   const [navigatorName, setNavigatorName] = useState(crew?.navigator.name ?? '');
   const [navigatorAvatar, setNavigatorAvatar] = useState(crew?.navigator.avatar ?? '');
+  const [videoUrl, setVideoUrl] = useState(crew?.videoUrl ?? '');
   const [color, setColor] = useState(crew?.color ?? '#FF3366');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +53,7 @@ export default function CrewForm({ crew, onClose, onSaved }: CrewFormProps) {
           driver_avatar: driverAvatar,
           navigator_name: navigatorName,
           navigator_avatar: navigatorAvatar,
+          video_url: videoUrl,
           color,
           glow_color: glowColor,
         })
@@ -71,6 +73,7 @@ export default function CrewForm({ crew, onClose, onSaved }: CrewFormProps) {
           driver_avatar: driverAvatar,
           navigator_name: navigatorName,
           navigator_avatar: navigatorAvatar,
+          video_url: videoUrl,
           color,
           glow_color: glowColor,
         })
@@ -171,6 +174,17 @@ export default function CrewForm({ crew, onClose, onSaved }: CrewFormProps) {
                 placeholder="https://..."
               />
             </div>
+          </div>
+
+          <div className="admin-field">
+            <label className="admin-label">Видео (URL или путь)</label>
+            <input
+              type="text"
+              value={videoUrl}
+              onChange={e => setVideoUrl(e.target.value)}
+              className="admin-input"
+              placeholder="/videos/crew-1.mp4"
+            />
           </div>
 
           <div className="admin-field">

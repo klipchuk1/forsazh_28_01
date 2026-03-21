@@ -16,6 +16,7 @@ CREATE TABLE crews (
   navigator_avatar TEXT NOT NULL DEFAULT '',
   color           TEXT NOT NULL DEFAULT '#FF3366',
   glow_color      TEXT NOT NULL DEFAULT 'rgba(255, 51, 102, 0.6)',
+  video_url       TEXT NOT NULL DEFAULT '',
   checkpoint1     BOOLEAN NOT NULL DEFAULT false,
   checkpoint2     BOOLEAN NOT NULL DEFAULT false,
   sort_order      INTEGER NOT NULL DEFAULT 0,
@@ -162,6 +163,7 @@ RETURNS JSON AS $$
       json_build_object('name', c.navigator_name, 'avatar', c.navigator_avatar) AS navigator,
       c.color,
       c.glow_color AS "glowColor",
+      c.video_url AS "videoUrl",
       c.checkpoint1,
       c.checkpoint2,
       json_build_object(
@@ -270,6 +272,7 @@ RETURNS JSON AS $$
       json_build_object('name', c.navigator_name, 'avatar', c.navigator_avatar) AS navigator,
       c.color,
       c.glow_color AS "glowColor",
+      c.video_url AS "videoUrl",
       c.checkpoint1,
       c.checkpoint2,
       json_build_object(
