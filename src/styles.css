@@ -626,6 +626,7 @@ body::before {
   border-radius: 50%;
   border: 2px solid var(--bg-card);
   object-fit: cover;
+  object-position: top;
   background: var(--bg-secondary);
 }
 
