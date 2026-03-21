@@ -17,7 +17,7 @@ UPDATE crews SET
   navigator_name = 'Исмагилов Артём',
   driver_avatar = '/avatars/kholodov.jpg',
   navigator_avatar = '/avatars/ismagilov.jpg',
-  video_url = '/videos/kremlyovskiy-utes.mp4'
+  video_url = '/videos/crew-1.mp4'
 WHERE id = 1;
 
 -- ID 2: Спасская башня
@@ -27,7 +27,7 @@ UPDATE crews SET
   navigator_name = 'Тазиев Руслан',
   driver_avatar = '/avatars/kuznetsov.jpg',
   navigator_avatar = '/avatars/taziev.jpg',
-  video_url = '/videos/spasskaya-bashnya.mp4'
+  video_url = '/videos/crew-2.mp4'
 WHERE id = 2;
 
 -- ID 3: Царицынский бастион
@@ -37,7 +37,7 @@ UPDATE crews SET
   navigator_name = 'Радаева Ирина',
   driver_avatar = '/avatars/shugurov.jpg',
   navigator_avatar = '/avatars/radaeva.jpg',
-  video_url = '/videos/tsaritsynskiy-bastion.mp4'
+  video_url = '/videos/crew-3.mp4'
 WHERE id = 3;
 
 -- ID 7: Армавирский сокол
@@ -47,7 +47,7 @@ UPDATE crews SET
   navigator_name = 'Машуров Олег',
   driver_avatar = '/avatars/sinyavinskiy.jpg',
   navigator_avatar = '/avatars/mashurov.jpg',
-  video_url = '/videos/armavir-sokol.mp4'
+  video_url = '/videos/crew-7.mp4'
 WHERE id = 7;
 
 -- ID 8: Морской бриз
@@ -57,7 +57,7 @@ UPDATE crews SET
   navigator_name = 'Бойчук Пётр',
   driver_avatar = '/avatars/ganin.jpg',
   navigator_avatar = '/avatars/boychuk.jpg',
-  video_url = '/videos/morskoy-briz.mp4'
+  video_url = '/videos/crew-8.mp4'
 WHERE id = 8;
 
 -- ID 16: Байкальский лёд
@@ -67,7 +67,7 @@ UPDATE crews SET
   navigator_name = 'Ровенский Алексей',
   driver_avatar = '/avatars/kopylevich.jpg',
   navigator_avatar = '/avatars/rovenskiy.jpg',
-  video_url = '/videos/baykalskiy-led.mp4'
+  video_url = '/videos/crew-16.mp4'
 WHERE id = 16;
 
 -- ID 17: Ледовый шторм (⚠ нет фото и видео — пока пустые)
@@ -141,9 +141,9 @@ UPDATE crews SET
 WHERE id = 11; -- Хакасский беркут
 
 
--- 4. Set video_url for remaining 12 crews (already have real names)
+-- 4. Set video_url for all crews uniformly as crew-{id}.mp4
 UPDATE crews SET video_url = '/videos/crew-' || id || '.mp4'
-WHERE id IN (4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 18, 19);
+WHERE id NOT IN (17); -- ID 17 (Ледовый шторм) has no video yet
 
 
 -- 5. Verify: all crews should have video_url, avatars, and real names
