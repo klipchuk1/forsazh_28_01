@@ -63,8 +63,8 @@ export default function TeamCards({ crews, onCrewClick }: TeamCardsProps) {
             >
               <div className="team-card-header">
                 <div className="team-card-avatars">
-                  <img className="team-card-avatar" src={crew.driver.avatar} alt={crew.driver.name} />
-                  <img className="team-card-avatar" src={crew.navigator.avatar} alt={crew.navigator.name} />
+                  <img className="team-card-avatar" src={`${crew.driver.avatar}?v=2`} alt={crew.driver.name} />
+                  <img className="team-card-avatar" src={`${crew.navigator.avatar}?v=2`} alt={crew.navigator.name} />
                 </div>
                 <div className="team-card-info">
                   <div className="team-card-name">{crew.teamName}</div>
