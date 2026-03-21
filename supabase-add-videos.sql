@@ -70,11 +70,14 @@ UPDATE crews SET
   video_url = '/videos/crew-16.mp4'
 WHERE id = 16;
 
--- ID 17: Ледовый шторм (⚠ нет фото и видео — пока пустые)
+-- ID 17: Ледовый шторм
 UPDATE crews SET
   team_name = 'Ледовый шторм',
   driver_name = 'Колесников Дмитрий',
-  navigator_name = 'Тихонов Вячеслав'
+  navigator_name = 'Тихонов Вячеслав',
+  driver_avatar = '/avatars/kolesnikov.jpg',
+  navigator_avatar = '/avatars/tikhonov.jpg',
+  video_url = '/videos/crew-17.mp4'
 WHERE id = 17;
 
 
@@ -143,7 +146,7 @@ WHERE id = 11; -- Хакасский беркут
 
 -- 4. Set video_url for all crews uniformly as crew-{id}.mp4
 UPDATE crews SET video_url = '/videos/crew-' || id || '.mp4'
-WHERE id NOT IN (17); -- ID 17 (Ледовый шторм) has no video yet
+WHERE video_url = '' OR video_url IS NULL;
 
 
 -- 5. Verify: all crews should have video_url, avatars, and real names
