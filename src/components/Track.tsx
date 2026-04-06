@@ -117,32 +117,51 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               <feGaussianBlur stdDeviation="3" result="b" />
               <feMerge><feMergeNode in="b" /><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
+            <filter id="carShadow">
+              <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#000" floodOpacity="0.7" />
+            </filter>
+            <filter id="edgeGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="b" />
+              <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
             <pattern id="checker" width="10" height="10" patternUnits="userSpaceOnUse">
               <rect width="5" height="5" fill="#ddd" />
               <rect x="5" width="5" height="5" fill="#222" />
               <rect y="5" width="5" height="5" fill="#222" />
               <rect x="5" y="5" width="5" height="5" fill="#ddd" />
             </pattern>
+            <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
+              <stop offset="0%" stopColor="#0f0f22" />
+              <stop offset="100%" stopColor="#07070f" />
+            </radialGradient>
           </defs>
 
-          <rect width={W} height={H} fill="#0c0c1a" />
+          <rect width={W} height={H} fill="url(#bgGrad)" />
 
           {/* Hidden path for getPointAtLength calculations */}
           <path ref={pathRef} d={zPath} fill="none" stroke="none" />
 
-          {/* Road layers */}
-          <path d={zPath} fill="none" stroke="#ffffff12" strokeWidth={roadW * 2 + 4}
+          {/* === ROAD === */}
+
+          {/* Outer edge glow */}
+          <path d={zPath} fill="none" stroke="#00d4ff" strokeWidth={roadW * 2 + 10}
+            strokeLinecap="round" strokeLinejoin="round" opacity="0.25" />
+
+          {/* Road base */}
+          <path d={zPath} fill="none" stroke="#0a0a18" strokeWidth={roadW * 2 + 6}
             strokeLinecap="round" strokeLinejoin="round" />
-          <path d={zPath} fill="none" stroke="#1e1e32" strokeWidth={roadW * 2}
+
+          {/* Asphalt */}
+          <path d={zPath} fill="none" stroke="#1c1c30" strokeWidth={roadW * 2}
             strokeLinecap="round" strokeLinejoin="round" />
-          <path d={zPath} fill="none" stroke="#00d4ff" strokeWidth={roadW * 2 + 2}
-            strokeLinecap="round" strokeLinejoin="round" opacity="0.6" />
-          <path d={zPath} fill="none" stroke="#1e1e32" strokeWidth={roadW * 2}
+
+          {/* Asphalt surface */}
+          <path d={zPath} fill="none" stroke="#222238" strokeWidth={roadW * 2 - 8}
             strokeLinecap="round" strokeLinejoin="round" />
-          <path d={zPath} fill="none" stroke="#16162a" strokeWidth={roadW * 1.2}
-            strokeLinecap="round" strokeLinejoin="round" />
-          <path d={zPath} fill="none" stroke="#ffffff" strokeWidth="1.5"
-            strokeDasharray="18,26" opacity="0.25" />
+
+          {/* Centre lane divider */}
+          <path d={zPath} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="2"
+            strokeDasharray="24,20" strokeLinecap="butt" />
 
           {/* Stage labels */}
           <text x={sx + (ex - sx) / 2} y={r1 - roadW - 14} textAnchor="middle"
@@ -205,14 +224,19 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
               >
                 <rect x={x - 28} y={y - 28} width="56" height="56" fill="transparent" />
                 <g transform={`translate(${x}, ${y}) rotate(${pt.angle})`}>
-                  <ellipse cx={0} cy={0} rx={22} ry={12}
-                    fill={crew.color} opacity={isHovered ? 0.35 : 0.15} />
+                  {/* Ground shadow */}
+                  <ellipse cx={2} cy={6} rx={20} ry={7}
+                    fill="#000" opacity="0.5" />
+                  {/* Color glow under car */}
+                  <ellipse cx={0} cy={2} rx={18} ry={8}
+                    fill={crew.color} opacity={isHovered ? 0.45 : 0.22} />
                   <image
                     href={`/cars/car-${((crew.id - 1) % 12) + 1}.png`}
                     x={-26} y={-16}
                     width="52" height="32"
                     preserveAspectRatio="xMidYMid meet"
-                    style={{ filter: isHovered ? 'brightness(1.2) drop-shadow(0 0 6px ' + crew.color + ')' : undefined }}
+                    filter={isHovered ? `url(#glowStrong)` : `url(#carShadow)`}
+                    style={{ filter: isHovered ? 'brightness(1.3) drop-shadow(0 0 8px ' + crew.color + ')' : 'drop-shadow(0 3px 4px rgba(0,0,0,0.8))' }}
                   />
                 </g>
                 {/* Rank badge — counter-rotated so it stays upright */}
@@ -227,12 +251,18 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
                 {isHovered && (
                   <g>
-                    <rect x={x - 60} y={y - 42} width="120" height="22" rx="5"
+                    <rect x={x - 70} y={y - 52} width="140" height="34" rx="5"
                       fill="#0c0c1a" stroke={crew.color} strokeWidth="1" opacity="0.95" />
-                    <text x={x} y={y - 27} textAnchor="middle" fill="#fff"
+                    <text x={x} y={y - 35} textAnchor="middle" fill="#fff"
                       fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600">
                       {crew.teamName} · {crew.totalScore}pts
                     </text>
+                    {crew.branch && (
+                      <text x={x} y={y - 23} textAnchor="middle" fill={crew.color}
+                        fontSize="8" fontFamily="Rajdhani, sans-serif" fontWeight="500">
+                        {crew.branch}
+                      </text>
+                    )}
                   </g>
                 )}
               </g>
