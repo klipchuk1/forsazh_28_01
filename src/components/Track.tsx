@@ -249,25 +249,37 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                   </text>
                 </g>
 
-                {isHovered && (
-                  <g>
-                    <rect x={x - 170} y={y - 72} width="340" height="52" rx="5"
-                      fill="#0c0c1a" stroke={crew.color} strokeWidth="1" opacity="0.95" />
-                    <text x={x} y={y - 48} textAnchor="middle" fill="#fff"
-                      fontSize="18" fontFamily="Rajdhani, sans-serif" fontWeight="600">
-                      {crew.teamName} · {crew.totalScore}pts
-                    </text>
-                    {crew.branch && (
-                      <text x={x} y={y - 28} textAnchor="middle" fill={crew.color}
-                        fontSize="16" fontFamily="Rajdhani, sans-serif" fontWeight="500">
-                        {crew.branch}
-                      </text>
-                    )}
-                  </g>
-                )}
               </g>
             );
           })}
+
+          {/* Tooltip layer — rendered last so it's always on top */}
+          {(() => {
+            const crew = sorted.find(c => c.id === hoveredCrew);
+            if (!crew) return null;
+            const t = getTrackPosition(crew);
+            const pt = getPointOnPath(t);
+            const angleRad = pt.angle * (Math.PI / 180);
+            const laneOffset = ((crew.id % 5) - 2) * 16;
+            const x = pt.x + laneOffset * Math.sin(angleRad) * -1;
+            const y = pt.y + laneOffset * Math.cos(angleRad);
+            return (
+              <g style={{ pointerEvents: 'none' }}>
+                <rect x={x - 170} y={y - 72} width="340" height="52" rx="5"
+                  fill="#0c0c1a" stroke={crew.color} strokeWidth="1" opacity="0.95" />
+                <text x={x} y={y - 48} textAnchor="middle" fill="#fff"
+                  fontSize="18" fontFamily="Rajdhani, sans-serif" fontWeight="600">
+                  {crew.teamName} · {crew.totalScore}pts
+                </text>
+                {crew.branch && (
+                  <text x={x} y={y - 28} textAnchor="middle" fill={crew.color}
+                    fontSize="16" fontFamily="Rajdhani, sans-serif" fontWeight="500">
+                    {crew.branch}
+                  </text>
+                )}
+              </g>
+            );
+          })()}
         </svg>
         {isMobile && showScrollHint && (
           <div className="track-scroll-label">
