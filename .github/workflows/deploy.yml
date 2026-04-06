@@ -32,3 +32,22 @@ jobs:
           SOURCE: dist/
           TARGET: /var/www/pilotforsazh.ru/
           ARGS: "-avz --delete"
+
+      - name: Fix Nginx SPA routing
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 185.218.16.37
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            CONF=$(grep -rl "pilotforsazh\|/var/www/pilotforsazh" /etc/nginx/sites-enabled/ /etc/nginx/conf.d/ 2>/dev/null | head -1)
+            if [ -n "$CONF" ]; then
+              if ! grep -q "try_files" "$CONF"; then
+                sed -i 's|index  index.html index.htm;|index  index.html index.htm;\n        try_files $uri $uri/ /index.html;|g' "$CONF"
+                nginx -t && systemctl reload nginx && echo "Nginx reloaded with SPA routing"
+              else
+                echo "try_files already present"
+              fi
+            else
+              echo "Nginx config not found"
+            fi
