@@ -317,7 +317,7 @@ export default function StatsBar() {
         change="Пилот проект"
         index={0}
         gaugeLabels={['МАРТ', 'АПР', 'МАЙ']}
-        gaugeNeedle={0}
+        gaugeNeedle={0.5}
         icon={<><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></>}
       />
       <StatCard
