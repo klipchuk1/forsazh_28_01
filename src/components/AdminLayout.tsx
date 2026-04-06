@@ -4,11 +4,11 @@ import { Users, BarChart3, Upload, Flag, LayoutDashboard, LogOut, ExternalLink }
 import '../styles/admin.css';
 
 const navItems = [
-  { to: '/admin', icon: LayoutDashboard, label: 'Обзор', end: true },
-  { to: '/admin/crews', icon: Users, label: 'Экипажи', end: false },
-  { to: '/admin/kpi', icon: BarChart3, label: 'KPI данные', end: false },
-  { to: '/admin/import', icon: Upload, label: 'Импорт Excel', end: false },
-  { to: '/admin/segments', icon: Flag, label: 'Этапы гонки', end: false },
+  { to: '/control-panel', icon: LayoutDashboard, label: 'Обзор', end: true },
+  { to: '/control-panel/crews', icon: Users, label: 'Экипажи', end: false },
+  { to: '/control-panel/kpi', icon: BarChart3, label: 'KPI данные', end: false },
+  { to: '/control-panel/import', icon: Upload, label: 'Импорт Excel', end: false },
+  { to: '/control-panel/segments', icon: Flag, label: 'Этапы гонки', end: false },
 ];
 
 export default function AdminLayout() {

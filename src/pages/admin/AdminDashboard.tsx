@@ -50,19 +50,19 @@ export default function AdminDashboard() {
       <h2 className="admin-page-title" style={{ fontSize: '14px', marginBottom: '16px' }}>Быстрые действия</h2>
 
       <div className="admin-quick-actions">
-        <Link to="/admin/crews" className="admin-quick-action">
+        <Link to="/control-panel/crews" className="admin-quick-action">
           <div className="admin-quick-action-icon">
             <Users size={20} />
           </div>
           <span className="admin-quick-action-text">Управление экипажами</span>
         </Link>
-        <Link to="/admin/kpi" className="admin-quick-action">
+        <Link to="/control-panel/kpi" className="admin-quick-action">
           <div className="admin-quick-action-icon" style={{ background: 'rgba(255, 214, 0, 0.1)', color: 'var(--accent-gold)' }}>
             <BarChart3 size={20} />
           </div>
           <span className="admin-quick-action-text">Обновить KPI</span>
         </Link>
-        <Link to="/admin/import" className="admin-quick-action">
+        <Link to="/control-panel/import" className="admin-quick-action">
           <div className="admin-quick-action-icon" style={{ background: 'rgba(0, 255, 136, 0.1)', color: 'var(--accent-green)' }}>
             <Upload size={20} />
           </div>
@@ -70,7 +70,7 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      <Link to="/admin/segments" className="admin-quick-action" style={{ maxWidth: '400px' }}>
+      <Link to="/control-panel/segments" className="admin-quick-action" style={{ maxWidth: '400px' }}>
         <div className="admin-quick-action-icon" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7' }}>
           <Flag size={20} />
         </div>

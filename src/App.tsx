@@ -16,10 +16,10 @@ export default function App() {
       <Route path="/" element={<Dashboard />} />
 
       {/* Admin login */}
-      <Route path="/admin/login" element={<LoginPage />} />
+      <Route path="/control-panel/login" element={<LoginPage />} />
 
       {/* Protected admin routes */}
-      <Route path="/admin" element={
+      <Route path="/control-panel" element={
         <ProtectedRoute>
           <AdminLayout />
         </ProtectedRoute>
