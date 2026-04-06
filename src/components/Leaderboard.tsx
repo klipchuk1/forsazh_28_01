@@ -53,7 +53,7 @@ export default function Leaderboard({ crews, onCrewClick }: LeaderboardProps) {
           {rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : rank}
         </div>
         <div className="leaderboard-team-info">
-          <div className="leaderboard-team-name" style={{ color: crew.color }}>{crew.teamName}</div>
+          <div className="leaderboard-team-name" style={{ color: crew.color }}>{crew.teamName}{crew.branch ? <span style={{ color: 'var(--text-secondary)', fontWeight: '400', fontSize: '0.85em' }}> | {crew.branch}</span> : ''}</div>
           <div className="leaderboard-team-members">
             {crew.driver.name.split(' ')[0]} & {crew.navigator.name.split(' ')[0]}
           </div>
