@@ -116,6 +116,7 @@ export function generateMockData(): Crew[] {
     return {
       id: index + 1,
       teamName: crew.team,
+      branch: '',
       driver: {
         name: crew.driver,
         avatar: `https://i.pravatar.cc/150?img=${(index * 3) % 70 + 1}`,
