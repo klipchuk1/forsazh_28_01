@@ -241,9 +241,9 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
                 </g>
                 {/* Rank badge — counter-rotated so it stays upright */}
                 <g transform={`translate(${x}, ${y})`}>
-                  <circle cx={0} cy={-14} r="7" fill={crew.color} stroke="#fff" strokeWidth="0.8" />
-                  <text x={0} y={-13.5} textAnchor="middle" dominantBaseline="middle"
-                    fill="#fff" fontSize="6.5" fontFamily="Orbitron, sans-serif"
+                  <circle cx={0} cy={-16} r="10.5" fill={crew.color} stroke="#fff" strokeWidth="0.8" />
+                  <text x={0} y={-15.5} textAnchor="middle" dominantBaseline="middle"
+                    fill="#fff" fontSize="9.75" fontFamily="Orbitron, sans-serif"
                     fontWeight="800">
                     {rank}
                   </text>
