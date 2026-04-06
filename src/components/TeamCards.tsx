@@ -67,7 +67,7 @@ export default function TeamCards({ crews, onCrewClick }: TeamCardsProps) {
                   <img className="team-card-avatar" src={`${crew.navigator.avatar}?v=2`} alt={crew.navigator.name} />
                 </div>
                 <div className="team-card-info">
-                  <div className="team-card-name">{crew.teamName}</div>
+                  <div className="team-card-name">{crew.teamName}{crew.branch ? <span className="team-card-branch"> | {crew.branch}</span> : ''}</div>
                   <div className="team-card-members">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="#ff4466" style={{ verticalAlign: '-1px', marginRight: '2px' }}>
                       <circle cx="6" cy="3" r="2.5"/><path d="M1.5 11.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5"/>

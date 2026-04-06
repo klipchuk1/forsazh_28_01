@@ -28,6 +28,7 @@ type SegmentScores = {
 type Crew = {
   id: number;
   teamName: string;
+  branch: string;
   driver: {
     name: string;
     avatar: string;

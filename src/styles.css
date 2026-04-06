@@ -644,6 +644,12 @@ body::before {
   color: var(--text-primary);
 }
 
+.team-card-branch {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
 .team-card-members {
   font-size: 11px;
   color: var(--text-secondary);

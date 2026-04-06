@@ -3,8 +3,30 @@
 -- Run this in Supabase SQL Editor
 -- ============================================================
 
--- 1. Add video_url column if not exists
+-- 1. Add columns if not exists
 ALTER TABLE crews ADD COLUMN IF NOT EXISTS video_url TEXT NOT NULL DEFAULT '';
+ALTER TABLE crews ADD COLUMN IF NOT EXISTS branch TEXT NOT NULL DEFAULT '';
+
+-- 1b. Set branch for all 19 crews
+UPDATE crews SET branch = 'Экспресс' WHERE id = 1;
+UPDATE crews SET branch = 'Сервис 77' WHERE id = 2;
+UPDATE crews SET branch = 'Сервис 78' WHERE id = 3;
+UPDATE crews SET branch = 'Краснодар' WHERE id = 4;
+UPDATE crews SET branch = 'Краснодар' WHERE id = 5;
+UPDATE crews SET branch = 'Армавир' WHERE id = 6;
+UPDATE crews SET branch = 'Армавир' WHERE id = 7;
+UPDATE crews SET branch = 'Симферополь' WHERE id = 8;
+UPDATE crews SET branch = 'Симферополь' WHERE id = 9;
+UPDATE crews SET branch = 'Севастополь' WHERE id = 10;
+UPDATE crews SET branch = 'Абакан' WHERE id = 11;
+UPDATE crews SET branch = 'Красноярск' WHERE id = 12;
+UPDATE crews SET branch = 'Уссурийск' WHERE id = 13;
+UPDATE crews SET branch = 'Владивосток' WHERE id = 14;
+UPDATE crews SET branch = 'Владивосток' WHERE id = 15;
+UPDATE crews SET branch = 'Иркутск' WHERE id = 16;
+UPDATE crews SET branch = 'Иркутск' WHERE id = 17;
+UPDATE crews SET branch = 'Благовещенск' WHERE id = 18;
+UPDATE crews SET branch = 'Якутск' WHERE id = 19;
 
 
 -- 2. Fix 7 placeholder crews — rename "Экипаж N" to real names
@@ -162,6 +184,7 @@ RETURNS JSON AS $$
     SELECT
       c.id,
       c.team_name AS "teamName",
+      c.branch AS "branch",
       json_build_object('name', c.driver_name, 'avatar', c.driver_avatar) AS driver,
       json_build_object('name', c.navigator_name, 'avatar', c.navigator_avatar) AS navigator,
       c.color,

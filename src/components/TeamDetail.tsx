@@ -141,7 +141,7 @@ export default function TeamDetail({ crew, crews, onClose }: TeamDetailProps) {
             <h2 style={{
               fontFamily: 'Orbitron, sans-serif', fontSize: isMobile ? '14px' : '18px', fontWeight: '700',
               color: crew.color, letterSpacing: '2px', textTransform: 'uppercase', margin: 0,
-            }}>{crew.teamName}</h2>
+            }}>{crew.teamName}{crew.branch ? <span style={{ color: 'var(--text-secondary)', fontWeight: '400' }}> | {crew.branch}</span> : ''}</h2>
             <p style={{ fontSize: isMobile ? '10px' : '12px', color: 'var(--text-secondary)', margin: '3px 0 0', display: 'flex', alignItems: 'center', gap: '3px' }}>
               <svg width="11" height="11" viewBox="0 0 12 12" fill="#ff4466" style={{ flexShrink: 0 }}>
                 <circle cx="6" cy="3" r="2.5"/><path d="M1.5 11.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5"/>
