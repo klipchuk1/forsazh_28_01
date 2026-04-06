@@ -251,15 +251,15 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
                 {isHovered && (
                   <g>
-                    <rect x={x - 70} y={y - 52} width="140" height="34" rx="5"
+                    <rect x={x - 110} y={y - 72} width="220" height="52" rx="5"
                       fill="#0c0c1a" stroke={crew.color} strokeWidth="1" opacity="0.95" />
-                    <text x={x} y={y - 35} textAnchor="middle" fill="#fff"
-                      fontSize="9" fontFamily="Rajdhani, sans-serif" fontWeight="600">
+                    <text x={x} y={y - 48} textAnchor="middle" fill="#fff"
+                      fontSize="18" fontFamily="Rajdhani, sans-serif" fontWeight="600">
                       {crew.teamName} · {crew.totalScore}pts
                     </text>
                     {crew.branch && (
-                      <text x={x} y={y - 23} textAnchor="middle" fill={crew.color}
-                        fontSize="8" fontFamily="Rajdhani, sans-serif" fontWeight="500">
+                      <text x={x} y={y - 28} textAnchor="middle" fill={crew.color}
+                        fontSize="16" fontFamily="Rajdhani, sans-serif" fontWeight="500">
                         {crew.branch}
                       </text>
                     )}
