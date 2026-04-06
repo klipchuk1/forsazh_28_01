@@ -251,7 +251,7 @@ export default function Track({ crews, onCrewClick }: TrackProps) {
 
                 {isHovered && (
                   <g>
-                    <rect x={x - 110} y={y - 72} width="220" height="52" rx="5"
+                    <rect x={x - 170} y={y - 72} width="340" height="52" rx="5"
                       fill="#0c0c1a" stroke={crew.color} strokeWidth="1" opacity="0.95" />
                     <text x={x} y={y - 48} textAnchor="middle" fill="#fff"
                       fontSize="18" fontFamily="Rajdhani, sans-serif" fontWeight="600">
