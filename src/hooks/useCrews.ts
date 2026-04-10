@@ -12,7 +12,15 @@ export function useCrews() {
       const { data, error: err } = await supabase.rpc('get_crews_full');
       if (err) throw err;
       // Ensure awards array exists on every crew (in case RPC doesn't return it yet)
-      const crewsData = (data ?? []).map((c: Crew) => ({ ...c, awards: c.awards ?? [] }));
+      const branchById: Record<number, string> = {
+        1: 'Экспресс', 2: 'Сервис 77', 3: 'Сервис 77',
+        4: 'Краснодар', 5: 'Краснодар', 6: 'Армавир', 7: 'Армавир',
+        8: 'Симферополь', 9: 'Симферополь', 10: 'Севастополь',
+        11: 'Абакан', 12: 'Красноярск', 13: 'Уссурийск',
+        14: 'Владивосток', 15: 'Владивосток', 16: 'Иркутск', 17: 'Иркутск',
+        18: 'Благовещенск', 19: 'Якутск',
+      };
+      const crewsData = (data ?? []).map((c: Crew) => ({ ...c, awards: c.awards ?? [], branch: c.branch || branchById[c.id] || '' }));
       setCrews(crewsData);
       setError(null);
     } catch {
