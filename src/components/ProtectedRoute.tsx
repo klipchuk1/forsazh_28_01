@@ -2,7 +2,10 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { ReactNode } from 'react';
 
-const ALLOWED_EMAIL = 'officialklip@gmail.com';
+const ALLOWED_EMAILS = [
+  'officialklip@gmail.com',
+  'avdulovnikita@gmail.com',
+];
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading, signOut } = useAuth();
@@ -29,7 +32,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     return <Navigate to="/control-panel/login" replace />;
   }
 
-  if (user.email !== ALLOWED_EMAIL) {
+  if (!ALLOWED_EMAILS.includes(user.email ?? '')) {
     signOut();
     return <Navigate to="/control-panel/login" replace />;
   }
