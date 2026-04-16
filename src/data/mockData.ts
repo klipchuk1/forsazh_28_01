@@ -1,147 +1,481 @@
-import type { Crew, SegmentScores } from './types';
+import type { Crew } from './types';
 
-const crewNames = [
-  { team: 'Молния', driver: 'Виктор Сорокин', navigator: 'Анна Петрова' },
-  { team: 'Торнадо', driver: 'Дмитрий Волков', navigator: 'Мария Иванова' },
-  { team: 'Стихия', driver: 'Алексей Кузнецов', navigator: 'Елена Смирнова' },
-  { team: 'Ураган', driver: 'Сергей Попов', navigator: 'Ольга Козлова' },
-  { team: 'Фантом', driver: 'Иван Новиков', navigator: 'Наталья Соколова' },
-  { team: 'Вихрь', driver: 'Павел Морозов', navigator: 'Юлия Борисова' },
-  { team: 'Метеор', driver: 'Роман Зеленов', navigator: 'Полина Карпова' },
-  { team: 'Конкорд', driver: 'Никита Тихонов', navigator: 'Виктория Лукьянова' },
-  { team: 'Юнкер', driver: 'Антон Семёнов', navigator: 'Полина Беляева' },
-  { team: 'Экзит', driver: 'Денис Фролов', navigator: 'Галина Чёрная' },
-  { team: 'Валкайрия', driver: 'Константин Орлов', navigator: 'Людмила Степанова' },
-  { team: 'Драгон', driver: 'Фёдор Горбачёв', navigator: 'Надежда Касимова' },
-  { team: 'Тайфун', driver: 'Геннадий Рогозин', navigator: 'Ирина Калинина' },
-  { team: 'Нейтрон', driver: 'Станислав Петров', navigator: 'Светлана Ломова' },
-  { team: 'Аист', driver: 'Виталий Касаткин', navigator: 'Валентина Шарова' },
-  { team: 'Пульсар', driver: 'Олег Шестаков', navigator: 'Дарья Кириллова' },
-  { team: 'Кнайт', driver: 'Марк Резниченко', navigator: 'Людмила Ващенко' },
-  { team: 'Аэро', driver: 'Степан Матвеев', navigator: 'Ксения Гаврилова' },
-  { team: 'Фаэтон', driver: 'Георгий Берестин', navigator: 'Анастасия Овчарова' },
+// Real crew data snapshot from Supabase (used as fallback when Supabase is unreachable)
+export const mockCrews: Crew[] = [
+  {
+    id: 1,
+    teamName: 'Кремлёвский утёс',
+    branch: 'Экспресс',
+    driver: { name: 'Исмагилов Артём', avatar: '/avatars/kholodov.jpg' },
+    navigator: { name: 'Холодов Андрей', avatar: '/avatars/ismagilov.jpg' },
+    color: '#FF3366',
+    glowColor: 'rgba(255, 51, 102, 0.6)',
+    videoUrl: '/videos/crew-1.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 1070,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 540 },
+      contracts: { target: 640, fact: 220 },
+      ligaPro: { target: 560, fact: 200 },
+      contacts: { target: 540, fact: 110 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 895 }, lap2: { target: 859, fact: 175 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#2 по дистрибуции', category: 'дистрибуция', place: 2, month: 'Март' },
+      { label: '#2 по контрактованию', category: 'контрактование', place: 2, month: 'Март' },
+      { label: '#3 по ЛигеПро', category: 'ЛигеПро', place: 3, month: 'Март' },
+      { label: 'Лидер месяца', category: 'лидер месяца', place: 0, month: 'Март' },
+    ],
+  },
+  {
+    id: 2,
+    teamName: 'Спасская башня',
+    branch: 'Сервис 77',
+    driver: { name: 'Кузнецов Александр', avatar: '/avatars/kuznetsov.jpg' },
+    navigator: { name: 'Тазиев Руслан', avatar: '/avatars/taziev.jpg' },
+    color: '#00D4FF',
+    glowColor: 'rgba(0, 212, 255, 0.6)',
+    videoUrl: '/videos/crew-2.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 933,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 440 },
+      contracts: { target: 640, fact: 100 },
+      ligaPro: { target: 560, fact: 280 },
+      contacts: { target: 540, fact: 113 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 620 }, lap2: { target: 859, fact: 313 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#2 по дистрибуции', category: 'дистрибуция', place: 2, month: 'Март' },
+      { label: '#3 по дистрибуции', category: 'дистрибуция', place: 3, month: 'Март' },
+      { label: '#1 по контрактованию', category: 'контрактование', place: 1, month: 'Март' },
+    ],
+  },
+  {
+    id: 3,
+    teamName: 'Царицынский бастион',
+    branch: 'Сервис 77',
+    driver: { name: 'Шугуров Артём', avatar: '/avatars/shugurov.jpg' },
+    navigator: { name: 'Радаева Ирина', avatar: '/avatars/radaeva.jpg' },
+    color: '#FFD600',
+    glowColor: 'rgba(255, 214, 0, 0.6)',
+    videoUrl: '/videos/crew-3.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 745,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 380 },
+      contracts: { target: 640, fact: 120 },
+      ligaPro: { target: 560, fact: 140 },
+      contacts: { target: 540, fact: 105 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 526 }, lap2: { target: 859, fact: 219 }, lap3: { target: 827, fact: 0 } },
+    awards: [],
+  },
+  {
+    id: 4,
+    teamName: 'Казачий острог',
+    branch: 'Краснодар',
+    driver: { name: 'Таценко Сергей', avatar: '/avatars/petrakov.jpg' },
+    navigator: { name: 'Петраков Максим', avatar: '/avatars/tatsenko.jpg' },
+    color: '#00FF88',
+    glowColor: 'rgba(0, 255, 136, 0.6)',
+    videoUrl: '/videos/crew-4.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 510,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 80 },
+      contracts: { target: 640, fact: 160 },
+      ligaPro: { target: 560, fact: 160 },
+      contacts: { target: 540, fact: 110 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 423 }, lap2: { target: 859, fact: 87 }, lap3: { target: 827, fact: 0 } },
+    awards: [],
+  },
+  {
+    id: 5,
+    teamName: 'Кубанская застава',
+    branch: 'Краснодар',
+    driver: { name: 'Сасин Даниил', avatar: '/avatars/sasin.jpg' },
+    navigator: { name: 'Лавренцов Никита', avatar: '/avatars/lavrentsov.jpg' },
+    color: '#FF6B35',
+    glowColor: 'rgba(255, 107, 53, 0.6)',
+    videoUrl: '/videos/crew-5.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 810,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 200 },
+      contracts: { target: 640, fact: 240 },
+      ligaPro: { target: 560, fact: 140 },
+      contacts: { target: 540, fact: 230 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 615 }, lap2: { target: 859, fact: 195 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#1 по контрактованию', category: 'контрактование', place: 1, month: 'Март' },
+      { label: '#3 по инфо контактам', category: 'инфо контакты', place: 3, month: 'Март' },
+    ],
+  },
+  {
+    id: 6,
+    teamName: 'Армавирский щит',
+    branch: 'Армавир',
+    driver: { name: 'Фелер Алексей', avatar: '/avatars/feler.jpg' },
+    navigator: { name: 'Яхонтов Алексей', avatar: '/avatars/yakhontov.jpg' },
+    color: '#A855F7',
+    glowColor: 'rgba(168, 85, 247, 0.6)',
+    videoUrl: '/videos/crew-6.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 578,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 140 },
+      contracts: { target: 640, fact: 120 },
+      ligaPro: { target: 560, fact: 220 },
+      contacts: { target: 540, fact: 98 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 437 }, lap2: { target: 859, fact: 141 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#2 по ЛигеПро', category: 'ЛигеПро', place: 2, month: 'Март' },
+    ],
+  },
+  {
+    id: 7,
+    teamName: 'Армавирский сокол',
+    branch: 'Армавир',
+    driver: { name: 'Машуров Олег', avatar: '/avatars/sinyavinskiy.jpg' },
+    navigator: { name: 'Синявский Александр', avatar: '/avatars/mashurov.jpg' },
+    color: '#06B6D4',
+    glowColor: 'rgba(6, 182, 212, 0.6)',
+    videoUrl: '/videos/crew-7.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 404,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 140 },
+      contracts: { target: 640, fact: 100 },
+      ligaPro: { target: 560, fact: 60 },
+      contacts: { target: 540, fact: 104 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 204 }, lap2: { target: 859, fact: 200 }, lap3: { target: 827, fact: 0 } },
+    awards: [],
+  },
+  {
+    id: 8,
+    teamName: 'Морской бриз',
+    branch: 'Симферополь',
+    driver: { name: 'Ганин Анатолий', avatar: '/avatars/ganin.jpg' },
+    navigator: { name: 'Бойчук Пётр', avatar: '/avatars/boychuk.jpg' },
+    color: '#F43F5E',
+    glowColor: 'rgba(244, 63, 94, 0.6)',
+    videoUrl: '/videos/crew-8.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 905,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 400 },
+      contracts: { target: 640, fact: 200 },
+      ligaPro: { target: 560, fact: 200 },
+      contacts: { target: 540, fact: 105 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 873 }, lap2: { target: 859, fact: 32 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#3 по дистрибуции', category: 'дистрибуция', place: 3, month: 'Март' },
+      { label: '#3 по контрактованию', category: 'контрактование', place: 3, month: 'Март' },
+      { label: '#3 по ЛигеПро', category: 'ЛигеПро', place: 3, month: 'Март' },
+    ],
+  },
+  {
+    id: 9,
+    teamName: 'Крымская весна',
+    branch: 'Симферополь',
+    driver: { name: 'Завгородний Марк', avatar: '/avatars/dyukov.jpg' },
+    navigator: { name: 'Дюков Станислав', avatar: '/avatars/zavgorodniy.jpg' },
+    color: '#10B981',
+    glowColor: 'rgba(16, 185, 129, 0.6)',
+    videoUrl: '/videos/crew-9.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 970,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 340 },
+      contracts: { target: 640, fact: 160 },
+      ligaPro: { target: 560, fact: 240 },
+      contacts: { target: 540, fact: 230 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 744 }, lap2: { target: 859, fact: 226 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#1 по инфо контактам', category: 'инфо контакты', place: 1, month: 'Март' },
+    ],
+  },
+  {
+    id: 10,
+    teamName: 'Морской бастион',
+    branch: 'Севастополь',
+    driver: { name: 'Салимгариева Гульнара', avatar: '/avatars/lager.jpg' },
+    navigator: { name: 'Лагерь Алексей', avatar: '/avatars/salimgarieva.jpg' },
+    color: '#F59E0B',
+    glowColor: 'rgba(245, 158, 11, 0.6)',
+    videoUrl: '/videos/crew-10.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 934,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 260 },
+      contracts: { target: 640, fact: 180 },
+      ligaPro: { target: 560, fact: 240 },
+      contacts: { target: 540, fact: 254 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 761 }, lap2: { target: 859, fact: 173 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#1 по ЛигеПро', category: 'ЛигеПро', place: 1, month: 'Март' },
+      { label: '#2 по инфо контактам', category: 'инфо контакты', place: 2, month: 'Март' },
+    ],
+  },
+  {
+    id: 11,
+    teamName: 'Хакасский беркут',
+    branch: 'Абакан',
+    driver: { name: 'Поляков Евгений', avatar: '/avatars/legkov.jpg' },
+    navigator: { name: 'Легков Евгений', avatar: '/avatars/polyakov.jpg' },
+    color: '#3B82F6',
+    glowColor: 'rgba(59, 130, 246, 0.6)',
+    videoUrl: '/videos/crew-11.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 808,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 480 },
+      contracts: { target: 640, fact: 60 },
+      ligaPro: { target: 560, fact: 200 },
+      contacts: { target: 540, fact: 68 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 689 }, lap2: { target: 859, fact: 119 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#3 по ЛигеПро', category: 'ЛигеПро', place: 3, month: 'Март' },
+    ],
+  },
+  {
+    id: 12,
+    teamName: 'Енисейский порог',
+    branch: 'Красноярск',
+    driver: { name: 'Трепышко Никита', avatar: '/avatars/denisov.jpg' },
+    navigator: { name: 'Денисов Алексей', avatar: '/avatars/trepyshko.jpg' },
+    color: '#EC4899',
+    glowColor: 'rgba(236, 72, 153, 0.6)',
+    videoUrl: '/videos/crew-12.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 277,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 60 },
+      contracts: { target: 640, fact: 100 },
+      ligaPro: { target: 560, fact: 20 },
+      contacts: { target: 540, fact: 97 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 227 }, lap2: { target: 859, fact: 50 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#3 по контрактованию', category: 'контрактование', place: 3, month: 'Март' },
+    ],
+  },
+  {
+    id: 13,
+    teamName: 'Приморский дракон',
+    branch: 'Уссурийск',
+    driver: { name: 'Сафонов Глеб', avatar: '/avatars/niyasov.jpg' },
+    navigator: { name: 'Ниясов Артем', avatar: '/avatars/safonov.jpg' },
+    color: '#14B8A6',
+    glowColor: 'rgba(20, 184, 166, 0.6)',
+    videoUrl: '/videos/crew-13.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 261,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 140 },
+      contracts: { target: 640, fact: 40 },
+      ligaPro: { target: 560, fact: 20 },
+      contacts: { target: 540, fact: 61 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 230 }, lap2: { target: 859, fact: 31 }, lap3: { target: 827, fact: 0 } },
+    awards: [],
+  },
+  {
+    id: 14,
+    teamName: 'Ворошиловская батарея',
+    branch: 'Владивосток',
+    driver: { name: 'Борка Данил', avatar: '/avatars/borka.jpg' },
+    navigator: { name: 'Мизинова Ольга', avatar: '/avatars/mizinova.jpg' },
+    color: '#EF4444',
+    glowColor: 'rgba(239, 68, 68, 0.6)',
+    videoUrl: '/videos/crew-14.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 632,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 260 },
+      contracts: { target: 640, fact: 140 },
+      ligaPro: { target: 560, fact: 80 },
+      contacts: { target: 540, fact: 152 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 568 }, lap2: { target: 859, fact: 64 }, lap3: { target: 827, fact: 0 } },
+    awards: [],
+  },
+  {
+    id: 15,
+    teamName: 'Русский остров',
+    branch: 'Владивосток',
+    driver: { name: 'Онишко Евгений', avatar: '/avatars/onishko.jpg' },
+    navigator: { name: 'Халдеева Ольга', avatar: '/avatars/khaldeeva.jpg' },
+    color: '#8B5CF6',
+    glowColor: 'rgba(139, 92, 246, 0.6)',
+    videoUrl: '/videos/crew-15.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 325,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 80 },
+      contracts: { target: 640, fact: 60 },
+      ligaPro: { target: 560, fact: 60 },
+      contacts: { target: 540, fact: 125 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 185 }, lap2: { target: 859, fact: 140 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#3 по объёму продаж', category: 'объём продаж', place: 3, month: 'Март' },
+      { label: '#1 по объёму продаж', category: 'объём продаж', place: 1, month: 'Март' },
+      { label: '#1 по количеству точек с продажами', category: 'количество точек', place: 1, month: 'Март' },
+    ],
+  },
+  {
+    id: 16,
+    teamName: 'Байкальский лёд',
+    branch: 'Иркутск',
+    driver: { name: 'Копылевич Александр', avatar: '/avatars/kopylevich.jpg' },
+    navigator: { name: 'Ровенский Алексей', avatar: '/avatars/rovenskiy.jpg' },
+    color: '#F97316',
+    glowColor: 'rgba(249, 115, 22, 0.6)',
+    videoUrl: '/videos/crew-16.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 536,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 280 },
+      contracts: { target: 640, fact: 80 },
+      ligaPro: { target: 560, fact: 100 },
+      contacts: { target: 540, fact: 76 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 420 }, lap2: { target: 859, fact: 116 }, lap3: { target: 827, fact: 0 } },
+    awards: [],
+  },
+  {
+    id: 17,
+    teamName: 'Ледовый шторм',
+    branch: 'Иркутск',
+    driver: { name: 'Тихонов Вячеслав', avatar: '/avatars/kolesnikov.jpg' },
+    navigator: { name: 'Колесников Дмитрий', avatar: '/avatars/tikhonov.jpg' },
+    color: '#22C55E',
+    glowColor: 'rgba(34, 197, 94, 0.6)',
+    videoUrl: '/videos/crew-17.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 807,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 360 },
+      contracts: { target: 640, fact: 140 },
+      ligaPro: { target: 560, fact: 180 },
+      contacts: { target: 540, fact: 127 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 664 }, lap2: { target: 859, fact: 143 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#3 по ЛигеПро', category: 'ЛигеПро', place: 3, month: 'Март' },
+    ],
+  },
+  {
+    id: 18,
+    teamName: 'Амурский тигр',
+    branch: 'Благовещенск',
+    driver: { name: 'Павленко Татьяна', avatar: '/avatars/yakimenko.jpg' },
+    navigator: { name: 'Якименко Александр', avatar: '/avatars/pavlenko.jpg' },
+    color: '#0EA5E9',
+    glowColor: 'rgba(14, 165, 233, 0.6)',
+    videoUrl: '/videos/crew-18.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 648,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 320 },
+      contracts: { target: 640, fact: 140 },
+      ligaPro: { target: 560, fact: 100 },
+      contacts: { target: 540, fact: 88 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 568 }, lap2: { target: 859, fact: 80 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#3 по количеству точек с продажами', category: 'количество точек', place: 3, month: 'Март' },
+      { label: '#2 по количеству точек с продажами', category: 'количество точек', place: 2, month: 'Март' },
+    ],
+  },
+  {
+    id: 19,
+    teamName: 'Дальневосточный гром',
+    branch: 'Якутск',
+    driver: { name: 'Сирык Николай', avatar: '/avatars/polyanichenko.jpg' },
+    navigator: { name: 'Поляниченко Андрей', avatar: '/avatars/siryk.jpg' },
+    color: '#D946EF',
+    glowColor: 'rgba(217, 70, 239, 0.6)',
+    videoUrl: '/videos/crew-19.mp4',
+    checkpoint1: false,
+    checkpoint2: false,
+    totalScore: 960,
+    finishTarget: 3180,
+    metrics: {
+      distribution: { target: 1440, fact: 500 },
+      contracts: { target: 640, fact: 100 },
+      ligaPro: { target: 560, fact: 200 },
+      contacts: { target: 540, fact: 160 },
+    },
+    weeklyHistory: [],
+    segmentScores: { warmup: { target: 636, fact: 0 }, lap1: { target: 859, fact: 890 }, lap2: { target: 859, fact: 70 }, lap3: { target: 827, fact: 0 } },
+    awards: [
+      { label: '#1 по дистрибуции', category: 'дистрибуция', place: 1, month: 'Март' },
+      { label: '#3 по ЛигеПро', category: 'ЛигеПро', place: 3, month: 'Март' },
+    ],
+  },
 ];
-
-const colors = [
-  { color: '#FF3366', glow: 'rgba(255, 51, 102, 0.6)' },
-  { color: '#00D4FF', glow: 'rgba(0, 212, 255, 0.6)' },
-  { color: '#FFD600', glow: 'rgba(255, 214, 0, 0.6)' },
-  { color: '#00FF88', glow: 'rgba(0, 255, 136, 0.6)' },
-  { color: '#FF6B35', glow: 'rgba(255, 107, 53, 0.6)' },
-  { color: '#A855F7', glow: 'rgba(168, 85, 247, 0.6)' },
-  { color: '#06B6D4', glow: 'rgba(6, 182, 212, 0.6)' },
-  { color: '#F43F5E', glow: 'rgba(244, 63, 94, 0.6)' },
-  { color: '#10B981', glow: 'rgba(16, 185, 129, 0.6)' },
-  { color: '#F59E0B', glow: 'rgba(245, 158, 11, 0.6)' },
-  { color: '#3B82F6', glow: 'rgba(59, 130, 246, 0.6)' },
-  { color: '#EC4899', glow: 'rgba(236, 72, 153, 0.6)' },
-  { color: '#14B8A6', glow: 'rgba(20, 184, 166, 0.6)' },
-  { color: '#EF4444', glow: 'rgba(239, 68, 68, 0.6)' },
-  { color: '#8B5CF6', glow: 'rgba(139, 92, 246, 0.6)' },
-  { color: '#F97316', glow: 'rgba(249, 115, 22, 0.6)' },
-  { color: '#22C55E', glow: 'rgba(34, 197, 94, 0.6)' },
-  { color: '#0EA5E9', glow: 'rgba(14, 165, 233, 0.6)' },
-  { color: '#D946EF', glow: 'rgba(217, 70, 239, 0.6)' },
-];
-
-const factPercentages = [
-  95, 78, 112, 67, 88, 102, 55, 91, 73, 85,
-  118, 62, 97, 45, 108, 83, 71, 93, 76
-];
-
-// Targets from Трасса sheet
-const TARGETS = {
-  distribution: 1440,
-  contracts: 640,
-  ligaPro: 560,
-  contacts: 540,
-  finish: 3180,
-};
-
-function generateWeeklyHistory(crewIndex: number, currentFact: number, target: number): { week: number; connectedPoints: number; salesVolume: number; skuCount: number }[] {
-  const weeks: { week: number; connectedPoints: number; salesVolume: number; skuCount: number }[] = [];
-  const totalWeeks = 12;
-  const variance = 0.3 + (crewIndex % 3) * 0.1;
-
-  for (let w = 1; w <= totalWeeks; w++) {
-    const randomFactor = 0.7 + Math.random() * 0.6;
-    const weekTarget = Math.round(target * (w / totalWeeks) * randomFactor);
-    const weekFact = Math.round(weekTarget * (currentFact / target) * (0.85 + Math.random() * variance));
-
-    weeks.push({
-      week: w,
-      connectedPoints: Math.max(0, weekFact),
-      salesVolume: Math.round(weekFact * (50 + Math.random() * 150)),
-      skuCount: Math.min(weekFact * 3, Math.round(10 + Math.random() * 40)),
-    });
-  }
-  return weeks;
-}
-
-function generateSegmentScores(target: number, fact: number): SegmentScores {
-  const weights = [0.2, 0.27, 0.27, 0.26];
-  const targets = weights.map(w => Math.round(target * w));
-
-  let remaining = fact;
-  const facts = targets.map((t, i) => {
-    if (i === targets.length - 1) {
-      const f = remaining;
-      remaining = 0;
-      return Math.max(0, f);
-    }
-    const f = Math.min(remaining, t);
-    remaining = Math.max(0, remaining - f);
-    return f;
-  });
-
-  return {
-    warmup: { target: targets[0], fact: facts[0] },
-    lap1:   { target: targets[1], fact: facts[1] },
-    lap2:   { target: targets[2], fact: facts[2] },
-    lap3:   { target: targets[3], fact: facts[3] },
-  };
-}
-
-export function generateMockData(): Crew[] {
-  return crewNames.map((crew, index) => {
-    const factPct = factPercentages[index] / 100;
-
-    const distFact = Math.round(TARGETS.distribution * factPct);
-    const contractsFact = Math.round(TARGETS.contracts * factPct * (0.9 + Math.random() * 0.2));
-    const ligaProFact = Math.round(TARGETS.ligaPro * factPct * (0.85 + Math.random() * 0.3));
-    const contactsFact = Math.round(TARGETS.contacts * factPct * (0.9 + Math.random() * 0.2));
-
-    const totalScore = distFact + contractsFact + ligaProFact + contactsFact;
-
-    return {
-      id: index + 1,
-      teamName: crew.team,
-      branch: '',
-      driver: {
-        name: crew.driver,
-        avatar: `https://i.pravatar.cc/150?img=${(index * 3) % 70 + 1}`,
-      },
-      navigator: {
-        name: crew.navigator,
-        avatar: `https://i.pravatar.cc/150?img=${(index * 3 + 1) % 70 + 1}`,
-      },
-      color: colors[index].color,
-      glowColor: colors[index].glow,
-      awards: [],
-      totalScore,
-      finishTarget: TARGETS.finish,
-      metrics: {
-        distribution: { target: TARGETS.distribution, fact: distFact },
-        contracts: { target: TARGETS.contracts, fact: contractsFact },
-        ligaPro: { target: TARGETS.ligaPro, fact: ligaProFact },
-        contacts: { target: TARGETS.contacts, fact: contactsFact },
-      },
-      weeklyHistory: generateWeeklyHistory(index, totalScore, TARGETS.finish),
-      checkpoint1: factPct > 0.3,
-      checkpoint2: factPct > 0.65,
-      segmentScores: generateSegmentScores(TARGETS.finish, totalScore),
-    };
-  });
-}
-
-export const mockCrews = generateMockData();
