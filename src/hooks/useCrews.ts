@@ -29,13 +29,21 @@ export function useCrews() {
 
   const fetchCrews = useCallback(async () => {
     try {
-      const timeout = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), SUPABASE_TIMEOUT_MS)
-      );
-      const query = supabase.rpc('get_crews_full');
-      const { data, error: err } = await Promise.race([query, timeout]) as Awaited<typeof query>;
-      if (err) throw err;
-      setCrews(normalize(data ?? []));
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), SUPABASE_TIMEOUT_MS);
+
+      // Use server-side proxy to avoid mobile operator blocks on direct Supabase calls
+      const proxyUrl = '/api/supabase/rest/v1/rpc/get_crews_full';
+      const res = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: Crew[] = await res.json();
+      setCrews(normalize(data));
       setError(null);
     } catch {
       // Keep showing current data (mockData or previously loaded real data)
