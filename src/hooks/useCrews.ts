@@ -3,8 +3,6 @@ import type { Crew } from '../data/types';
 import { supabase } from '../lib/supabase';
 import { mockCrews } from '../data/mockData';
 
-const SUPABASE_TIMEOUT_MS = 6000;
-
 const branchById: Record<number, string> = {
   1: 'Экспресс', 2: 'Сервис 77', 3: 'Сервис 77',
   4: 'Краснодар', 5: 'Краснодар', 6: 'Армавир', 7: 'Армавир',
@@ -29,24 +27,14 @@ export function useCrews() {
 
   const fetchCrews = useCallback(async () => {
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), SUPABASE_TIMEOUT_MS);
-
-      // Use server-side proxy to avoid mobile operator blocks on direct Supabase calls
-      const proxyUrl = '/api/supabase/rest/v1/rpc/get_crews_full';
-      const res = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-        signal: controller.signal,
-      });
-      clearTimeout(timer);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: Crew[] = await res.json();
-      setCrews(normalize(data));
+      const { data, error: err } = await supabase.rpc('get_crews_full');
+      if (err) throw err;
+      if (data && data.length > 0) {
+        setCrews(normalize(data));
+      }
       setError(null);
     } catch {
-      // Keep showing current data (mockData or previously loaded real data)
+      // Keep showing current mockData silently
       setError(null);
     }
   }, []);
