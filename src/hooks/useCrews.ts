@@ -26,43 +26,17 @@ export function useCrews() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchCrews = useCallback(async () => {
-    // Try same-origin proxy first (works on mobile networks that block Supabase US),
-    // fall back to direct Supabase if proxy fails.
-    const trySource = async (fetcher: () => Promise<Crew[] | null>) => {
-      try {
-        const data = await fetcher();
-        if (data && data.length > 0) {
-          setCrews(normalize(data));
-          setError(null);
-          return true;
-        }
-      } catch { /* try next source */ }
-      return false;
-    };
-
-    const fromProxy = async (): Promise<Crew[] | null> => {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 6000);
-      try {
-        const res = await fetch('/api/supabase/rest/v1/rpc/get_crews_full', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: '{}',
-          signal: ctrl.signal,
-        });
-        if (!res.ok) return null;
-        return await res.json();
-      } finally { clearTimeout(t); }
-    };
-
-    const fromDirect = async (): Promise<Crew[] | null> => {
+    try {
       const { data, error: err } = await supabase.rpc('get_crews_full');
       if (err) throw err;
-      return data;
-    };
-
-    if (await trySource(fromProxy)) return;
-    await trySource(fromDirect);
+      if (data && data.length > 0) {
+        setCrews(normalize(data));
+      }
+      setError(null);
+    } catch {
+      // Keep showing current mockData silently
+      setError(null);
+    }
   }, []);
 
   useEffect(() => {
