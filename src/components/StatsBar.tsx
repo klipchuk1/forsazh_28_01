@@ -327,7 +327,7 @@ export default function StatsBar() {
         change="План подключения"
         index={1}
         gaugeLabels={['500', '1000', '1500']}
-        gaugeNeedle={0.9}
+        gaugeNeedle={1}
         icon={<><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></>}
       />
       <StatCard
