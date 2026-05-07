@@ -99,8 +99,8 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
         distribution: 1440,
         contracts: 640,
         ligaPro: 560,
-        contacts: 540,
-        finish: 3180,
+        contacts: 422,
+        finish: 3062,
       };
 
       const trackSheetName = workbook.SheetNames.find(n => n.includes('Трасса') || n.includes('трасса'));
