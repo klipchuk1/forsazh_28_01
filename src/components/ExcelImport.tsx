@@ -157,15 +157,15 @@ export default function ExcelImport({ onImport, existingCrews }: ExcelImportProp
         });
       }
 
-      // --- Parse awards sheet (e.g. "Экипажи награды Март") ---
+      // --- Parse all awards sheets (e.g. "Экипажи награды Март", "...Апрель", "...Май") ---
       const awards: ParsedAward[] = [];
-      const awardsSheetName = workbook.SheetNames.find(n => n.includes('наград'));
-      if (awardsSheetName) {
-        const awardsSheet = workbook.Sheets[awardsSheetName];
+      const awardsSheetNames = workbook.SheetNames.filter(n => n.includes('наград'));
+      for (const sheetName of awardsSheetNames) {
+        const awardsSheet = workbook.Sheets[sheetName];
         const awardsRows: string[][] = XLSX.utils.sheet_to_json(awardsSheet, { header: 1 });
 
-        // Extract month from header row (row 0) or sheet name
-        const monthMatch = awardsSheetName.match(/(Март|Апрель|Май)/i);
+        // Extract month from sheet name
+        const monthMatch = sheetName.match(/(Март|Апрель|Май)/i);
         const month = monthMatch ? monthMatch[1] : 'Март';
 
         for (let i = 1; i < awardsRows.length; i++) {

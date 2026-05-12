@@ -143,41 +143,48 @@ export default function ExcelImportPage() {
         updatedCrewCount++;
       }
 
-      // --- 3. Insert awards ---
+      // --- 3. Insert awards (accumulate across months, skip duplicates) ---
       if (result.awards.length > 0) {
-        const months = [...new Set(result.awards.map(a => a.month))];
-
-        for (const month of months) {
-          const monthAwards = result.awards.filter(a => a.month === month);
-
-          const awardsWithIds: { crew_id: number; award_label: string; category: string; place: number; month: string }[] = [];
-
-          for (const award of monthAwards) {
-            const crewId = crewMap.get(award.crewName.toLowerCase());
-            if (crewId) {
-              awardsWithIds.push({
-                crew_id: crewId,
-                award_label: award.awardLabel,
-                category: award.category,
-                place: award.place,
-                month: award.month,
-              });
-            }
+        // Build list of awards-to-insert with resolved crew IDs
+        const awardsWithIds: { crew_id: number; award_label: string; category: string; place: number; month: string }[] = [];
+        for (const award of result.awards) {
+          const crewId = crewMap.get(award.crewName.toLowerCase());
+          if (crewId) {
+            awardsWithIds.push({
+              crew_id: crewId,
+              award_label: award.awardLabel,
+              category: award.category,
+              place: award.place,
+              month: award.month,
+            });
           }
+        }
 
-          if (awardsWithIds.length > 0) {
-            const crewIds = [...new Set(awardsWithIds.map(a => a.crew_id))];
-            await supabase.from('crew_awards').delete().in('crew_id', crewIds).eq('month', month);
+        if (awardsWithIds.length > 0) {
+          // Fetch existing awards for the affected crews/months so we can skip duplicates
+          const crewIds = [...new Set(awardsWithIds.map(a => a.crew_id))];
+          const months = [...new Set(awardsWithIds.map(a => a.month))];
+          const { data: existing } = await supabase
+            .from('crew_awards')
+            .select('crew_id, month, category, place')
+            .in('crew_id', crewIds)
+            .in('month', months);
+          const existingKeys = new Set(
+            (existing ?? []).map(e => `${e.crew_id}|${e.month}|${e.category}|${e.place}`)
+          );
 
-            const { error: awardsErr } = await supabase.from('crew_awards').insert(awardsWithIds);
+          const newAwards = awardsWithIds.filter(
+            a => !existingKeys.has(`${a.crew_id}|${a.month}|${a.category}|${a.place}`)
+          );
 
+          if (newAwards.length > 0) {
+            const { error: awardsErr } = await supabase.from('crew_awards').insert(newAwards);
             if (awardsErr) {
               setError(`Ошибка наград: ${awardsErr.message}`);
               setImporting(false);
               return;
             }
-
-            updatedAwardCount += awardsWithIds.length;
+            updatedAwardCount += newAwards.length;
           }
         }
       }
